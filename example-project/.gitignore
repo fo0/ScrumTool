@@ -50,3 +50,10 @@ hs_err_pid*
 !**/resources/**
 # outcomment if needed
 #!**/webapp/**
+
+# Ignore npm configs and folders
+package-lock.json
+package.json
+webpack.config.js
+webpack.generated.js
+node_modules/
