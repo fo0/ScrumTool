@@ -8,6 +8,9 @@ import com.fo0.vaadin.projects.data.repository.ProjectDataRepository;
 import com.fo0.vaadin.projects.data.table.ProjectData;
 import com.fo0.vaadin.projects.data.table.ProjectDataCard;
 import com.fo0.vaadin.projects.utils.ProjectBoardViewLoader;
+import com.fo0.vaadin.projects.views.components.CardComponent;
+import com.fo0.vaadin.projects.views.components.ColumnComponent;
+import com.fo0.vaadin.projects.views.utils.ProjectBoardViewUtils;
 import com.google.gson.GsonBuilder;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -115,13 +118,13 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 			return;
 		}
 
-		ColumnComponent col = createColumn(id, name);
+		ColumnComponent col = createColumn(this, id, name);
 		columns.add(col);
 		saveData(data -> data.addColumn(col.getProductDataColumn()));
 	}
 
-	public ColumnComponent createColumn(String id, String name) {
-		return new ColumnComponent(id, name);
+	public ColumnComponent createColumn(ProjectBoardView view, String id, String name) {
+		return new ColumnComponent(view, id, name);
 	}
 
 	public ColumnComponent getColumnLayoutById(String columnId) {
@@ -150,7 +153,8 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 		for (int i = 0; i < columns.getComponentCount(); i++) {
 			ColumnComponent col = (ColumnComponent) columns.getComponentAt(i);
 			if (col.getId().get().equals(columnId)) {
-				col.addCard(cardId, message);
+				CardComponent cc = col.addCard(cardId, message);
+				saveData(data -> data.addCard(col.getId().get(), cc.getCard()));
 				break;
 			}
 		}

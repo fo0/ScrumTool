@@ -1,6 +1,7 @@
-package com.fo0.vaadin.projects.views;
+package com.fo0.vaadin.projects.views.utils;
 
 import com.fo0.vaadin.projects.utils.Utils;
+import com.fo0.vaadin.projects.views.ProjectBoardView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Label;

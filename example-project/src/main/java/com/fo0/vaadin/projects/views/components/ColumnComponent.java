@@ -1,10 +1,11 @@
-package com.fo0.vaadin.projects.views;
+package com.fo0.vaadin.projects.views.components;
 
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.fo0.vaadin.projects.data.table.ProjectDataCard;
 import com.fo0.vaadin.projects.data.table.ProjectDataColumn;
 import com.fo0.vaadin.projects.utils.Utils;
+import com.fo0.vaadin.projects.views.ProjectBoardView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -25,7 +26,9 @@ public class ColumnComponent extends VerticalLayout {
 	@Getter
 	private String name;
 
-	public ColumnComponent(String id, String name) {
+	private TextArea area;
+
+	public ColumnComponent(ProjectBoardView view, String id, String name) {
 		this.name = name;
 		setId(id);
 		H3 h3 = new H3(name);
@@ -42,16 +45,14 @@ public class ColumnComponent extends VerticalLayout {
 		layoutHeader.setHeight("200px");
 		add(layoutHeader);
 
-		TextArea area = new TextArea();
+		area = new TextArea();
 		area.setSizeFull();
 		layoutHeader.add(area);
 
 		Button btnAdd = new Button("Note", VaadinIcon.PLUS.create());
 		btnAdd.setWidthFull();
 		btnAdd.addClickListener(e -> {
-			addCard(Utils.randomId(), area.getValue());
-			area.clear();
-			area.focus();
+			view.addCard(id, Utils.randomId(), area.getValue());
 		});
 
 		Button btnCancel = new Button("Clear", VaadinIcon.TRASH.create());
@@ -68,8 +69,14 @@ public class ColumnComponent extends VerticalLayout {
 		productDataColumn = ProjectDataColumn.builder().id(id).name(name).build();
 	}
 
-	public void addCard(String id, String message) {
-		add(new CardComponent(id, message));
+	public CardComponent addCard() {
+		return addCard(Utils.randomId(), area.getValue());
+	}
+
+	public CardComponent addCard(String id, String message) {
+		CardComponent card = new CardComponent(id, message);
+		add(card);
+		return card;
 	}
 
 	public ProjectDataCard getCardById(String cardId) {

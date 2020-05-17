@@ -1,4 +1,4 @@
-package com.fo0.vaadin.projects.views;
+package com.fo0.vaadin.projects.views.components;
 
 import com.fo0.vaadin.projects.data.table.ProjectDataCard;
 import com.vaadin.flow.component.html.Label;

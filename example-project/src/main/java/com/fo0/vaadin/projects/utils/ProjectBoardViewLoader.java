@@ -6,8 +6,10 @@ import java.util.stream.IntStream;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.fo0.vaadin.projects.data.table.ProjectData;
+import com.fo0.vaadin.projects.data.table.ProjectDataCard;
 import com.fo0.vaadin.projects.data.table.ProjectDataColumn;
 import com.fo0.vaadin.projects.views.ProjectBoardView;
+import com.fo0.vaadin.projects.views.components.ColumnComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import lombok.extern.log4j.Log4j2;
@@ -15,16 +17,38 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ProjectBoardViewLoader {
 
-	public static void createMissingColumns(ProjectBoardView view, HorizontalLayout columns, Set<ProjectDataColumn> list) {
-		list.stream().forEachOrdered(pdc -> {
-			int compIndex = columns.getComponentCount() == 0 ? 0
-					: IntStream.range(0, columns.getComponentCount())
-							.filter(cc -> !columns.getComponentAt(cc).getId().get().equals(pdc.getId())).findFirst().orElse(-1);
+	public static void createMissingCards(ProjectBoardView view, HorizontalLayout currentColumns, Set<ProjectDataColumn> latestColumns) {
+		latestColumns.stream().forEachOrdered(latestColumn -> {
+			log.info("[CARD] iterating over lastest columns");
+			IntStream.range(0, currentColumns.getComponentCount()).forEachOrdered(currentColumnIdx -> {
+				log.info("[CARD] iterating over component columns");
+				ColumnComponent ccc = (ColumnComponent) currentColumns.getComponentAt(currentColumnIdx);
+				if (ccc.getId().get().equals(latestColumn.getId())) {
+					log.info("[CARD] iterating over colum components");
+					latestColumn.getCards().stream().forEachOrdered(pdc -> {
+						ProjectDataCard pdcc = ccc.getCardById(pdc.getId());
+						if (pdcc == null) {
+							log.info("update card for column: {} - {} - {}", ccc.getId().get(), pdc.getId(), pdc.getText());
+							view.addCard(ccc.getId().get(), pdc.getId(), pdc.getText());
+						} else {
+							log.info("no card update found");
+						}
+					});
+				}
+			});
+		});
+	}
+
+	public static void createMissingColumns(ProjectBoardView view, HorizontalLayout currentColumns, Set<ProjectDataColumn> latestColumns) {
+		latestColumns.stream().forEachOrdered(lc -> {
+			int compIndex = currentColumns.getComponentCount() == 0 ? 0
+					: IntStream.range(0, currentColumns.getComponentCount())
+							.filter(cc -> !currentColumns.getComponentAt(cc).getId().get().equals(lc.getId())).findFirst().orElse(-1);
 			if (compIndex != -1) {
-				log.info("add missing column: {} - {}", pdc.getId(), pdc.getName());
-				view.addColumn(pdc.getId(), pdc.getName());
+				log.info("[COLUMN] add missing column: {} - {}", lc.getId(), lc.getName());
+				view.addColumn(lc.getId(), lc.getName());
 			} else {
-				log.info("column aleady exists: {} - {}", pdc.getId(), pdc.getName());
+				log.info("[COLUMN] column aleady exists: {} - {}", lc.getId(), lc.getName());
 			}
 		});
 	}
@@ -41,6 +65,8 @@ public class ProjectBoardViewLoader {
 		}
 
 		createMissingColumns(view, view.getColumns(), latestData.getColumns());
+
+		createMissingCards(view, view.getColumns(), latestData.getColumns());
 
 		// data.getColumns().stream().forEachOrdered(c -> {
 		// IntStream.range(0, columns.getComponentCount()).forEachOrdered(cc -> {
