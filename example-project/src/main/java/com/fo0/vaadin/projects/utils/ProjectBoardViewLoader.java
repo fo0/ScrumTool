@@ -18,14 +18,14 @@ import lombok.extern.log4j.Log4j2;
 public class ProjectBoardViewLoader {
 
 	public static void createMissingCards(ProjectBoardView view, HorizontalLayout currentColumns, Set<ProjectDataColumn> latestColumns) {
-		latestColumns.stream().forEachOrdered(latestColumn -> {
+		latestColumns.stream().forEachOrdered(latestColumnAtDb -> {
 			log.info("[CARD] iterating over lastest columns");
 			IntStream.range(0, currentColumns.getComponentCount()).forEachOrdered(currentColumnIdx -> {
 				log.info("[CARD] iterating over component columns");
 				ColumnComponent ccc = (ColumnComponent) currentColumns.getComponentAt(currentColumnIdx);
-				if (ccc.getId().get().equals(latestColumn.getId())) {
+				if (ccc.getId().get().equals(latestColumnAtDb.getId())) {
 					log.info("[CARD] iterating over colum components");
-					latestColumn.getCards().stream().forEachOrdered(pdc -> {
+					latestColumnAtDb.getCards().stream().forEachOrdered(pdc -> {
 						ProjectDataCard pdcc = ccc.getCardById(pdc.getId());
 						if (pdcc == null) {
 							log.info("update card for column: {} - {} - {}", ccc.getId().get(), pdc.getId(), pdc.getText());

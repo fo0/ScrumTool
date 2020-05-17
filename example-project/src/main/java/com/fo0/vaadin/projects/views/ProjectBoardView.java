@@ -150,15 +150,19 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 	}
 
 	public void addCard(String columnId, String cardId, String message) {
-		for (int i = 0; i < columns.getComponentCount(); i++) {
-			ColumnComponent col = (ColumnComponent) columns.getComponentAt(i);
-			if (col.getId().get().equals(columnId)) {
-				CardComponent cc = col.addCard(cardId, message);
-				saveData(data -> data.addCard(col.getId().get(), cc.getCard()));
-				break;
-			}
+		ColumnComponent cc = getColumn(columnId);
+		if (cc == null) {
+			return;
 		}
 
+		ProjectDataCard pdc = cc.getCardById(cardId);
+		if (pdc != null) {
+			log.warn("card already exists: {} - {}", cardId, message);
+			return;
+		}
+
+		CardComponent ccc = cc.addCard(cardId, message);
+		saveData(data -> data.addCard(columnId, ccc.getCard()));
 	}
 
 	public ProjectDataCard getCardLayoutById(String columnId, String cardId) {

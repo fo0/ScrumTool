@@ -59,7 +59,8 @@ public class PersistenceConfig {
 
 	final Properties additionalProperties() {
 		final Properties hibernateProperties = new Properties();
-		hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "create"); // dev: create-drop
+		hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "validate"); // dev: create-drop
+		hibernateProperties.setProperty("spring.jpa.generate-ddl", "true"); 
 		hibernateProperties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
 		hibernateProperties.setProperty("hibernate.show_sql", "false");
 
