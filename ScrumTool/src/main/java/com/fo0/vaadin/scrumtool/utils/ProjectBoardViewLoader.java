@@ -18,11 +18,12 @@ public class ProjectBoardViewLoader {
 
 	public static void createMissingColumns(ProjectBoardView view, HorizontalLayout currentColumns, Set<ProjectDataColumn> latestColumns) {
 		latestColumns.stream().forEachOrdered(latestColumnAtDb -> {
-			log.info("[COLUMN] iterating over lastest columns");
 
 			ColumnComponent cc = view.getColumnLayoutById(latestColumnAtDb.getId());
 			if (cc == null) {
 				cc = checkForMissingColumn(view, currentColumns, latestColumnAtDb);
+			} else {
+				log.info("[COLUMN] no update: " + cc.getId());
 			}
 
 			checkForMissingCard(view, latestColumnAtDb, cc);

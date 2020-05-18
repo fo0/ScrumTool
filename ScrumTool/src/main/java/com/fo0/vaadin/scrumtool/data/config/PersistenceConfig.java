@@ -17,14 +17,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories("com.fo0.vaadin.projects.data.repository")
+@EnableJpaRepositories("com.fo0.vaadin.scrumtool.data.repository")
 public class PersistenceConfig {
 
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 		em.setDataSource(dataSource());
-		em.setPackagesToScan("com.fo0.vaadin.projects.data.table");
+		em.setPackagesToScan("com.fo0.vaadin.scrumtool.data.table");
 
 		final HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		em.setJpaVendorAdapter(vendorAdapter);
@@ -59,7 +59,7 @@ public class PersistenceConfig {
 
 	final Properties additionalProperties() {
 		final Properties hibernateProperties = new Properties();
-		hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "create-drop"); // dev: create-drop || validate
+		hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "create"); // dev: create-drop || validate
 		hibernateProperties.setProperty("spring.jpa.generate-ddl", "true");
 		hibernateProperties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
 		hibernateProperties.setProperty("hibernate.show_sql", "false");
