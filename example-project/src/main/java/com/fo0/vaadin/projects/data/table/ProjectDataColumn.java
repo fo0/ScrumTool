@@ -49,7 +49,7 @@ public class ProjectDataColumn implements Serializable {
 	}
 
 	public ProjectDataCard getCardById(String id) {
-		if (CollectionUtils.isEmpty(cards)) {	
+		if (CollectionUtils.isEmpty(cards)) {
 			return null;
 		}
 

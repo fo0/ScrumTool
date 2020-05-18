@@ -69,13 +69,10 @@ public class ColumnComponent extends VerticalLayout {
 		productDataColumn = ProjectDataColumn.builder().id(id).name(name).build();
 	}
 
-	public CardComponent addCard() {
-		return addCard(Utils.randomId(), area.getValue());
-	}
-
 	public CardComponent addCard(String id, String message) {
 		CardComponent card = new CardComponent(id, message);
 		add(card);
+		productDataColumn.addCard(card.getCard());
 		return card;
 	}
 

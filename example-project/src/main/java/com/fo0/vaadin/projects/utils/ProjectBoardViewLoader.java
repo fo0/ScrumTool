@@ -21,17 +21,18 @@ public class ProjectBoardViewLoader {
 		latestColumns.stream().forEachOrdered(latestColumnAtDb -> {
 			log.info("[CARD] iterating over lastest columns");
 			IntStream.range(0, currentColumns.getComponentCount()).forEachOrdered(currentColumnIdx -> {
-				log.info("[CARD] iterating over component columns");
+				log.info("[CARD] iterating over current column component");
 				ColumnComponent ccc = (ColumnComponent) currentColumns.getComponentAt(currentColumnIdx);
 				if (ccc.getId().get().equals(latestColumnAtDb.getId())) {
-					log.info("[CARD] iterating over colum components");
+					log.info("[CARD] iterating over cards components");
 					latestColumnAtDb.getCards().stream().forEachOrdered(pdc -> {
 						ProjectDataCard pdcc = ccc.getCardById(pdc.getId());
 						if (pdcc == null) {
 							log.info("update card for column: {} - {} - {}", ccc.getId().get(), pdc.getId(), pdc.getText());
+							ccc.getProductDataColumn().getCards().forEach(log::info);
 							view.addCard(ccc.getId().get(), pdc.getId(), pdc.getText());
 						} else {
-							log.info("no card update found");
+							log.info("no card update found: " + pdcc.getId());
 						}
 					});
 				}
@@ -40,15 +41,16 @@ public class ProjectBoardViewLoader {
 	}
 
 	public static void createMissingColumns(ProjectBoardView view, HorizontalLayout currentColumns, Set<ProjectDataColumn> latestColumns) {
-		latestColumns.stream().forEachOrdered(lc -> {
+		latestColumns.stream().forEachOrdered(latestColumnAtDb -> {
 			int compIndex = currentColumns.getComponentCount() == 0 ? 0
 					: IntStream.range(0, currentColumns.getComponentCount())
-							.filter(cc -> !currentColumns.getComponentAt(cc).getId().get().equals(lc.getId())).findFirst().orElse(-1);
+							.filter(cc -> !currentColumns.getComponentAt(cc).getId().get().equals(latestColumnAtDb.getId())).findFirst()
+							.orElse(-1);
 			if (compIndex != -1) {
-				log.info("[COLUMN] add missing column: {} - {}", lc.getId(), lc.getName());
-				view.addColumn(lc.getId(), lc.getName());
+				log.info("[COLUMN] add missing column: {} - {}", latestColumnAtDb.getId(), latestColumnAtDb.getName());
+				view.addColumn(latestColumnAtDb.getId(), latestColumnAtDb.getName());
 			} else {
-				log.info("[COLUMN] column aleady exists: {} - {}", lc.getId(), lc.getName());
+				log.info("[COLUMN] column aleady exists: {} - {}", latestColumnAtDb.getId(), latestColumnAtDb.getName());
 			}
 		});
 	}
