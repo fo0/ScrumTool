@@ -92,7 +92,6 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 		}
 
 		log.info("sync & refreshing data: {}", pd.getId());
-		printProjectData();
 		ProjectBoardViewLoader.loadData(this, pd);
 	}
 
@@ -105,22 +104,22 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 		tmp = save.apply(tmp);
 		tmp = repository.save(tmp);
 		log.info("save data: {}", tmp.getId());
-		printProjectData();
 	}
 
 	public ProjectData getData() {
 		return repository.findById(sessionId).get();
 	}
 
-	public void addColumn(String id, String name) {
+	public ColumnComponent addColumn(String id, String name) {
 		if (getColumnLayoutById(id) != null) {
 			log.warn("column already exists: {} - {}", id, name);
-			return;
+			return null;
 		}
 
 		ColumnComponent col = createColumn(this, id, name);
 		columns.add(col);
 		saveData(data -> data.addColumn(col.getProductDataColumn()));
+		return col;
 	}
 
 	public ColumnComponent createColumn(ProjectBoardView view, String id, String name) {
