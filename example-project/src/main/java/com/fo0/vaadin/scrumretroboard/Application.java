@@ -1,4 +1,4 @@
-package com.fo0.vaadin.projects;
+package com.fo0.vaadin.scrumretroboard;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

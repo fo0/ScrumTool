@@ -1,4 +1,4 @@
-package com.fo0.vaadin.projects.data.config;
+package com.fo0.vaadin.scrumretroboard.data.config;
 
 import java.util.Properties;
 

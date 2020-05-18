@@ -1,16 +1,16 @@
-package com.fo0.vaadin.projects.views;
+package com.fo0.vaadin.scrumretroboard.views;
 
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fo0.vaadin.projects.data.repository.ProjectDataRepository;
-import com.fo0.vaadin.projects.data.table.ProjectData;
-import com.fo0.vaadin.projects.data.table.ProjectDataCard;
-import com.fo0.vaadin.projects.utils.ProjectBoardViewLoader;
-import com.fo0.vaadin.projects.views.components.CardComponent;
-import com.fo0.vaadin.projects.views.components.ColumnComponent;
-import com.fo0.vaadin.projects.views.utils.ProjectBoardViewUtils;
+import com.fo0.vaadin.scrumretroboard.data.repository.ProjectDataRepository;
+import com.fo0.vaadin.scrumretroboard.data.table.ProjectData;
+import com.fo0.vaadin.scrumretroboard.data.table.ProjectDataCard;
+import com.fo0.vaadin.scrumretroboard.utils.ProjectBoardViewLoader;
+import com.fo0.vaadin.scrumretroboard.views.components.CardComponent;
+import com.fo0.vaadin.scrumretroboard.views.components.ColumnComponent;
+import com.fo0.vaadin.scrumretroboard.views.utils.ProjectBoardViewUtils;
 import com.google.gson.GsonBuilder;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;

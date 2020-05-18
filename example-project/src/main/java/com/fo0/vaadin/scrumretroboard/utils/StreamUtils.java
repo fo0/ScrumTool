@@ -1,4 +1,4 @@
-package com.fo0.vaadin.projects.utils;
+package com.fo0.vaadin.scrumretroboard.utils;
 
 import java.util.Collection;
 import java.util.stream.Stream;

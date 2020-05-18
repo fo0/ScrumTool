@@ -1,14 +1,14 @@
-package com.fo0.vaadin.projects.utils;
+package com.fo0.vaadin.scrumretroboard.utils;
 
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.fo0.vaadin.projects.data.table.ProjectData;
-import com.fo0.vaadin.projects.data.table.ProjectDataCard;
-import com.fo0.vaadin.projects.data.table.ProjectDataColumn;
-import com.fo0.vaadin.projects.views.ProjectBoardView;
-import com.fo0.vaadin.projects.views.components.ColumnComponent;
+import com.fo0.vaadin.scrumretroboard.data.table.ProjectData;
+import com.fo0.vaadin.scrumretroboard.data.table.ProjectDataCard;
+import com.fo0.vaadin.scrumretroboard.data.table.ProjectDataColumn;
+import com.fo0.vaadin.scrumretroboard.views.ProjectBoardView;
+import com.fo0.vaadin.scrumretroboard.views.components.ColumnComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import lombok.extern.log4j.Log4j2;
