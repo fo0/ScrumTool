@@ -1,6 +1,6 @@
-package com.fo0.vaadin.scrumretroboard.views.components;
+package com.fo0.vaadin.scrumtool.views.components;
 
-import com.fo0.vaadin.scrumretroboard.data.table.ProjectDataCard;
+import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
 import com.vaadin.flow.component.html.Label;
 
 import lombok.Getter;

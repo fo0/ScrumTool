@@ -1,4 +1,4 @@
-package com.fo0.vaadin.scrumretroboard.data.table;
+package com.fo0.vaadin.scrumtool.data.table;
 
 import java.io.Serializable;
 import java.util.UUID;

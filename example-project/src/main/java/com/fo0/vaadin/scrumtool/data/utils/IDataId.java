@@ -1,4 +1,4 @@
-package com.fo0.vaadin.scrumretroboard.data.utils;
+package com.fo0.vaadin.scrumtool.data.utils;
 
 public interface IDataId {
 

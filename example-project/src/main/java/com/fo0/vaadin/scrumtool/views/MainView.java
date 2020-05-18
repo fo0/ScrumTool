@@ -1,10 +1,10 @@
-package com.fo0.vaadin.scrumretroboard.views;
+package com.fo0.vaadin.scrumtool.views;
 
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fo0.vaadin.scrumretroboard.data.repository.ProjectDataRepository;
-import com.fo0.vaadin.scrumretroboard.data.table.ProjectData;
+import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
+import com.fo0.vaadin.scrumtool.data.table.ProjectData;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;

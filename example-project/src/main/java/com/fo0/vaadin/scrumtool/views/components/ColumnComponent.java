@@ -1,11 +1,11 @@
-package com.fo0.vaadin.scrumretroboard.views.components;
+package com.fo0.vaadin.scrumtool.views.components;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.fo0.vaadin.scrumretroboard.data.table.ProjectDataCard;
-import com.fo0.vaadin.scrumretroboard.data.table.ProjectDataColumn;
-import com.fo0.vaadin.scrumretroboard.utils.Utils;
-import com.fo0.vaadin.scrumretroboard.views.ProjectBoardView;
+import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
+import com.fo0.vaadin.scrumtool.data.table.ProjectDataColumn;
+import com.fo0.vaadin.scrumtool.utils.Utils;
+import com.fo0.vaadin.scrumtool.views.ProjectBoardView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;

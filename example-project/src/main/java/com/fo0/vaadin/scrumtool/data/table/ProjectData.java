@@ -1,4 +1,4 @@
-package com.fo0.vaadin.scrumretroboard.data.table;
+package com.fo0.vaadin.scrumtool.data.table;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -10,7 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
-import com.fo0.vaadin.scrumretroboard.data.utils.IDataId;
+import com.fo0.vaadin.scrumtool.data.utils.IDataId;
 import com.google.common.collect.Sets;
 
 import lombok.AllArgsConstructor;
