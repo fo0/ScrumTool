@@ -37,7 +37,7 @@ public class PersistenceConfig {
 	public DataSource dataSource() {
 		final DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		dataSource.setDriverClassName("org.h2.Driver");
-		dataSource.setUrl("jdbc:h2:mem:db;DB_CLOSE_DELAY=-1");
+		dataSource.setUrl("jdbc:h2:file:database.db"); // in memory: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
 		dataSource.setUsername("sa");
 		dataSource.setPassword("sa");
 
@@ -60,7 +60,7 @@ public class PersistenceConfig {
 	final Properties additionalProperties() {
 		final Properties hibernateProperties = new Properties();
 		hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "create-drop"); // dev: create-drop || validate
-		hibernateProperties.setProperty("spring.jpa.generate-ddl", "true"); 
+		hibernateProperties.setProperty("spring.jpa.generate-ddl", "true");
 		hibernateProperties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
 		hibernateProperties.setProperty("hibernate.show_sql", "false");
 
