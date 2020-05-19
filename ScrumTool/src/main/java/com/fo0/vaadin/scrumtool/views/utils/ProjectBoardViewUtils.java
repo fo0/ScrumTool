@@ -38,7 +38,7 @@ public class ProjectBoardViewUtils {
 		t.focus();
 		Button b = new Button("Erstellen");
 		b.addClickListener(e -> {
-			view.addColumn(Utils.randomId(), t.getValue());
+			view.addColumn(Utils.randomId(), t.getValue(), true);
 			d.close();
 		});
 

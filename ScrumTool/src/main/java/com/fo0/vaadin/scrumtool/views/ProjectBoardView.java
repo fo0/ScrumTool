@@ -110,7 +110,7 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 		return repository.findById(sessionId).get();
 	}
 
-	public ColumnComponent addColumn(String id, String name) {
+	public ColumnComponent addColumn(String id, String name, boolean saveToDb) {
 		if (getColumnLayoutById(id) != null) {
 			log.warn("column already exists: {} - {}", id, name);
 			return null;
@@ -148,7 +148,7 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 		return null;
 	}
 
-	public void addCard(String columnId, String cardId, String message) {
+	public void addCard(String columnId, String cardId, String message, boolean saveToDb) {
 		ColumnComponent cc = getColumn(columnId);
 		if (cc == null) {
 			return;

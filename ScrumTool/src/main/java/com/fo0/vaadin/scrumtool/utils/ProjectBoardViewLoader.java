@@ -33,7 +33,7 @@ public class ProjectBoardViewLoader {
 	private static ColumnComponent checkForMissingColumn(ProjectBoardView view, HorizontalLayout currentColumns,
 			ProjectDataColumn latestColumnAtDb) {
 		log.info("[COLUMN] add missing column: {} - {}", latestColumnAtDb.getId(), latestColumnAtDb.getName());
-		return view.addColumn(latestColumnAtDb.getId(), latestColumnAtDb.getName());
+		return view.addColumn(latestColumnAtDb.getId(), latestColumnAtDb.getName(), false);
 	}
 
 	private static void checkForMissingCard(ProjectBoardView view, ProjectDataColumn latestColumnAtDb, ColumnComponent ccc) {
@@ -41,7 +41,7 @@ public class ProjectBoardViewLoader {
 			ProjectDataCard pdcc = ccc.getCardById(pdc.getId());
 			if (pdcc == null) {
 				log.info("[CARD] update: column {} - card {} - {}", ccc.getId().get(), pdc.getId(), pdc.getText());
-				view.addCard(ccc.getId().get(), pdc.getId(), pdc.getText());
+				view.addCard(ccc.getId().get(), pdc.getId(), pdc.getText(), false);
 			} else {
 				log.info("[CARD] no card update: " + pdcc.getId());
 			}

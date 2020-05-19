@@ -52,7 +52,7 @@ public class ColumnComponent extends VerticalLayout {
 		Button btnAdd = new Button("Note", VaadinIcon.PLUS.create());
 		btnAdd.setWidthFull();
 		btnAdd.addClickListener(e -> {
-			view.addCard(id, Utils.randomId(), area.getValue());
+			view.addCard(id, Utils.randomId(), area.getValue(), true);
 		});
 
 		Button btnCancel = new Button("Clear", VaadinIcon.TRASH.create());
