@@ -59,3 +59,4 @@ webpack.generated.js
 node_modules/
 npm/
 database.mv.db
+/database.trace.db
