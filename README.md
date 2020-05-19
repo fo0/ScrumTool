@@ -1,3 +1,5 @@
 # ScrumTool
 
-still in dev...
+### TODO:
+- Planning Poker
+- Export (Bspw. PDF)
