@@ -1,0 +1,61 @@
+------------------------------------ JAVA -----------------------------------------
+# recursive ignores (delete everywhere)
+**.class
+**.log.gz
+**.log
+**/target
+**/config
+
+# ============ Java & Eclipse .gitignore ============
+.metadata
+# spring files start
+.mvn/wrapper
+mvnw
+mvnw.cmd
+# spring files end
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+*.pydevproject
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+.classpath
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# ============ Java & Eclipse .gitignore :: recursive ============
+# NEVER IGNORE .GITIGNORE
+!.gitignore
+!**/src/**
+!**/resources/**
+# outcomment if needed
+#!**/webapp/**
+
+# Ignore npm configs and folders
+package-lock.json
+package.json
+webpack.config.js
+webpack.generated.js
+node_modules/
+npm/
+database.mv.db
