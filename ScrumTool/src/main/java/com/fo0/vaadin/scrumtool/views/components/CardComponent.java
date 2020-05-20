@@ -9,7 +9,9 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class CardComponent extends HorizontalLayout {
 
 	private static final long serialVersionUID = -1213748155629932731L;
@@ -24,12 +26,17 @@ public class CardComponent extends HorizontalLayout {
 		add(new Label(text));
 
 		card = ProjectDataCard.builder().id(id).ownerId(SessionUtils.getSessionId()).text(text).build();
+		
+		log.info("owner id: {} | session id: {}", card.getOwnerId(), SessionUtils.getSessionId());
 
-		Button btn = new Button(VaadinIcon.TRASH.create());
-		btn.addClickListener(e -> {
-			view.removeCard(columnId, id);
-		});
-		add(btn);
+		if (card.getOwnerId().equals(SessionUtils.getSessionId())) {
+			Button btnDelete = new Button(VaadinIcon.TRASH.create());
+			btnDelete.addClickListener(e -> {
+				view.removeCard(columnId, id);
+			});
+			add(btnDelete);
+		}
+
 		setAlignItems(Alignment.CENTER);
 	}
 

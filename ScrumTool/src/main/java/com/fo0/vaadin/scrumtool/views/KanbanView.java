@@ -9,6 +9,7 @@ import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.ProjectData;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
+import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.ProjectBoardViewLoader;
 import com.fo0.vaadin.scrumtool.views.components.CardComponent;
@@ -57,7 +58,9 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 	public HorizontalLayout columns;
 
 	private Button btnBoardId;
-	private String projectDataId;
+	private String boardId;
+
+	private Button btnDelete;
 
 	private void init() {
 		log.info("init");
@@ -76,8 +79,11 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 
 	@Override
 	public void setParameter(BeforeEvent event, String parameter) {
-		projectDataId = parameter;
-		if (!repository.findById(projectDataId).isPresent()) {
+		SessionUtils.createSessionIdIfExists();
+
+		boardId = parameter;
+		
+		if (!repository.findById(boardId).isPresent()) {
 			Button b = new Button("No Session Found -> Navigate to Dashbaord");
 			b.addClickListener(e -> UI.getCurrent().navigate(MainView.class));
 			add(b);
@@ -86,12 +92,12 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 
 		init();
 		sync();
-		setSessionIdAtButton(projectDataId);
+		setSessionIdAtButton(boardId);
 	}
 
 //	@Scheduled(fixedRate = 1000 * 5)
 	public void sync() {
-		ProjectData pd = repository.findById(projectDataId).orElse(null);
+		ProjectData pd = repository.findById(boardId).orElse(null);
 		if (pd == null) {
 			log.info("no data in repository found");
 			return;
@@ -106,7 +112,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 	}
 
 	public void saveData(Function<ProjectData, ProjectData> save) {
-		ProjectData tmp = repository.findById(projectDataId).get();
+		ProjectData tmp = repository.findById(boardId).get();
 		tmp = save.apply(tmp);
 		tmp = repository.save(tmp);
 		log.info("save data: {}", tmp.getId());
@@ -114,7 +120,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 	}
 
 	public ProjectData getData() {
-		return repository.findById(projectDataId).get();
+		return repository.findById(boardId).get();
 	}
 
 	public ColumnComponent addColumn(String id, String name, boolean saveToDb) {
@@ -220,12 +226,12 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		});
 		layout.add(btnSync);
 
-		Button btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
+		btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
 		btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
 		btnDelete.addClickListener(e -> {
 			new ConfirmDialog("Delete", null, "Delete", ok -> {
 				UI.getCurrent().navigate(MainView.class);
-				repository.deleteById(projectDataId);
+				repository.deleteById(boardId);
 			}).open();
 		});
 		layout.add(btnDelete);
@@ -235,5 +241,8 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 
 	public void setSessionIdAtButton(String id) {
 		btnBoardId.setText("Board: " + id);
+		if (!getData().getOwnerId().equals(SessionUtils.getSessionId())) {
+			btnDelete.setVisible(false);
+		}
 	}
 }
