@@ -5,10 +5,11 @@ import java.util.function.Function;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fo0.vaadin.scrumtool.config.ProjectBoardConfig;
+import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.ProjectData;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
+import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.ProjectBoardViewLoader;
 import com.fo0.vaadin.scrumtool.views.components.CardComponent;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
@@ -34,10 +35,10 @@ import lombok.extern.log4j.Log4j2;
 /**
  * The main view is a top-level placeholder for other views.
  */
-@Route(ProjectBoardView.NAME)
+@Route(KanbanView.NAME)
 @Log4j2
 @Push
-public class ProjectBoardView extends Div implements HasUrlParameter<String> {
+public class KanbanView extends Div implements HasUrlParameter<String> {
 
 	public static final String NAME = "projectboard";
 
@@ -56,7 +57,7 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 	public HorizontalLayout columns;
 
 	private Button btnSession;
-	private String sessionId;
+	private String projectDataId;
 
 	private void init() {
 		log.info("init");
@@ -75,8 +76,8 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 
 	@Override
 	public void setParameter(BeforeEvent event, String parameter) {
-		sessionId = parameter;
-		if (!repository.findById(sessionId).isPresent()) {
+		projectDataId = parameter;
+		if (!repository.findById(projectDataId).isPresent()) {
 			Button b = new Button("No Session Found -> Navigate to Dashbaord");
 			b.addClickListener(e -> UI.getCurrent().navigate(MainView.class));
 			add(b);
@@ -85,12 +86,12 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 
 		init();
 		sync();
-		setSessionIdAtButton(sessionId);
+		setSessionIdAtButton(projectDataId);
 	}
 
 //	@Scheduled(fixedRate = 1000 * 5)
 	public void sync() {
-		ProjectData pd = repository.findById(sessionId).orElse(null);
+		ProjectData pd = repository.findById(projectDataId).orElse(null);
 		if (pd == null) {
 			log.info("no data in repository found");
 			return;
@@ -105,18 +106,19 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 	}
 
 	public void saveData(Function<ProjectData, ProjectData> save) {
-		ProjectData tmp = repository.findById(sessionId).get();
+		ProjectData tmp = repository.findById(projectDataId).get();
 		tmp = save.apply(tmp);
 		tmp = repository.save(tmp);
 		log.info("save data: {}", tmp.getId());
+//		printProjectData();
 	}
 
 	public ProjectData getData() {
-		return repository.findById(sessionId).get();
+		return repository.findById(projectDataId).get();
 	}
 
 	public ColumnComponent addColumn(String id, String name, boolean saveToDb) {
-		if (columns.getComponentCount() >= ProjectBoardConfig.MAX_COLUMNS) {
+		if (columns.getComponentCount() >= KanbanConfig.MAX_COLUMNS) {
 			Notification.show("Column limit reached", 3000, Position.MIDDLE);
 			return null;
 		}
@@ -132,7 +134,7 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 		return col;
 	}
 
-	public ColumnComponent createColumn(ProjectBoardView view, String id, String name) {
+	public ColumnComponent createColumn(KanbanView view, String id, String name) {
 		return new ColumnComponent(view, id, name);
 	}
 
@@ -164,7 +166,7 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 			return;
 		}
 
-		if (CollectionUtils.size(cc.getProductDataColumn().getCards()) >= ProjectBoardConfig.MAX_CARDS) {
+		if (CollectionUtils.size(cc.getProductDataColumn().getCards()) >= KanbanConfig.MAX_CARDS) {
 			Notification.show("Card limit reached", 5000, Position.MIDDLE);
 			return;
 		}
@@ -184,8 +186,18 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 		return col.getCardById(cardId);
 	}
 
-	public CardComponent createCard(String id, String name) {
-		return new CardComponent(id, name);
+	public CardComponent createCard(String columnId, String id, String name) {
+		return new CardComponent(this, columnId, id, name);
+	}
+
+	public void removeCard(String columnId, String cardId) {
+		ColumnComponent cc = getColumn(columnId);
+		if (cc == null) {
+			return;
+		}
+		log.info("[CARD] remove card " + cardId);
+		cc.removeCardById(cardId);
+		saveData(data -> data.removeCardById(columnId, cardId));
 	}
 
 	public HorizontalLayout createHeaderLayout() {
@@ -209,11 +221,11 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 		layout.add(btnSync);
 
 		Button btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
-		btnDelete.getStyle().set("color", "#F44336");
+		btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
 		btnDelete.addClickListener(e -> {
 			new ConfirmDialog("Delete", null, "Delete", ok -> {
 				UI.getCurrent().navigate(MainView.class);
-				repository.deleteById(sessionId);
+				repository.deleteById(projectDataId);
 			}).open();
 		});
 		layout.add(btnDelete);

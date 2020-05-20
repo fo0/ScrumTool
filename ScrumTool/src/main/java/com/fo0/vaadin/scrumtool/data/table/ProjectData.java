@@ -10,6 +10,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fo0.vaadin.scrumtool.data.utils.IDataId;
 import com.google.common.collect.Sets;
 
@@ -58,6 +60,33 @@ public class ProjectData implements IDataId, Serializable {
 		}
 
 		pdc.addCard(note);
+		return this;
+	}
+
+	public ProjectData removeCardById(String columnId, String cardId) {
+		if (CollectionUtils.isEmpty(columns)) {
+			return this;
+		}
+
+		ProjectDataColumn pdc = getColumnById(columnId);
+		if (pdc == null) {
+			return this;
+		}
+
+		pdc.removeCardById(cardId);
+		return this;
+	}
+
+	public boolean removeColumn(ProjectDataColumn column) {
+		return columns.remove(column);
+	}
+
+	public ProjectData removeColumnById(String id) {
+		if (CollectionUtils.isEmpty(columns)) {
+			return this;
+		}
+
+		columns.removeIf(e -> e.getId().equals(id));
 		return this;
 	}
 

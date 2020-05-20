@@ -1,7 +1,7 @@
 package com.fo0.vaadin.scrumtool.views.utils;
 
 import com.fo0.vaadin.scrumtool.utils.Utils;
-import com.fo0.vaadin.scrumtool.views.ProjectBoardView;
+import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Label;
@@ -32,7 +32,7 @@ public class ProjectBoardViewUtils {
 		return layout;
 	}
 
-	public static Dialog createColumnDialog(ProjectBoardView view) {
+	public static Dialog createColumnDialog(KanbanView view) {
 		Dialog d = new Dialog();
 		TextField t = new TextField("Name");
 		t.focus();
