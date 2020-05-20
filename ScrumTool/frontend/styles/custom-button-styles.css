@@ -1,0 +1,16 @@
+:host(.theme-toggle) {
+	background-color: var(--material-body-text-color) !important;
+	box-shadow: 0px 0 3px var(--material-body-text-color);
+	color: var(--material-background-color) !important;
+	min-width: auto !important;
+	padding: 5px !important;
+	border-radius: 50%;
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
+}
+
+:host(.theme-toggle) [part="prefix"] {
+	margin-right: -8px;
+	margin-left: 4px;
+}

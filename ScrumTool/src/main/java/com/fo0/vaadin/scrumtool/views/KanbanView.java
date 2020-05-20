@@ -12,9 +12,9 @@ import com.fo0.vaadin.scrumtool.data.table.ProjectData;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.ProjectBoardViewLoader;
-import com.fo0.vaadin.scrumtool.utils.UIUtils;
 import com.fo0.vaadin.scrumtool.views.components.CardComponent;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
+import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
 import com.fo0.vaadin.scrumtool.views.utils.ProjectBoardViewUtils;
 import com.google.gson.GsonBuilder;
 import com.vaadin.flow.component.UI;
@@ -26,7 +26,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
@@ -37,9 +36,8 @@ import lombok.extern.log4j.Log4j2;
 /**
  * The main view is a top-level placeholder for other views.
  */
-@Route(KanbanView.NAME)
 @Log4j2
-@Push
+@Route(value = KanbanView.NAME, layout = MainLayout.class)
 public class KanbanView extends Div implements HasUrlParameter<String> {
 
 	public static final String NAME = "projectboard";
@@ -75,8 +73,6 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		root.add(columns);
 
 		root.expand(columns);
-		
-		UIUtils.checkOSTheme(UI.getCurrent());
 	}
 
 	@Override
