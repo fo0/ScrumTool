@@ -25,6 +25,8 @@ public class ProjectDataCard implements Serializable {
 	@Id
 	@Builder.Default
 	private String id = UUID.randomUUID().toString();
+	
+	private String ownerId;
 
 	private String text;
 
