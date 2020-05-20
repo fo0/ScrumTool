@@ -1,3 +1,5 @@
+![Build-Publish](https://github.com/fo0/ScrumTool/workflows/Build-Publish/badge.svg?event=push)
+
 # ScrumTool
 
 ### Getting Started
