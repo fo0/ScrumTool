@@ -3,11 +3,8 @@
 
 name: Build-Publish
 
-on:
-  push:
-    tags:
-      - 'v0.2'
-
+on: [push]
+  
 jobs:
   build:
     name: Publish binaries
