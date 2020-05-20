@@ -117,7 +117,7 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 
 	public ColumnComponent addColumn(String id, String name, boolean saveToDb) {
 		if (columns.getComponentCount() >= ProjectBoardConfig.MAX_COLUMNS) {
-			Notification.show("Column limit reached", 5000, Position.MIDDLE);
+			Notification.show("Column limit reached", 3000, Position.MIDDLE);
 			return null;
 		}
 
