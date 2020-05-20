@@ -191,8 +191,12 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 		btnSync.addClickListener(e -> {
 			sync();
 		});
-
 		layout.add(btnSync);
+
+		Button btnDelete = new Button("Delete Project", VaadinIcon.TRASH.create());
+		btnDelete.getStyle().set("color", "#F44336");
+		layout.add(btnDelete);
+
 		return layout;
 	}
 
