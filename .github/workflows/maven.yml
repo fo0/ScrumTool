@@ -3,11 +3,8 @@
 
 name: Build-Publish
 
-on:
-  push:
-    tags:
-      - 'v0.2'
-
+on: [push]
+  
 jobs:
   build:
     name: Publish binaries
@@ -19,12 +16,12 @@ jobs:
         rust-version: stable
     - uses: actions/checkout@v1
     - name: Build
-      run: mvn -B package --file ScrumTool/pom.xml
+      run: mvn -B package --file ScrumTool/pom.xml -Pproduction
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v1-release
       with:
         repo_token: ${{ secrets.GH_TOKEN }}
         file: ScrumTool/target/ScrumTool-1.0-SNAPSHOT.jar
-        asset_name: mything
-        tag: ${{ github.ref }}
+        asset_name: ScrumTool.jar
+        tag: v0.2
         overwrite: true
