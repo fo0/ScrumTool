@@ -1,6 +1,7 @@
 # ScrumTool
 
 ### TODO: Features
+- Voting funktion (Eine config wo bspw der Admin festlegen kann wieviel Votes die user haben bspw 5 Votes jeder. Und auch dass die User die Votes zurücknehmen / clearen können und neu verteilen=
 - Planning Poker
 - Export (Bspw. PDF)
 - Shuffle (Cards durchwirbeln) Button für Columns
