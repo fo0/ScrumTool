@@ -2,8 +2,10 @@ package com.fo0.vaadin.scrumtool.views;
 
 import java.util.function.Function;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fo0.vaadin.scrumtool.config.ProjectBoardConfig;
 import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.ProjectData;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
@@ -14,8 +16,11 @@ import com.fo0.vaadin.scrumtool.views.utils.ProjectBoardViewUtils;
 import com.google.gson.GsonBuilder;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
@@ -111,6 +116,11 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 	}
 
 	public ColumnComponent addColumn(String id, String name, boolean saveToDb) {
+		if (columns.getComponentCount() >= ProjectBoardConfig.MAX_COLUMNS) {
+			Notification.show("Column limit reached", 5000, Position.MIDDLE);
+			return null;
+		}
+
 		if (getColumnLayoutById(id) != null) {
 			log.warn("column already exists: {} - {}", id, name);
 			return null;
@@ -154,6 +164,11 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 			return;
 		}
 
+		if (CollectionUtils.size(cc.getProductDataColumn().getCards()) >= ProjectBoardConfig.MAX_CARDS) {
+			Notification.show("Card limit reached", 5000, Position.MIDDLE);
+			return;
+		}
+
 		ProjectDataCard pdc = cc.getCardById(cardId);
 		if (pdc != null) {
 			log.warn("card already exists: {} - {}", cardId, message);
@@ -191,8 +206,18 @@ public class ProjectBoardView extends Div implements HasUrlParameter<String> {
 		btnSync.addClickListener(e -> {
 			sync();
 		});
-
 		layout.add(btnSync);
+
+		Button btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
+		btnDelete.getStyle().set("color", "#F44336");
+		btnDelete.addClickListener(e -> {
+			new ConfirmDialog("Delete", null, "Delete", ok -> {
+				UI.getCurrent().navigate(MainView.class);
+				repository.deleteById(sessionId);
+			}).open();
+		});
+		layout.add(btnDelete);
+
 		return layout;
 	}
 
