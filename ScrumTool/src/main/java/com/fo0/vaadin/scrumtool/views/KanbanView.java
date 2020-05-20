@@ -10,6 +10,7 @@ import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.ProjectData;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
+import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.ProjectBoardViewLoader;
 import com.fo0.vaadin.scrumtool.utils.UIUtils;
@@ -41,7 +42,7 @@ import lombok.extern.log4j.Log4j2;
 @Route(value = KanbanView.NAME, layout = MainLayout.class)
 public class KanbanView extends Div implements HasUrlParameter<String> {
 
-	public static final String NAME = "projectboard";
+	public static final String NAME = "kanbanboard";
 
 	private static final long serialVersionUID = 8874200985319706829L;
 
@@ -58,8 +59,10 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 	public HorizontalLayout columns;
 
 	private Button btnBoardId;
+	private String boardId;
+
+	private Button btnDelete;
 	private ClipboardHelper btnBoardIdClipboard;
-	private String projectDataId;
 
 	private void init() {
 		log.info("init");
@@ -74,14 +77,17 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		root.add(columns);
 
 		root.expand(columns);
-		
+
 		UIUtils.checkOSTheme(UI.getCurrent());
 	}
 
 	@Override
 	public void setParameter(BeforeEvent event, String parameter) {
-		projectDataId = parameter;
-		if (!repository.findById(projectDataId).isPresent()) {
+		SessionUtils.createSessionIdIfExists();
+
+		boardId = parameter;
+
+		if (!repository.findById(boardId).isPresent()) {
 			Button b = new Button("No Session Found -> Navigate to Dashbaord");
 			b.addClickListener(e -> UI.getCurrent().navigate(MainView.class));
 			add(b);
@@ -90,19 +96,19 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 
 		init();
 		sync();
-		setSessionIdAtButton(projectDataId);
+		setSessionIdAtButton(boardId);
 	}
 
 //	@Scheduled(fixedRate = 1000 * 5)
 	public void sync() {
-		ProjectData pd = repository.findById(projectDataId).orElse(null);
+		ProjectData pd = repository.findById(boardId).orElse(null);
 		if (pd == null) {
 			log.info("no data in repository found");
 			return;
 		}
 		
 		log.info("sync & refreshing data: {}", pd.getId());
-		ProjectBoardViewLoader.loadData(this, pd);
+		ProjectBoardViewLoader.loadData(this, pd, SessionUtils.getSessionId());
 	}
 
 	public void printProjectData() {
@@ -110,7 +116,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 	}
 
 	public void saveData(Function<ProjectData, ProjectData> save) {
-		ProjectData tmp = repository.findById(projectDataId).get();
+		ProjectData tmp = repository.findById(boardId).get();
 		tmp = save.apply(tmp);
 		tmp = repository.save(tmp);
 		log.info("save data: {}", tmp.getId());
@@ -118,10 +124,10 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 	}
 
 	public ProjectData getData() {
-		return repository.findById(projectDataId).get();
+		return repository.findById(boardId).get();
 	}
 
-	public ColumnComponent addColumn(String id, String name, boolean saveToDb) {
+	public ColumnComponent addColumn(String id, String ownerId, String name, boolean saveToDb) {
 		if (columns.getComponentCount() >= KanbanConfig.MAX_COLUMNS) {
 			Notification.show("Column limit reached", 3000, Position.MIDDLE);
 			return null;
@@ -132,14 +138,18 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 			return null;
 		}
 
-		ColumnComponent col = createColumn(this, id, name);
+		ColumnComponent col = createColumn(this, id, ownerId, name);
 		columns.add(col);
 		saveData(data -> data.addColumn(col.getProductDataColumn()));
 		return col;
 	}
 
-	public ColumnComponent createColumn(KanbanView view, String id, String name) {
-		return new ColumnComponent(view, id, name);
+	public ColumnComponent addColumn(String id, String name, boolean saveToDb) {
+		return addColumn(id, SessionUtils.getSessionId(), name, saveToDb);
+	}
+
+	public ColumnComponent createColumn(KanbanView view, String id, String ownerId, String name) {
+		return new ColumnComponent(view, id, ownerId, name);
 	}
 
 	public ColumnComponent getColumnLayoutById(String columnId) {
@@ -164,7 +174,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		return null;
 	}
 
-	public void addCard(String columnId, String cardId, String message, boolean saveToDb) {
+	public void addCard(String columnId, String cardId, String ownerId, String message, boolean saveToDb) {
 		ColumnComponent cc = getColumn(columnId);
 		if (cc == null) {
 			return;
@@ -181,7 +191,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 			return;
 		}
 
-		CardComponent ccc = cc.addCard(cardId, message);
+		CardComponent ccc = cc.addCard(cardId, ownerId, message);
 		saveData(data -> data.addCard(columnId, ccc.getCard()));
 	}
 
@@ -190,8 +200,8 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		return col.getCardById(cardId);
 	}
 
-	public CardComponent createCard(String columnId, String id, String name) {
-		return new CardComponent(this, columnId, id, name);
+	public CardComponent createCard(String columnId, String cardId, String ownerId, String name) {
+		return new CardComponent(this, columnId, cardId, ownerId, name);
 	}
 
 	public void removeCard(String columnId, String cardId) {
@@ -226,12 +236,12 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		});
 		layout.add(btnSync);
 
-		Button btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
+		btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
 		btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
 		btnDelete.addClickListener(e -> {
 			new ConfirmDialog("Delete", null, "Delete", ok -> {
 				UI.getCurrent().navigate(MainView.class);
-				repository.deleteById(projectDataId);
+				repository.deleteById(boardId);
 			}).open();
 		});
 		layout.add(btnDelete);
@@ -241,6 +251,10 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 
 	public void setSessionIdAtButton(String id) {
 		btnBoardId.setText("Board: " + id);
+		log.info("projectdata ownerId: {} | SessionID: {}", getData().getOwnerId(), SessionUtils.getSessionId());
+		if (!getData().getOwnerId().equals(SessionUtils.getSessionId())) {
+			btnDelete.setVisible(false);
+		}
 		btnBoardIdClipboard.setContent(id);
 	}
 }
