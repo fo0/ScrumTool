@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.olli.ClipboardHelper;
 
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
@@ -58,6 +59,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 	public HorizontalLayout columns;
 
 	private Button btnBoardId;
+	private ClipboardHelper btnBoardIdClipboard;
 	private String projectDataId;
 
 	private void init() {
@@ -99,7 +101,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 			log.info("no data in repository found");
 			return;
 		}
-
+		
 		log.info("sync & refreshing data: {}", pd.getId());
 		ProjectBoardViewLoader.loadData(this, pd);
 	}
@@ -215,7 +217,9 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		layout.add(b);
 
 		btnBoardId = new Button("Board: Unknown", VaadinIcon.GROUP.create());
-		layout.add(btnBoardId);
+		btnBoardId.getStyle().set("vertical-align", "0");
+		btnBoardIdClipboard = new ClipboardHelper("", btnBoardId);
+		layout.add(btnBoardIdClipboard);
 
 		Button btnSync = new Button("Refresh", VaadinIcon.REFRESH.create());
 		btnSync.addClickListener(e -> {
@@ -238,5 +242,6 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 
 	public void setSessionIdAtButton(String id) {
 		btnBoardId.setText("Board: " + id);
+		btnBoardIdClipboard.setContent(id);
 	}
 }
