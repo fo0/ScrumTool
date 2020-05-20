@@ -42,7 +42,7 @@ import lombok.extern.log4j.Log4j2;
 @Push
 public class KanbanView extends Div implements HasUrlParameter<String> {
 
-	public static final String NAME = "projectboard";
+	public static final String NAME = "kanbanboard";
 
 	private static final long serialVersionUID = 8874200985319706829L;
 
@@ -76,7 +76,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		root.add(columns);
 
 		root.expand(columns);
-		
+
 		UIUtils.checkOSTheme(UI.getCurrent());
 	}
 
@@ -85,7 +85,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		SessionUtils.createSessionIdIfExists();
 
 		boardId = parameter;
-		
+
 		if (!repository.findById(boardId).isPresent()) {
 			Button b = new Button("No Session Found -> Navigate to Dashbaord");
 			b.addClickListener(e -> UI.getCurrent().navigate(MainView.class));
@@ -107,7 +107,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		}
 
 		log.info("sync & refreshing data: {}", pd.getId());
-		ProjectBoardViewLoader.loadData(this, pd);
+		ProjectBoardViewLoader.loadData(this, pd, SessionUtils.getSessionId());
 	}
 
 	public void printProjectData() {
@@ -126,7 +126,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		return repository.findById(boardId).get();
 	}
 
-	public ColumnComponent addColumn(String id, String name, boolean saveToDb) {
+	public ColumnComponent addColumn(String id, String ownerId, String name, boolean saveToDb) {
 		if (columns.getComponentCount() >= KanbanConfig.MAX_COLUMNS) {
 			Notification.show("Column limit reached", 3000, Position.MIDDLE);
 			return null;
@@ -137,14 +137,18 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 			return null;
 		}
 
-		ColumnComponent col = createColumn(this, id, name);
+		ColumnComponent col = createColumn(this, id, ownerId, name);
 		columns.add(col);
 		saveData(data -> data.addColumn(col.getProductDataColumn()));
 		return col;
 	}
 
-	public ColumnComponent createColumn(KanbanView view, String id, String name) {
-		return new ColumnComponent(view, id, name);
+	public ColumnComponent addColumn(String id, String name, boolean saveToDb) {
+		return addColumn(id, SessionUtils.getSessionId(), name, saveToDb);
+	}
+
+	public ColumnComponent createColumn(KanbanView view, String id, String ownerId, String name) {
+		return new ColumnComponent(view, id, ownerId, name);
 	}
 
 	public ColumnComponent getColumnLayoutById(String columnId) {
@@ -169,7 +173,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		return null;
 	}
 
-	public void addCard(String columnId, String cardId, String message, boolean saveToDb) {
+	public void addCard(String columnId, String cardId, String ownerId, String message, boolean saveToDb) {
 		ColumnComponent cc = getColumn(columnId);
 		if (cc == null) {
 			return;
@@ -186,7 +190,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 			return;
 		}
 
-		CardComponent ccc = cc.addCard(cardId, message);
+		CardComponent ccc = cc.addCard(cardId, ownerId, message);
 		saveData(data -> data.addCard(columnId, ccc.getCard()));
 	}
 
@@ -195,8 +199,8 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		return col.getCardById(cardId);
 	}
 
-	public CardComponent createCard(String columnId, String id, String name) {
-		return new CardComponent(this, columnId, id, name);
+	public CardComponent createCard(String columnId, String cardId, String ownerId, String name) {
+		return new CardComponent(this, columnId, cardId, ownerId, name);
 	}
 
 	public void removeCard(String columnId, String cardId) {
@@ -244,6 +248,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 
 	public void setSessionIdAtButton(String id) {
 		btnBoardId.setText("Board: " + id);
+		log.info("projectdata ownerId: {} | SessionID: {}", getData().getOwnerId(), SessionUtils.getSessionId());
 		if (!getData().getOwnerId().equals(SessionUtils.getSessionId())) {
 			btnDelete.setVisible(false);
 		}

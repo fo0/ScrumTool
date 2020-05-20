@@ -19,15 +19,13 @@ public class CardComponent extends HorizontalLayout {
 	@Getter
 	private ProjectDataCard card;
 
-	public CardComponent(KanbanView view, String columnId, String id, String text) {
+	public CardComponent(KanbanView view, String columnId, String id, String ownerId, String text) {
 		setId(id);
 		getStyle().set("border", "2px solid black");
 		setSpacing(true);
 		add(new Label(text));
 
-		card = ProjectDataCard.builder().id(id).ownerId(SessionUtils.getSessionId()).text(text).build();
-		
-		log.info("owner id: {} | session id: {}", card.getOwnerId(), SessionUtils.getSessionId());
+		card = ProjectDataCard.builder().id(id).ownerId(ownerId).text(text).build();
 
 		if (card.getOwnerId().equals(SessionUtils.getSessionId())) {
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());

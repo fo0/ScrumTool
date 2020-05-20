@@ -5,7 +5,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataColumn;
-import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.Utils;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
@@ -34,7 +33,7 @@ public class ColumnComponent extends VerticalLayout {
 
 	private TextArea area;
 
-	public ColumnComponent(KanbanView view, String id, String name) {
+	public ColumnComponent(KanbanView view, String id, String ownerId, String name) {
 		this.name = name;
 		this.view = view;
 		setId(id);
@@ -68,7 +67,7 @@ public class ColumnComponent extends VerticalLayout {
 		Button btnAdd = new Button("Note", VaadinIcon.PLUS.create());
 		btnAdd.setWidthFull();
 		btnAdd.addClickListener(e -> {
-			view.addCard(id, Utils.randomId(), area.getValue(), true);
+			view.addCard(id, Utils.randomId(), ownerId, area.getValue(), true);
 			area.clear();
 			area.focus();
 		});
@@ -84,11 +83,11 @@ public class ColumnComponent extends VerticalLayout {
 		layoutHeader.add(btnLayout);
 		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, h3);
 
-		productDataColumn = ProjectDataColumn.builder().id(id).ownerId(SessionUtils.getSessionId()).name(name).build();
+		productDataColumn = ProjectDataColumn.builder().id(id).ownerId(ownerId).name(name).build();
 	}
 
-	public CardComponent addCard(String id, String message) {
-		CardComponent card = new CardComponent(view, getId().get(), id, message);
+	public CardComponent addCard(String id, String ownerId, String message) {
+		CardComponent card = new CardComponent(view, getId().get(), id, ownerId, message);
 		add(card);
 		productDataColumn.addCard(card.getCard());
 		return card;
