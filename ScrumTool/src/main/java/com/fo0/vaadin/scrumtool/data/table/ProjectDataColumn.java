@@ -40,6 +40,14 @@ public class ProjectDataColumn implements Serializable {
 	@Builder.Default
 	private Set<ProjectDataCard> cards = Sets.newHashSet();
 
+	public ProjectDataCard getCardById(String id) {
+		if (CollectionUtils.isEmpty(cards)) {
+			return null;
+		}
+
+		return cards.stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
+	}
+
 	public boolean addCard(ProjectDataCard note) {
 		return cards.add(note);
 	}
@@ -48,11 +56,8 @@ public class ProjectDataColumn implements Serializable {
 		return cards.remove(note);
 	}
 
-	public ProjectDataCard getCardById(String id) {
-		if (CollectionUtils.isEmpty(cards)) {
-			return null;
-		}
-
-		return cards.stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
+	public boolean removeCardById(String id) {
+		return cards.removeIf(e -> e.getId().equals(id));
 	}
+
 }

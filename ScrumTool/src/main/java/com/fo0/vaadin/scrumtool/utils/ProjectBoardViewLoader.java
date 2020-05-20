@@ -7,7 +7,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.fo0.vaadin.scrumtool.data.table.ProjectData;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataColumn;
-import com.fo0.vaadin.scrumtool.views.ProjectBoardView;
+import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
@@ -16,7 +16,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ProjectBoardViewLoader {
 
-	public static void createMissingColumns(ProjectBoardView view, HorizontalLayout currentColumns, Set<ProjectDataColumn> latestColumns) {
+	public static void createMissingColumns(KanbanView view, HorizontalLayout currentColumns, Set<ProjectDataColumn> latestColumns) {
 		latestColumns.stream().forEachOrdered(latestColumnAtDb -> {
 
 			ColumnComponent cc = view.getColumnLayoutById(latestColumnAtDb.getId());
@@ -30,13 +30,13 @@ public class ProjectBoardViewLoader {
 		});
 	}
 
-	private static ColumnComponent checkForMissingColumn(ProjectBoardView view, HorizontalLayout currentColumns,
+	private static ColumnComponent checkForMissingColumn(KanbanView view, HorizontalLayout currentColumns,
 			ProjectDataColumn latestColumnAtDb) {
 		log.info("[COLUMN] add missing column: {} - {}", latestColumnAtDb.getId(), latestColumnAtDb.getName());
 		return view.addColumn(latestColumnAtDb.getId(), latestColumnAtDb.getName(), false);
 	}
 
-	private static void checkForMissingCard(ProjectBoardView view, ProjectDataColumn latestColumnAtDb, ColumnComponent ccc) {
+	private static void checkForMissingCard(KanbanView view, ProjectDataColumn latestColumnAtDb, ColumnComponent ccc) {
 		latestColumnAtDb.getCards().stream().forEachOrdered(pdc -> {
 			ProjectDataCard pdcc = ccc.getCardById(pdc.getId());
 			if (pdcc == null) {
@@ -48,7 +48,7 @@ public class ProjectBoardViewLoader {
 		});
 	}
 
-	public static void loadData(ProjectBoardView view, ProjectData latestData) {
+	public static void loadData(KanbanView view, ProjectData latestData) {
 		if (latestData == null) {
 			log.info("no data found");
 			return;

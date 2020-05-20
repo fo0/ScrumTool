@@ -2,10 +2,12 @@ package com.fo0.vaadin.scrumtool.views.components;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataColumn;
+import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.Utils;
-import com.fo0.vaadin.scrumtool.views.ProjectBoardView;
+import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -13,12 +15,15 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import lombok.Getter;
 
 public class ColumnComponent extends VerticalLayout {
 
 	private static final long serialVersionUID = 8415434953831247614L;
+
+	private KanbanView view;
 
 	@Getter
 	private ProjectDataColumn productDataColumn;
@@ -28,8 +33,9 @@ public class ColumnComponent extends VerticalLayout {
 
 	private TextArea area;
 
-	public ColumnComponent(ProjectBoardView view, String id, String name) {
+	public ColumnComponent(KanbanView view, String id, String name) {
 		this.name = name;
+		this.view = view;
 		setId(id);
 		H3 h3 = new H3(name);
 		add(h3);
@@ -47,6 +53,15 @@ public class ColumnComponent extends VerticalLayout {
 
 		area = new TextArea();
 		area.setSizeFull();
+		area.setMaxLength(KanbanConfig.MAX_CARD_TEXT_LENGTH);
+		area.setValueChangeMode(ValueChangeMode.EAGER);
+		area.addValueChangeListener(e -> {
+			if (e.getSource().getValue().length() >= KanbanConfig.MAX_CARD_TEXT_LENGTH) {
+				layoutHeader.getStyle().set("border-color", STYLES.COLOR_RED_500);
+			} else {
+				layoutHeader.getStyle().remove("border-color");
+			}
+		});
 		layoutHeader.add(area);
 
 		Button btnAdd = new Button("Note", VaadinIcon.PLUS.create());
@@ -54,6 +69,7 @@ public class ColumnComponent extends VerticalLayout {
 		btnAdd.addClickListener(e -> {
 			view.addCard(id, Utils.randomId(), area.getValue(), true);
 			area.clear();
+			area.focus();
 		});
 
 		Button btnCancel = new Button("Clear", VaadinIcon.TRASH.create());
@@ -71,7 +87,7 @@ public class ColumnComponent extends VerticalLayout {
 	}
 
 	public CardComponent addCard(String id, String message) {
-		CardComponent card = new CardComponent(id, message);
+		CardComponent card = new CardComponent(view, getId().get(), id, message);
 		add(card);
 		productDataColumn.addCard(card.getCard());
 		return card;
@@ -83,6 +99,24 @@ public class ColumnComponent extends VerticalLayout {
 		}
 
 		return productDataColumn.getCardById(cardId);
+	}
+
+	public void removeCardById(String cardId) {
+		if (CollectionUtils.isEmpty(productDataColumn.getCards())) {
+			return;
+		}
+
+		productDataColumn.getCards().removeIf(e -> e.getId().equals(cardId));
+
+		for (int i = 0; i < getComponentCount(); i++) {
+			if (getComponentAt(i) instanceof CardComponent) {
+				CardComponent col = (CardComponent) getComponentAt(i);
+				if (col.getId().get().equals(cardId)) {
+					remove(col);
+					break;
+				}
+			}
+		}
 	}
 
 }

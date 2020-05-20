@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.ProjectData;
+import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -48,6 +49,8 @@ public class MainView extends Div {
 
 		root.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, centerLayout);
 		root.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+		
+		SessionUtils.createSessionIdIfExists();
 	}
 
 	private Button createBtnJoin() {
@@ -66,7 +69,7 @@ public class MainView extends Div {
 		btn.getStyle().set("border", "1px solid black");
 		btn.addClickListener(e -> {
 			ProjectData p = repository.save(ProjectData.builder().build());
-			UI.getCurrent().navigate(ProjectBoardView.class, p.getId());
+			UI.getCurrent().navigate(KanbanView.class, p.getId());
 		});
 		btn.setWidth("150px");
 		btn.setHeight("100px");
@@ -91,7 +94,7 @@ public class MainView extends Div {
 				return;
 			}
 
-			UI.getCurrent().navigate(ProjectBoardView.class, p.getId());
+			UI.getCurrent().navigate(KanbanView.class, p.getId());
 			d.close();
 		});
 
