@@ -56,7 +56,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 	@Getter
 	public HorizontalLayout columns;
 
-	private Button btnSession;
+	private Button btnBoardId;
 	private String projectDataId;
 
 	private void init() {
@@ -211,8 +211,8 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		});
 		layout.add(b);
 
-		btnSession = new Button("Session: Unknown", VaadinIcon.GROUP.create());
-		layout.add(btnSession);
+		btnBoardId = new Button("Board: Unknown", VaadinIcon.GROUP.create());
+		layout.add(btnBoardId);
 
 		Button btnSync = new Button("Refresh", VaadinIcon.REFRESH.create());
 		btnSync.addClickListener(e -> {
@@ -234,6 +234,6 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 	}
 
 	public void setSessionIdAtButton(String id) {
-		btnSession.setText("Session: " + id);
+		btnBoardId.setText("Board: " + id);
 	}
 }
