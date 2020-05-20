@@ -12,6 +12,7 @@ import com.fo0.vaadin.scrumtool.data.table.ProjectData;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.ProjectBoardViewLoader;
+import com.fo0.vaadin.scrumtool.utils.UIUtils;
 import com.fo0.vaadin.scrumtool.views.components.CardComponent;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
@@ -73,6 +74,8 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		root.add(columns);
 
 		root.expand(columns);
+		
+		UIUtils.checkOSTheme(UI.getCurrent());
 	}
 
 	@Override
