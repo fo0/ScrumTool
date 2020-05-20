@@ -64,7 +64,6 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 
 	private Button btnDelete;
 	private ClipboardHelper btnBoardIdClipboard;
-	private String projectDataId;
 
 	private void init() {
 		log.info("init");
