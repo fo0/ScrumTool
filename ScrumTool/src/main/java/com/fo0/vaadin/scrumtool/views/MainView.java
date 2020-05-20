@@ -71,7 +71,7 @@ public class MainView extends Div {
 		Button btn = new Button("Erstellen");
 		btn.getStyle().set("border", "1px solid black");
 		btn.addClickListener(e -> {
-			ProjectData p = repository.save(ProjectData.builder().build());
+			ProjectData p = repository.save(ProjectData.builder().ownerId(SessionUtils.getSessionId()).build());
 			UI.getCurrent().navigate(KanbanView.class, p.getId());
 		});
 		btn.setWidth("150px");
@@ -93,7 +93,7 @@ public class MainView extends Div {
 		b.addClickListener(e -> {
 			ProjectData p = repository.findById(t.getValue()).get();
 			if (p == null) {
-				Notification.show("No Session found", 5000, Position.MIDDLE);
+				Notification.show("No Board found", 5000, Position.MIDDLE);
 				return;
 			}
 

@@ -36,6 +36,8 @@ public class ProjectData implements IDataId, Serializable {
 	@Builder.Default
 	private String id = UUID.randomUUID().toString();
 
+	private String ownerId;
+	
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@Builder.Default
 	private Set<ProjectDataColumn> columns = Sets.newHashSet();

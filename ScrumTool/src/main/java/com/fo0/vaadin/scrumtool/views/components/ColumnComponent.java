@@ -5,6 +5,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataColumn;
+import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.Utils;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
@@ -83,7 +84,7 @@ public class ColumnComponent extends VerticalLayout {
 		layoutHeader.add(btnLayout);
 		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, h3);
 
-		productDataColumn = ProjectDataColumn.builder().id(id).name(name).build();
+		productDataColumn = ProjectDataColumn.builder().id(id).ownerId(SessionUtils.getSessionId()).name(name).build();
 	}
 
 	public CardComponent addCard(String id, String message) {

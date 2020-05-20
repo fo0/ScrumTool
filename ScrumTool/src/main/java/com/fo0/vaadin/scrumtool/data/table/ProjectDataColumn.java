@@ -34,6 +34,8 @@ public class ProjectDataColumn implements Serializable {
 	@Builder.Default
 	private String id = UUID.randomUUID().toString();
 
+	private String ownerId;
+
 	private String name;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
