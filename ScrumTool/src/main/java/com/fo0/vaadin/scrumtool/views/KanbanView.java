@@ -15,6 +15,8 @@ import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.ProjectBoardViewLoader;
 import com.fo0.vaadin.scrumtool.views.components.CardComponent;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
+import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
+import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
 import com.fo0.vaadin.scrumtool.views.utils.ProjectBoardViewUtils;
 import com.google.gson.GsonBuilder;
@@ -39,7 +41,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Route(value = KanbanView.NAME, layout = MainLayout.class)
-public class KanbanView extends Div implements HasUrlParameter<String> {
+public class KanbanView extends Div implements HasUrlParameter<String>, IThemeToggleButton {
 
 	public static final String NAME = "kanbanboard";
 
@@ -53,6 +55,11 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 
 	@Getter
 	private HorizontalLayout header;
+	private HorizontalLayout headerLeft;
+	private HorizontalLayout headerRight;
+	
+	@Getter
+	private ThemeToggleButton themeToggleButton;
 
 	@Getter
 	public HorizontalLayout columns;
@@ -242,6 +249,10 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 			}).open();
 		});
 		layout.add(btnDelete);
+		
+		themeToggleButton = new ThemeToggleButton(false);
+		
+		layout.add(themeToggleButton);
 
 		return layout;
 	}

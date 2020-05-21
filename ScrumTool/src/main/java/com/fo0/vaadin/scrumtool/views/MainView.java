@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.ProjectData;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
+import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
+import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -18,11 +20,13 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
+import lombok.Getter;
+
 /**
  * The main view is a top-level placeholder for other views.
  */
 @Route(value = Strings.EMPTY, layout = MainLayout.class)
-public class MainView extends VerticalLayout {
+public class MainView extends VerticalLayout implements IThemeToggleButton {
 
 	private static final long serialVersionUID = 8874200985319706829L;
 
@@ -30,6 +34,9 @@ public class MainView extends VerticalLayout {
 	private ProjectDataRepository repository;
 
 	private HorizontalLayout root;
+	
+	@Getter
+	private ThemeToggleButton themeToggleButton;
 
 	public MainView() {
 		super();
@@ -46,6 +53,10 @@ public class MainView extends VerticalLayout {
 		Button btnJoin = createBtnJoin();
 		centerLayout.add(btnCreate);
 		centerLayout.add(btnJoin);
+		
+		themeToggleButton = new ThemeToggleButton();
+		
+		add(themeToggleButton);
 
 		root.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, centerLayout);
 		root.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);

@@ -1,10 +1,13 @@
 package com.fo0.vaadin.scrumtool.views.layouts;
 
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.UIUtils;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
+import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -14,8 +17,6 @@ import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
-import lombok.Getter;
-
 /**
  * 
  * @created 21.05.2020 - 00:27:23
@@ -24,12 +25,10 @@ import lombok.Getter;
  */
 @Push
 @Theme(value = Material.class, variant = Material.LIGHT)
+@CssImport("./styles/custom-styles.css")
 @CssImport(value = "./styles/custom-button-styles.css", themeFor = "vaadin-button")
-public class MainLayout extends VerticalLayout implements RouterLayout {
+public class MainLayout extends VerticalLayout implements RouterLayout, IThemeToggleButton {
 	private static final long serialVersionUID = 4630537412936320207L;
-	
-	@Getter
-	private ThemeToggleButton themeToggleBtn;
 	
 	/**
 	 * 
@@ -39,11 +38,6 @@ public class MainLayout extends VerticalLayout implements RouterLayout {
 		
 		setSizeFull();
 		setPadding(false);
-		
-		themeToggleBtn = new ThemeToggleButton();
-		
-		add(themeToggleBtn);
-		
 		
 		SessionUtils.createSessionIdIfExists();
 		
@@ -74,5 +68,18 @@ public class MainLayout extends VerticalLayout implements RouterLayout {
 		} else if (StringUtils.equals(String.valueOf(value), Material.DARK)) {
 			UIUtils.setThemeAndUpdateUI(ui, Material.DARK);
 		}
+	}
+
+	@Override
+	public ThemeToggleButton getThemeToggleButton() {
+		return getChildren()
+				.filter(Objects::nonNull)
+				.filter(component -> component instanceof IThemeToggleButton)
+				.filter(Objects::nonNull)
+				.map(component -> (IThemeToggleButton) component)
+				.filter(Objects::nonNull)
+				.map(component -> component.getThemeToggleButton())
+				.findAny()
+				.orElse(null);
 	}
 }

@@ -1,6 +1,8 @@
 package com.fo0.vaadin.scrumtool.utils;
 
-import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
+import java.util.Objects;
+
+import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.vaadin.flow.component.UI;
 
 /**
@@ -41,7 +43,13 @@ public class UIUtils {
 		ui.getSession().setAttribute(THEME_CHECK, theme);
 		ui.getElement().setAttribute("theme", theme);
 		ui.getChildren()
-				.filter(view -> view instanceof MainLayout)
-				.forEach(view -> ((MainLayout) view).getThemeToggleBtn().refresh());
+				.filter(Objects::nonNull)
+				.filter(view -> view instanceof IThemeToggleButton)
+				.filter(Objects::nonNull)
+				.map(view -> (IThemeToggleButton) view)
+				.filter(Objects::nonNull)
+				.map(view -> view.getThemeToggleButton())
+				.filter(Objects::nonNull)
+				.forEach(button -> button.refresh());
 	}
 }
