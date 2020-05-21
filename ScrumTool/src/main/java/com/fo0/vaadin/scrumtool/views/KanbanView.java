@@ -13,9 +13,11 @@ import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.ProjectBoardViewLoader;
-import com.fo0.vaadin.scrumtool.utils.UIUtils;
 import com.fo0.vaadin.scrumtool.views.components.CardComponent;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
+import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
+import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
+import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
 import com.fo0.vaadin.scrumtool.views.utils.ProjectBoardViewUtils;
 import com.google.gson.GsonBuilder;
 import com.vaadin.flow.component.UI;
@@ -27,7 +29,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
@@ -38,10 +39,9 @@ import lombok.extern.log4j.Log4j2;
 /**
  * The main view is a top-level placeholder for other views.
  */
-@Route(KanbanView.NAME)
 @Log4j2
-@Push
-public class KanbanView extends Div implements HasUrlParameter<String> {
+@Route(value = KanbanView.NAME, layout = MainLayout.class)
+public class KanbanView extends Div implements HasUrlParameter<String>, IThemeToggleButton {
 
 	public static final String NAME = "kanbanboard";
 
@@ -55,6 +55,11 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 
 	@Getter
 	private HorizontalLayout header;
+	private HorizontalLayout headerLeft;
+	private HorizontalLayout headerRight;
+	
+	@Getter
+	private ThemeToggleButton themeToggleButton;
 
 	@Getter
 	public HorizontalLayout columns;
@@ -78,8 +83,6 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		root.add(columns);
 
 		root.expand(columns);
-
-		UIUtils.checkOSTheme(UI.getCurrent());
 	}
 
 	@Override
@@ -263,6 +266,10 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 			}).open();
 		});
 		layout.add(btnDelete);
+		
+		themeToggleButton = new ThemeToggleButton(false);
+		
+		layout.add(themeToggleButton);
 
 		return layout;
 	}

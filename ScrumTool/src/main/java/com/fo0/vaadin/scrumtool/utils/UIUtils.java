@@ -1,8 +1,9 @@
 package com.fo0.vaadin.scrumtool.utils;
 
+import java.util.Objects;
+
+import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
-import com.vaadin.flow.theme.material.Material;
 
 /**
  * 
@@ -14,22 +15,41 @@ public class UIUtils {
 	
 	public static final String THEME_CHECK = "theme-check";
 	
-	public static void checkOSTheme(UI ui) {
-		Object value = ui.getSession().getAttribute(THEME_CHECK);
+	/**
+	 * 
+	 * @param ui
+	 * @param theme
+	 * @Created 21.05.2020 - 00:40:42
+	 * @author KaesDingeling
+	 */
+	public static void updateThemeForAllSessionUIs(UI ui, String theme) {
+		ui.getSession().setAttribute(THEME_CHECK, theme);
 		
-		if (value == null || value instanceof Boolean) {
-			PendingJavaScriptResult jsResult = ui.getPage().executeJs("return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);");
-			
-			jsResult.then(Boolean.class, i -> {
-				if (i) {
-					ui.getElement().setAttribute("theme", Material.DARK);
-					ui.getSession().setAttribute(THEME_CHECK, true);
-				} else {
-					ui.getSession().setAttribute(THEME_CHECK, false);
-				}
+		ui.getSession().getUIs().forEach(browserTab -> {
+			browserTab.access(() -> {
+				setThemeAndUpdateUI(browserTab, theme);
 			});
-		} else if ((Boolean) value) {
-			ui.getElement().setAttribute("theme", Material.DARK);
-		}
+		});
+	}
+	
+	/**
+	 * 
+	 * @param ui
+	 * @param theme
+	 * @Created 21.05.2020 - 00:49:35
+	 * @author KaesDingeling
+	 */
+	public static void setThemeAndUpdateUI(UI ui, String theme) {
+		ui.getSession().setAttribute(THEME_CHECK, theme);
+		ui.getElement().setAttribute("theme", theme);
+		ui.getChildren()
+				.filter(Objects::nonNull)
+				.filter(view -> view instanceof IThemeToggleButton)
+				.filter(Objects::nonNull)
+				.map(view -> (IThemeToggleButton) view)
+				.filter(Objects::nonNull)
+				.map(view -> view.getThemeToggleButton())
+				.filter(Objects::nonNull)
+				.forEach(button -> button.refresh());
 	}
 }
