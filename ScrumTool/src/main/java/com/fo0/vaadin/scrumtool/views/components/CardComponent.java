@@ -19,23 +19,40 @@ public class CardComponent extends HorizontalLayout {
 	@Getter
 	private ProjectDataCard card;
 
-	public CardComponent(KanbanView view, String columnId, String id, String ownerId, String text) {
-		setId(id);
+	private Label likesLabel;
+
+	public CardComponent(KanbanView view, String columnId, String cardId, String ownerId, String text) {
+		setId(cardId);
 		getStyle().set("border", "2px solid black");
 		setSpacing(true);
 		add(new Label(text));
 
-		card = ProjectDataCard.builder().id(id).ownerId(ownerId).text(text).build();
+		card = ProjectDataCard.builder().id(cardId).ownerId(ownerId).text(text).build();
+
+		likesLabel = new Label(String.valueOf(card.countAllLikes()));
+		likesLabel.getStyle().set("border", "1px solid black");
+		add(likesLabel);
+
+		Button btnLike = new Button(VaadinIcon.THUMBS_UP.create());
+		btnLike.addClickListener(e -> {
+			view.likeCard(columnId, cardId, ownerId, true);
+		});
+		add(btnLike);
 
 		if (card.getOwnerId().equals(SessionUtils.getSessionId())) {
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			btnDelete.addClickListener(e -> {
-				view.removeCard(columnId, id);
+				view.removeCard(columnId, cardId);
 			});
 			add(btnDelete);
 		}
 
 		setAlignItems(Alignment.CENTER);
+	}
+
+	public void addLikes(String ownerId) {
+		card.doLike(ownerId);
+		likesLabel.setText(String.valueOf(card.countAllLikes()));
 	}
 
 }

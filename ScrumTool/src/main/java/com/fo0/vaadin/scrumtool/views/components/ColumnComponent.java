@@ -93,7 +93,21 @@ public class ColumnComponent extends VerticalLayout {
 		return card;
 	}
 
-	public ProjectDataCard getCardById(String cardId) {
+	public CardComponent getCardById(String cardId) {
+		if (CollectionUtils.isEmpty(productDataColumn.getCards())) {
+			return null;
+		}
+
+		for (int i = 0; i < getComponentCount(); i++) {
+			if (getComponentAt(i) instanceof CardComponent) {
+				return (CardComponent) getComponentAt(i);
+			}
+		}
+
+		return null;
+	}
+
+	public ProjectDataCard getProjectCardById(String cardId) {
 		if (CollectionUtils.isEmpty(productDataColumn.getCards())) {
 			return null;
 		}

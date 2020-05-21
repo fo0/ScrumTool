@@ -62,4 +62,12 @@ public class ProjectDataColumn implements Serializable {
 		return cards.removeIf(e -> e.getId().equals(id));
 	}
 
+	public int likeCardById(String id, String ownerId) {
+		ProjectDataCard card = getCardById(id);
+		if (card == null) {
+			return 0;
+		}
+
+		return card.doLike(ownerId);
+	}
 }

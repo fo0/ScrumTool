@@ -107,7 +107,7 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 			log.info("no data in repository found");
 			return;
 		}
-		
+
 		log.info("sync & refreshing data: {}", pd.getId());
 		ProjectBoardViewLoader.loadData(this, pd, SessionUtils.getSessionId());
 	}
@@ -141,7 +141,9 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 
 		ColumnComponent col = createColumn(this, id, ownerId, name);
 		columns.add(col);
-		saveData(data -> data.addColumn(col.getProductDataColumn()));
+		if (saveToDb) {
+			saveData(data -> data.addColumn(col.getProductDataColumn()));
+		}
 		return col;
 	}
 
@@ -186,17 +188,19 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 			return;
 		}
 
-		ProjectDataCard pdc = cc.getCardById(cardId);
+		ProjectDataCard pdc = cc.getProjectCardById(cardId);
 		if (pdc != null) {
 			log.warn("card already exists: {} - {}", cardId, message);
 			return;
 		}
 
 		CardComponent ccc = cc.addCard(cardId, ownerId, message);
-		saveData(data -> data.addCard(columnId, ccc.getCard()));
+		if (saveToDb) {
+			saveData(data -> data.addCard(columnId, ccc.getCard()));
+		}
 	}
 
-	public ProjectDataCard getCardLayoutById(String columnId, String cardId) {
+	public CardComponent getCardLayoutById(String columnId, String cardId) {
 		ColumnComponent col = getColumnLayoutById(columnId);
 		return col.getCardById(cardId);
 	}
@@ -213,6 +217,19 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		log.info("[CARD] remove card " + cardId);
 		cc.removeCardById(cardId);
 		saveData(data -> data.removeCardById(columnId, cardId));
+	}
+
+	public void likeCard(String columnId, String cardId, String ownerId, boolean saveToDb) {
+		ColumnComponent cc = getColumn(columnId);
+		if (cc == null) {
+			return;
+		}
+		
+		log.info("[CARD] like card: " + cardId);
+		cc.getCardById(cardId).addLikes(ownerId);
+		if (saveToDb) {
+			saveData(data -> data.likeCard(columnId, cardId, ownerId));
+		}
 	}
 
 	public HorizontalLayout createHeaderLayout() {

@@ -37,7 +37,7 @@ public class ProjectData implements IDataId, Serializable {
 	private String id = UUID.randomUUID().toString();
 
 	private String ownerId;
-	
+
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@Builder.Default
 	private Set<ProjectDataColumn> columns = Sets.newHashSet();
@@ -76,6 +76,20 @@ public class ProjectData implements IDataId, Serializable {
 		}
 
 		pdc.removeCardById(cardId);
+		return this;
+	}
+
+	public ProjectData likeCard(String columnId, String cardId, String ownerId) {
+		if (CollectionUtils.isEmpty(columns)) {
+			return this;
+		}
+
+		ProjectDataColumn pdc = getColumnById(columnId);
+		if (pdc == null) {
+			return this;
+		}
+
+		pdc.likeCardById(cardId, ownerId);
 		return this;
 	}
 
