@@ -153,11 +153,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	}
 
 	public ColumnComponent addColumnLayout(TKBColumn column) {
-		if (columns.getComponentCount() >= KanbanConfig.MAX_COLUMNS) {
-			Notification.show("Column limit reached", 3000, Position.MIDDLE);
-			return null;
-		}
-
 		if (getColumnLayoutById(column.getId()) != null) {
 			log.warn("column already exists: {} - {}", column.getId(), column.getName());
 			return null;
@@ -186,6 +181,11 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		Button b = new Button("Column", VaadinIcon.PLUS.create());
 		b.addClickListener(e -> {
+			if (columns.getComponentCount() >= KanbanConfig.MAX_COLUMNS) {
+				Notification.show("Column limit reached", 3000, Position.MIDDLE);
+				return;
+			}
+
 			KanbanBoardViewUtils.createColumnDialog(this).open();
 		});
 		layout.add(b);

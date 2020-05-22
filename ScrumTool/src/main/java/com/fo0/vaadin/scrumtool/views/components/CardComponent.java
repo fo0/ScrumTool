@@ -30,6 +30,8 @@ public class CardComponent extends HorizontalLayout {
 
 	private String columnId;
 
+	private Label textLabel;
+
 	public CardComponent(KanbanView view, ColumnComponent column, String columnId, TKBCard card) {
 		this.card = card;
 		this.columnId = columnId;
@@ -37,20 +39,32 @@ public class CardComponent extends HorizontalLayout {
 		setId(card.getId());
 		getStyle().set("border", "2px solid black");
 		setSpacing(true);
-		add(new Label(card.getText()));
+		textLabel = new Label(card.getText());
+		add(textLabel);
 
 		likeComponent = new LikeComponent(card.getId());
 		add(likeComponent);
 
 		if (card.getOwnerId().equals(SessionUtils.getSessionId())) {
+			Button btnEdit = new Button(VaadinIcon.EDIT.create());
+			btnEdit.addClickListener(e -> {
+				new ChangeTextDialog("Edit Text", savedText -> {
+					log.info("edit card: " + getId().get());
+					TKBCard c = cardRepository.findById(getId().get()).get();
+					c.setText(savedText);
+					cardRepository.save(c);
+					reload();
+				}).open();
+			});
+			add(btnEdit);
+
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			btnDelete.addClickListener(e -> {
-				log.info("delete card: " + getId().get());
+				log.info("edit card: " + getId().get());
 				TKBColumn c = columnRepository.findById(columnId).get();
 				c.removeCardById(getId().get());
 				columnRepository.save(c);
 				column.reload();
-
 			});
 			add(btnDelete);
 		}
@@ -60,7 +74,8 @@ public class CardComponent extends HorizontalLayout {
 
 	public void reload() {
 		TKBCard tmp = cardRepository.findById(getId().get()).get();
-		tmp = cardRepository.save(tmp);
+
+		textLabel.setText(tmp.getText());
 
 		// update layout with new missing data
 		likeComponent.changeText(tmp.countAllLikes());
