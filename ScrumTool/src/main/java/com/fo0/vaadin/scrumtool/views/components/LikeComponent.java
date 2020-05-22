@@ -1,8 +1,8 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
 import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
-import com.fo0.vaadin.scrumtool.data.table.TKBCardLikes;
 import com.fo0.vaadin.scrumtool.data.table.TKBCard;
+import com.fo0.vaadin.scrumtool.data.table.TKBCardLikes;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.utils.Utils;

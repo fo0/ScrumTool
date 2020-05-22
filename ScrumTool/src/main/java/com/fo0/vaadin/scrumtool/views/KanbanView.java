@@ -8,16 +8,15 @@ import org.vaadin.olli.ClipboardHelper;
 
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
-import com.fo0.vaadin.scrumtool.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
+import com.fo0.vaadin.scrumtool.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
-import com.fo0.vaadin.scrumtool.views.components.CardComponent;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
-import com.fo0.vaadin.scrumtool.views.utils.ProjectBoardViewUtils;
+import com.fo0.vaadin.scrumtool.views.utils.KanbanBoardViewUtils;
 import com.google.common.collect.Lists;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -54,9 +53,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Getter
 	private HorizontalLayout header;
-	private HorizontalLayout headerLeft;
-	private HorizontalLayout headerRight;
-	
+
 	@Getter
 	private ThemeToggleButton themeToggleButton;
 
@@ -74,13 +71,13 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private void init() {
 		log.info("init");
 		setSizeFull();
-		root = ProjectBoardViewUtils.createRootLayout();
+		root = KanbanBoardViewUtils.createRootLayout();
 		add(root);
 
 		header = createHeaderLayout();
 		root.add(header);
 
-		columns = ProjectBoardViewUtils.createColumnLayout();
+		columns = KanbanBoardViewUtils.createColumnLayout();
 		root.add(columns);
 
 		root.expand(columns);
@@ -128,17 +125,21 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 
 		// removes deleted columns
-		getCardComponents().stream().filter(e -> tmp.getColumns().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
+		//@formatter:off
+		getCardComponents().stream()
+				.filter(e -> tmp.getColumns().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
 				.collect(Collectors.toList()).forEach(e -> {
-					remove(e);
+					log.info("remove column: " + e);
+					columns.remove(e);
 				});
+		//@formatter:on
 	}
 
-	public List<CardComponent> getCardComponents() {
-		List<CardComponent> components = Lists.newArrayList();
-		for (int i = 0; i < root.getComponentCount(); i++) {
-			if (root.getComponentAt(i) instanceof CardComponent) {
-				components.add((CardComponent) root.getComponentAt(i));
+	public List<ColumnComponent> getCardComponents() {
+		List<ColumnComponent> components = Lists.newArrayList();
+		for (int i = 0; i < columns.getComponentCount(); i++) {
+			if (columns.getComponentAt(i) instanceof ColumnComponent) {
+				components.add((ColumnComponent) columns.getComponentAt(i));
 			}
 		}
 
@@ -185,7 +186,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		Button b = new Button("Column", VaadinIcon.PLUS.create());
 		b.addClickListener(e -> {
-			ProjectBoardViewUtils.createColumnDialog(this).open();
+			KanbanBoardViewUtils.createColumnDialog(this).open();
 		});
 		layout.add(b);
 
@@ -209,9 +210,9 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			}).open();
 		});
 		layout.add(btnDelete);
-		
+
 		themeToggleButton = new ThemeToggleButton(false);
-		
+
 		layout.add(themeToggleButton);
 
 		return layout;

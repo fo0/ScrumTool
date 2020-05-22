@@ -5,8 +5,10 @@ import java.util.stream.Collectors;
 
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
+import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
+import com.fo0.vaadin.scrumtool.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
@@ -16,6 +18,8 @@ import com.google.common.collect.Lists;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -30,6 +34,7 @@ public class ColumnComponent extends VerticalLayout {
 
 	private static final long serialVersionUID = 8415434953831247614L;
 
+	private KBDataRepository dataRepository = SpringContext.getBean(KBDataRepository.class);
 	private KBColumnRepository repository = SpringContext.getBean(KBColumnRepository.class);
 
 	private KanbanView view;
@@ -47,7 +52,22 @@ public class ColumnComponent extends VerticalLayout {
 		this.view = view;
 		setId(id);
 		H3 h3 = new H3(name);
-		add(h3);
+		h3.getStyle().set("text-align", "center");
+		h3.setWidthFull();
+		Button btn = new Button(VaadinIcon.TRASH.create());
+		btn.addClickListener(e -> {
+			log.info("delete column: " + getId().get());
+			Notification.show("Deleting Column: " + name, 3000, Position.MIDDLE);
+			TKBData c = dataRepository.findById(view.getBoardId()).get();
+			c.removeColumnById(getId().get());
+			dataRepository.save(c);
+			view.reload();
+		});
+		HorizontalLayout captionLayout = new HorizontalLayout(h3, btn);
+		captionLayout.setWidthFull();
+		captionLayout.setVerticalComponentAlignment(Alignment.CENTER, h3);
+		captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btn);
+		add(captionLayout);
 		setMinWidth("400px");
 		setWidth("400px");
 		getStyle().set("border", "2px solid black");
