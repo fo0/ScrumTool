@@ -22,6 +22,8 @@ public class Likes {
 	 */
 	@Id
 	private String id;
+	
+	private String ownerId;
 
 	@Builder.Default
 	private int likeValue = 1;

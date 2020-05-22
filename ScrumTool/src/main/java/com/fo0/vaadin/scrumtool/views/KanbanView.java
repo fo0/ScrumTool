@@ -1,23 +1,22 @@
 package com.fo0.vaadin.scrumtool.views;
 
-import java.util.function.Function;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.olli.ClipboardHelper;
 
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.ProjectData;
-import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
+import com.fo0.vaadin.scrumtool.data.table.ProjectDataColumn;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
-import com.fo0.vaadin.scrumtool.utils.ProjectBoardViewLoader;
 import com.fo0.vaadin.scrumtool.utils.UIUtils;
 import com.fo0.vaadin.scrumtool.views.components.CardComponent;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
 import com.fo0.vaadin.scrumtool.views.utils.ProjectBoardViewUtils;
-import com.google.gson.GsonBuilder;
+import com.google.common.collect.Lists;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -60,6 +59,8 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 	public HorizontalLayout columns;
 
 	private Button btnBoardId;
+
+	@Getter
 	private String boardId;
 
 	private Button btnDelete;
@@ -100,59 +101,67 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		setSessionIdAtButton(boardId);
 	}
 
-//	@Scheduled(fixedRate = 1000 * 5)
 	public void sync() {
-		ProjectData pd = repository.findById(boardId).orElse(null);
-		if (pd == null) {
-			log.info("no data in repository found");
-			return;
+		log.info("sync & refreshing data: {}", boardId);
+		reload();
+	}
+
+	public void reload() {
+		ProjectData tmp = repository.findById(boardId).get();
+
+		// update layout with new missing data
+		tmp.getColumns().stream().forEachOrdered(pdc -> {
+			ColumnComponent column = getColumnLayoutById(pdc.getId());
+			if (column == null) {
+				// add card as new card
+				column = addColumnLayout(pdc);
+			}
+
+			if (column != null) {
+				column.reload();
+			} else {
+				log.info("ignore column reload");
+			}
+		});
+
+		// removes deleted columns
+		getCardComponents().stream().filter(e -> tmp.getColumns().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
+				.collect(Collectors.toList()).forEach(e -> {
+					remove(e);
+				});
+	}
+
+	public List<CardComponent> getCardComponents() {
+		List<CardComponent> components = Lists.newArrayList();
+		for (int i = 0; i < root.getComponentCount(); i++) {
+			if (root.getComponentAt(i) instanceof CardComponent) {
+				components.add((CardComponent) root.getComponentAt(i));
+			}
 		}
 
-		log.info("sync & refreshing data: {}", pd.getId());
-		ProjectBoardViewLoader.loadData(this, pd, SessionUtils.getSessionId());
+		return components;
 	}
 
-	public void printProjectData() {
-		System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(getData()));
-	}
-
-	public void saveData(Function<ProjectData, ProjectData> save) {
+	public void addColumn(String id, String ownerId, String name) {
 		ProjectData tmp = repository.findById(boardId).get();
-		tmp = save.apply(tmp);
-		tmp = repository.save(tmp);
-		log.info("save data: {}", tmp.getId());
-//		printProjectData();
+		tmp.addColumn(ProjectDataColumn.builder().id(id).ownerId(ownerId).name(name).build());
+		repository.save(tmp);
 	}
 
-	public ProjectData getData() {
-		return repository.findById(boardId).get();
-	}
-
-	public ColumnComponent addColumn(String id, String ownerId, String name, boolean saveToDb) {
+	public ColumnComponent addColumnLayout(ProjectDataColumn column) {
 		if (columns.getComponentCount() >= KanbanConfig.MAX_COLUMNS) {
 			Notification.show("Column limit reached", 3000, Position.MIDDLE);
 			return null;
 		}
 
-		if (getColumnLayoutById(id) != null) {
-			log.warn("column already exists: {} - {}", id, name);
+		if (getColumnLayoutById(column.getId()) != null) {
+			log.warn("column already exists: {} - {}", column.getId(), column.getName());
 			return null;
 		}
 
-		ColumnComponent col = createColumn(this, id, ownerId, name);
+		ColumnComponent col = new ColumnComponent(this, column.getId(), column.getOwnerId(), column.getName());
 		columns.add(col);
-		if (saveToDb) {
-			saveData(data -> data.addColumn(col.getProductDataColumn()));
-		}
 		return col;
-	}
-
-	public ColumnComponent addColumn(String id, String name, boolean saveToDb) {
-		return addColumn(id, SessionUtils.getSessionId(), name, saveToDb);
-	}
-
-	public ColumnComponent createColumn(KanbanView view, String id, String ownerId, String name) {
-		return new ColumnComponent(view, id, ownerId, name);
 	}
 
 	public ColumnComponent getColumnLayoutById(String columnId) {
@@ -164,72 +173,6 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 		}
 
 		return null;
-	}
-
-	public ColumnComponent getColumn(String columnId) {
-		for (int i = 0; i < columns.getComponentCount(); i++) {
-			ColumnComponent col = (ColumnComponent) columns.getComponentAt(i);
-			if (col.getId().get().equals(columnId)) {
-				return col;
-			}
-		}
-
-		return null;
-	}
-
-	public void addCard(String columnId, String cardId, String ownerId, String message, boolean saveToDb) {
-		ColumnComponent cc = getColumn(columnId);
-		if (cc == null) {
-			return;
-		}
-
-		if (CollectionUtils.size(cc.getProductDataColumn().getCards()) >= KanbanConfig.MAX_CARDS) {
-			Notification.show("Card limit reached", 5000, Position.MIDDLE);
-			return;
-		}
-
-		ProjectDataCard pdc = cc.getProjectCardById(cardId);
-		if (pdc != null) {
-			log.warn("card already exists: {} - {}", cardId, message);
-			return;
-		}
-
-		CardComponent ccc = cc.addCard(cardId, ownerId, message);
-		if (saveToDb) {
-			saveData(data -> data.addCard(columnId, ccc.getCard()));
-		}
-	}
-
-	public CardComponent getCardLayoutById(String columnId, String cardId) {
-		ColumnComponent col = getColumnLayoutById(columnId);
-		return col.getCardById(cardId);
-	}
-
-	public CardComponent createCard(String columnId, String cardId, String ownerId, String name) {
-		return new CardComponent(this, columnId, cardId, ownerId, name);
-	}
-
-	public void removeCard(String columnId, String cardId) {
-		ColumnComponent cc = getColumn(columnId);
-		if (cc == null) {
-			return;
-		}
-		log.info("[CARD] remove card " + cardId);
-		cc.removeCardById(cardId);
-		saveData(data -> data.removeCardById(columnId, cardId));
-	}
-
-	public void likeCard(String columnId, String cardId, String ownerId, boolean saveToDb) {
-		ColumnComponent cc = getColumn(columnId);
-		if (cc == null) {
-			return;
-		}
-		
-		log.info("[CARD] like card: " + cardId);
-		cc.getCardById(cardId).addLikes(ownerId);
-		if (saveToDb) {
-			saveData(data -> data.likeCard(columnId, cardId, ownerId));
-		}
 	}
 
 	public HorizontalLayout createHeaderLayout() {
@@ -269,10 +212,10 @@ public class KanbanView extends Div implements HasUrlParameter<String> {
 
 	public void setSessionIdAtButton(String id) {
 		btnBoardId.setText("Board: " + id);
-		log.info("projectdata ownerId: {} | SessionID: {}", getData().getOwnerId(), SessionUtils.getSessionId());
-		if (!getData().getOwnerId().equals(SessionUtils.getSessionId())) {
+		btnBoardIdClipboard.setContent(id);
+		if (!repository.findById(boardId).get().getOwnerId().equals(SessionUtils.getSessionId())) {
 			btnDelete.setVisible(false);
 		}
-		btnBoardIdClipboard.setContent(id);
+
 	}
 }

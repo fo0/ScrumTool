@@ -1,7 +1,11 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
+import com.fo0.vaadin.scrumtool.data.repository.ProjectDataCardRepository;
+import com.fo0.vaadin.scrumtool.data.repository.ProjectDataColumnRepository;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
+import com.fo0.vaadin.scrumtool.data.table.ProjectDataColumn;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
+import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
@@ -16,33 +20,37 @@ public class CardComponent extends HorizontalLayout {
 
 	private static final long serialVersionUID = -1213748155629932731L;
 
+	private ProjectDataCardRepository cardRepository = SpringContext.getBean(ProjectDataCardRepository.class);
+	private ProjectDataColumnRepository columnRepository = SpringContext.getBean(ProjectDataColumnRepository.class);
+
 	@Getter
 	private ProjectDataCard card;
 
-	private Label likesLabel;
+	private LikeComponent likeComponent;
 
-	public CardComponent(KanbanView view, String columnId, String cardId, String ownerId, String text) {
-		setId(cardId);
+	private String columnId;
+
+	public CardComponent(KanbanView view, ColumnComponent column, String columnId, ProjectDataCard card) {
+		this.card = card;
+		this.columnId = columnId;
+
+		setId(card.getId());
 		getStyle().set("border", "2px solid black");
 		setSpacing(true);
-		add(new Label(text));
+		add(new Label(card.getText()));
 
-		card = ProjectDataCard.builder().id(cardId).ownerId(ownerId).text(text).build();
-
-		likesLabel = new Label(String.valueOf(card.countAllLikes()));
-		likesLabel.getStyle().set("border", "1px solid black");
-		add(likesLabel);
-
-		Button btnLike = new Button(VaadinIcon.THUMBS_UP.create());
-		btnLike.addClickListener(e -> {
-			view.likeCard(columnId, cardId, ownerId, true);
-		});
-		add(btnLike);
+		likeComponent = new LikeComponent(card.getId());
+		add(likeComponent);
 
 		if (card.getOwnerId().equals(SessionUtils.getSessionId())) {
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			btnDelete.addClickListener(e -> {
-				view.removeCard(columnId, cardId);
+				log.info("delete card: " + getId().get());
+				ProjectDataColumn c = columnRepository.findById(columnId).get();
+				c.removeCardById(getId().get());
+				columnRepository.save(c);
+				column.reload();
+
 			});
 			add(btnDelete);
 		}
@@ -50,9 +58,12 @@ public class CardComponent extends HorizontalLayout {
 		setAlignItems(Alignment.CENTER);
 	}
 
-	public void addLikes(String ownerId) {
-		card.doLike(ownerId);
-		likesLabel.setText(String.valueOf(card.countAllLikes()));
+	public void reload() {
+		ProjectDataCard tmp = cardRepository.findById(getId().get()).get();
+		tmp = cardRepository.save(tmp);
+
+		// update layout with new missing data
+		likeComponent.changeText(tmp.countAllLikes());
 	}
 
 }
