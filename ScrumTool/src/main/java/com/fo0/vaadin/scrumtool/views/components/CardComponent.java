@@ -1,9 +1,9 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
-import com.fo0.vaadin.scrumtool.data.repository.ProjectDataCardRepository;
-import com.fo0.vaadin.scrumtool.data.repository.ProjectDataColumnRepository;
-import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
-import com.fo0.vaadin.scrumtool.data.table.ProjectDataColumn;
+import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
+import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
+import com.fo0.vaadin.scrumtool.data.table.TKBCard;
+import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
@@ -20,17 +20,17 @@ public class CardComponent extends HorizontalLayout {
 
 	private static final long serialVersionUID = -1213748155629932731L;
 
-	private ProjectDataCardRepository cardRepository = SpringContext.getBean(ProjectDataCardRepository.class);
-	private ProjectDataColumnRepository columnRepository = SpringContext.getBean(ProjectDataColumnRepository.class);
+	private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
+	private KBColumnRepository columnRepository = SpringContext.getBean(KBColumnRepository.class);
 
 	@Getter
-	private ProjectDataCard card;
+	private TKBCard card;
 
 	private LikeComponent likeComponent;
 
 	private String columnId;
 
-	public CardComponent(KanbanView view, ColumnComponent column, String columnId, ProjectDataCard card) {
+	public CardComponent(KanbanView view, ColumnComponent column, String columnId, TKBCard card) {
 		this.card = card;
 		this.columnId = columnId;
 
@@ -46,7 +46,7 @@ public class CardComponent extends HorizontalLayout {
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			btnDelete.addClickListener(e -> {
 				log.info("delete card: " + getId().get());
-				ProjectDataColumn c = columnRepository.findById(columnId).get();
+				TKBColumn c = columnRepository.findById(columnId).get();
 				c.removeCardById(getId().get());
 				columnRepository.save(c);
 				column.reload();
@@ -59,7 +59,7 @@ public class CardComponent extends HorizontalLayout {
 	}
 
 	public void reload() {
-		ProjectDataCard tmp = cardRepository.findById(getId().get()).get();
+		TKBCard tmp = cardRepository.findById(getId().get()).get();
 		tmp = cardRepository.save(tmp);
 
 		// update layout with new missing data

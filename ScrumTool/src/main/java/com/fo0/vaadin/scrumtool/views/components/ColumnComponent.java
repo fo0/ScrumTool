@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
-import com.fo0.vaadin.scrumtool.data.repository.ProjectDataColumnRepository;
-import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
-import com.fo0.vaadin.scrumtool.data.table.ProjectDataColumn;
+import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
+import com.fo0.vaadin.scrumtool.data.table.TKBCard;
+import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
@@ -30,12 +30,12 @@ public class ColumnComponent extends VerticalLayout {
 
 	private static final long serialVersionUID = 8415434953831247614L;
 
-	private ProjectDataColumnRepository repository = SpringContext.getBean(ProjectDataColumnRepository.class);
+	private KBColumnRepository repository = SpringContext.getBean(KBColumnRepository.class);
 
 	private KanbanView view;
 
 	@Getter
-	private ProjectDataColumn productDataColumn;
+	private TKBColumn productDataColumn;
 
 	@Getter
 	private String name;
@@ -93,25 +93,25 @@ public class ColumnComponent extends VerticalLayout {
 		layoutHeader.add(btnLayout);
 		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, h3);
 
-		productDataColumn = ProjectDataColumn.builder().id(id).ownerId(ownerId).name(name).build();
+		productDataColumn = TKBColumn.builder().id(id).ownerId(ownerId).name(name).build();
 	}
 
 	private void addCard(String randomId, String sessionId, String value) {
-		ProjectDataColumn tmp = repository.findById(getId().get()).get();
-		ProjectDataCard card = ProjectDataCard.builder().id(randomId).ownerId(sessionId).text(value).build();
+		TKBColumn tmp = repository.findById(getId().get()).get();
+		TKBCard card = TKBCard.builder().id(randomId).ownerId(sessionId).text(value).build();
 		tmp.addCard(card);
 		repository.save(tmp);
 		log.info("add card: {}", randomId);
 	}
 
-	private CardComponent addCardLayout(ProjectDataCard card) {
+	private CardComponent addCardLayout(TKBCard card) {
 		CardComponent cc = new CardComponent(view, this, getId().get(), card);
 		add(cc);
 		return cc;
 	}
 
 	public void reload() {
-		ProjectDataColumn tmp = repository.findById(productDataColumn.getId()).get();
+		TKBColumn tmp = repository.findById(productDataColumn.getId()).get();
 
 		// update layout with new missing data
 		tmp.getCards().stream().forEachOrdered(pdc -> {

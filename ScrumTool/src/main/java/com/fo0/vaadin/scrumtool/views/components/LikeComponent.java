@@ -1,8 +1,8 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
-import com.fo0.vaadin.scrumtool.data.repository.ProjectDataCardRepository;
-import com.fo0.vaadin.scrumtool.data.table.Likes;
-import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
+import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
+import com.fo0.vaadin.scrumtool.data.table.TKBCardLikes;
+import com.fo0.vaadin.scrumtool.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.utils.Utils;
@@ -17,7 +17,7 @@ public class LikeComponent extends HorizontalLayout {
 
 	private static final long serialVersionUID = -2483871323771596716L;
 
-	private ProjectDataCardRepository repository = SpringContext.getBean(ProjectDataCardRepository.class);
+	private KBCardRepository repository = SpringContext.getBean(KBCardRepository.class);
 
 	private String cardId;
 
@@ -52,8 +52,8 @@ public class LikeComponent extends HorizontalLayout {
 	}
 
 	public void addLike(String id, String ownerId) {
-		ProjectDataCard tmp = repository.findById(cardId).get();
-		tmp.getLikes().add(Likes.builder().id(id).ownerId(ownerId).likeValue(1).build());
+		TKBCard tmp = repository.findById(cardId).get();
+		tmp.getLikes().add(TKBCardLikes.builder().id(id).ownerId(ownerId).likeValue(1).build());
 		repository.save(tmp);
 	}
 
@@ -62,7 +62,7 @@ public class LikeComponent extends HorizontalLayout {
 	}
 
 	public void reload() {
-		ProjectDataCard tmp = repository.findById(cardId).get();
+		TKBCard tmp = repository.findById(cardId).get();
 
 		// update layout with new missing data
 		changeText(tmp.countAllLikes());

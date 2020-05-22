@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.olli.ClipboardHelper;
 
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
-import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
-import com.fo0.vaadin.scrumtool.data.table.ProjectData;
-import com.fo0.vaadin.scrumtool.data.table.ProjectDataColumn;
+import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
+import com.fo0.vaadin.scrumtool.data.table.TKBData;
+import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.views.components.CardComponent;
@@ -47,7 +47,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private static final long serialVersionUID = 8874200985319706829L;
 
 	@Autowired
-	private ProjectDataRepository repository;
+	private KBDataRepository repository;
 
 	@Getter
 	private VerticalLayout root;
@@ -110,7 +110,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	}
 
 	public void reload() {
-		ProjectData tmp = repository.findById(boardId).get();
+		TKBData tmp = repository.findById(boardId).get();
 
 		// update layout with new missing data
 		tmp.getColumns().stream().forEachOrdered(pdc -> {
@@ -146,12 +146,12 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	}
 
 	public void addColumn(String id, String ownerId, String name) {
-		ProjectData tmp = repository.findById(boardId).get();
-		tmp.addColumn(ProjectDataColumn.builder().id(id).ownerId(ownerId).name(name).build());
+		TKBData tmp = repository.findById(boardId).get();
+		tmp.addColumn(TKBColumn.builder().id(id).ownerId(ownerId).name(name).build());
 		repository.save(tmp);
 	}
 
-	public ColumnComponent addColumnLayout(ProjectDataColumn column) {
+	public ColumnComponent addColumnLayout(TKBColumn column) {
 		if (columns.getComponentCount() >= KanbanConfig.MAX_COLUMNS) {
 			Notification.show("Column limit reached", 3000, Position.MIDDLE);
 			return null;

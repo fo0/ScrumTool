@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectDataCard implements Serializable {
+public class TKBCard implements Serializable {
 
 	private static final long serialVersionUID = 652620276690725942L;
 
@@ -38,7 +38,7 @@ public class ProjectDataCard implements Serializable {
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@Builder.Default
-	private Set<Likes> likes = Sets.newHashSet();
+	private Set<TKBCardLikes> likes = Sets.newHashSet();
 
 	/**
 	 * 
@@ -49,12 +49,12 @@ public class ProjectDataCard implements Serializable {
 			return countAllLikes();
 		}
 
-		likes.add(Likes.builder().id(ownerId).build());
+		likes.add(TKBCardLikes.builder().id(ownerId).build());
 
 		return countAllLikes();
 	}
 
 	public int countAllLikes() {
-		return likes.stream().mapToInt(Likes::getLikeValue).sum();
+		return likes.stream().mapToInt(TKBCardLikes::getLikeValue).sum();
 	}
 }

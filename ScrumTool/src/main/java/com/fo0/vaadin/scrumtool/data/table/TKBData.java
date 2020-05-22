@@ -28,7 +28,7 @@ import lombok.NonNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class ProjectData implements IDataId, Serializable {
+public class TKBData implements IDataId, Serializable {
 
 	private static final long serialVersionUID = 3523289407526253761L;
 
@@ -40,23 +40,23 @@ public class ProjectData implements IDataId, Serializable {
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@Builder.Default
-	private Set<ProjectDataColumn> columns = Sets.newHashSet();
+	private Set<TKBColumn> columns = Sets.newHashSet();
 
-	public ProjectDataColumn getColumnById(@NonNull ProjectDataColumn projectDataColumn) {
+	public TKBColumn getColumnById(@NonNull TKBColumn projectDataColumn) {
 		return getColumnById(projectDataColumn.getId());
 	}
 
-	public ProjectDataColumn getColumnById(String id) {
+	public TKBColumn getColumnById(String id) {
 		return columns.stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
 	}
 
-	public ProjectData addColumn(@NonNull ProjectDataColumn column) {
+	public TKBData addColumn(@NonNull TKBColumn column) {
 		columns.add(column);
 		return this;
 	}
 
-	public ProjectData addCard(String columnId, ProjectDataCard note) {
-		ProjectDataColumn pdc = getColumnById(columnId);
+	public TKBData addCard(String columnId, TKBCard note) {
+		TKBColumn pdc = getColumnById(columnId);
 		if (pdc == null) {
 			return this;
 		}
@@ -65,12 +65,12 @@ public class ProjectData implements IDataId, Serializable {
 		return this;
 	}
 
-	public ProjectData removeCardById(String columnId, String cardId) {
+	public TKBData removeCardById(String columnId, String cardId) {
 		if (CollectionUtils.isEmpty(columns)) {
 			return this;
 		}
 
-		ProjectDataColumn pdc = getColumnById(columnId);
+		TKBColumn pdc = getColumnById(columnId);
 		if (pdc == null) {
 			return this;
 		}
@@ -79,12 +79,12 @@ public class ProjectData implements IDataId, Serializable {
 		return this;
 	}
 
-	public ProjectData likeCard(String columnId, String cardId, String ownerId) {
+	public TKBData likeCard(String columnId, String cardId, String ownerId) {
 		if (CollectionUtils.isEmpty(columns)) {
 			return this;
 		}
 
-		ProjectDataColumn pdc = getColumnById(columnId);
+		TKBColumn pdc = getColumnById(columnId);
 		if (pdc == null) {
 			return this;
 		}
@@ -93,11 +93,11 @@ public class ProjectData implements IDataId, Serializable {
 		return this;
 	}
 
-	public boolean removeColumn(ProjectDataColumn column) {
+	public boolean removeColumn(TKBColumn column) {
 		return columns.remove(column);
 	}
 
-	public ProjectData removeColumnById(String id) {
+	public TKBData removeColumnById(String id) {
 		if (CollectionUtils.isEmpty(columns)) {
 			return this;
 		}

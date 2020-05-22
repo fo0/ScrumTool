@@ -3,8 +3,8 @@ package com.fo0.vaadin.scrumtool.views;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
-import com.fo0.vaadin.scrumtool.data.table.ProjectData;
+import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
+import com.fo0.vaadin.scrumtool.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
@@ -31,7 +31,7 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 	private static final long serialVersionUID = 8874200985319706829L;
 
 	@Autowired
-	private ProjectDataRepository repository;
+	private KBDataRepository repository;
 
 	private HorizontalLayout root;
 	
@@ -77,7 +77,7 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 		Button btn = new Button("Erstellen");
 		btn.getStyle().set("border", "1px solid black");
 		btn.addClickListener(e -> {
-			ProjectData p = repository.save(ProjectData.builder().ownerId(SessionUtils.getSessionId()).build());
+			TKBData p = repository.save(TKBData.builder().ownerId(SessionUtils.getSessionId()).build());
 			UI.getCurrent().navigate(KanbanView.class, p.getId());
 		});
 		btn.setWidth("150px");
@@ -97,7 +97,7 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 		Button b = new Button("Beitreten");
 
 		b.addClickListener(e -> {
-			ProjectData p = repository.findById(t.getValue()).get();
+			TKBData p = repository.findById(t.getValue()).get();
 			if (p == null) {
 				Notification.show("No Board found", 5000, Position.MIDDLE);
 				return;

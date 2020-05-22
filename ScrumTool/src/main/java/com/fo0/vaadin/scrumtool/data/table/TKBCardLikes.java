@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Likes {
+public class TKBCardLikes {
 
 	/**
 	 * ID = OwnerId
