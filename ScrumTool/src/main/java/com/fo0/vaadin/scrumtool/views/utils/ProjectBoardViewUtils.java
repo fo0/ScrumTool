@@ -1,5 +1,6 @@
 package com.fo0.vaadin.scrumtool.views.utils;
 
+import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.Utils;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.vaadin.flow.component.button.Button;
@@ -38,7 +39,8 @@ public class ProjectBoardViewUtils {
 		t.focus();
 		Button b = new Button("Erstellen");
 		b.addClickListener(e -> {
-			view.addColumn(Utils.randomId(), t.getValue(), true);
+			view.addColumn(Utils.randomId(), SessionUtils.getSessionId(), t.getValue());
+			view.reload();
 			d.close();
 		});
 

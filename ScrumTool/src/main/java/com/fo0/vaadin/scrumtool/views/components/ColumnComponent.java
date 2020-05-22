@@ -1,13 +1,18 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
-import org.apache.commons.collections4.CollectionUtils;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
+import com.fo0.vaadin.scrumtool.data.repository.ProjectDataColumnRepository;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataColumn;
+import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
+import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.utils.Utils;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
+import com.google.common.collect.Lists;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -18,10 +23,14 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class ColumnComponent extends VerticalLayout {
 
 	private static final long serialVersionUID = 8415434953831247614L;
+
+	private ProjectDataColumnRepository repository = SpringContext.getBean(ProjectDataColumnRepository.class);
 
 	private KanbanView view;
 
@@ -67,7 +76,8 @@ public class ColumnComponent extends VerticalLayout {
 		Button btnAdd = new Button("Note", VaadinIcon.PLUS.create());
 		btnAdd.setWidthFull();
 		btnAdd.addClickListener(e -> {
-			view.addCard(id, Utils.randomId(), ownerId, area.getValue(), true);
+			addCard(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
+			reload();
 			area.clear();
 			area.focus();
 		});
@@ -86,51 +96,63 @@ public class ColumnComponent extends VerticalLayout {
 		productDataColumn = ProjectDataColumn.builder().id(id).ownerId(ownerId).name(name).build();
 	}
 
-	public CardComponent addCard(String id, String ownerId, String message) {
-		CardComponent card = new CardComponent(view, getId().get(), id, ownerId, message);
-		add(card);
-		productDataColumn.addCard(card.getCard());
-		return card;
+	private void addCard(String randomId, String sessionId, String value) {
+		ProjectDataColumn tmp = repository.findById(getId().get()).get();
+		ProjectDataCard card = ProjectDataCard.builder().id(randomId).ownerId(sessionId).text(value).build();
+		tmp.addCard(card);
+		repository.save(tmp);
+		log.info("add card: {}", randomId);
+	}
+
+	private CardComponent addCardLayout(ProjectDataCard card) {
+		CardComponent cc = new CardComponent(view, this, getId().get(), card);
+		add(cc);
+		return cc;
+	}
+
+	public void reload() {
+		ProjectDataColumn tmp = repository.findById(productDataColumn.getId()).get();
+
+		// update layout with new missing data
+		tmp.getCards().stream().forEachOrdered(pdc -> {
+			CardComponent card = getCardById(pdc.getId());
+			if (card == null) {
+				// add card as new card
+				card = addCardLayout(pdc);
+			}
+
+			card.reload();
+		});
+
+		// remove old
+		getCardComponents().stream().filter(e -> tmp.getCards().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
+				.collect(Collectors.toList()).forEach(e -> {
+					remove(e);
+				});
+	}
+
+	public List<CardComponent> getCardComponents() {
+		List<CardComponent> components = Lists.newArrayList();
+		for (int i = 0; i < getComponentCount(); i++) {
+			if (getComponentAt(i) instanceof CardComponent) {
+				components.add((CardComponent) getComponentAt(i));
+			}
+		}
+
+		return components;
 	}
 
 	public CardComponent getCardById(String cardId) {
-		if (CollectionUtils.isEmpty(productDataColumn.getCards())) {
-			return null;
-		}
-
 		for (int i = 0; i < getComponentCount(); i++) {
 			if (getComponentAt(i) instanceof CardComponent) {
-				return (CardComponent) getComponentAt(i);
+				CardComponent card = (CardComponent) getComponentAt(i);
+				if (card.getId().get().equals(cardId)) {
+					return card;
+				}
 			}
 		}
 
 		return null;
-	}
-
-	public ProjectDataCard getProjectCardById(String cardId) {
-		if (CollectionUtils.isEmpty(productDataColumn.getCards())) {
-			return null;
-		}
-
-		return productDataColumn.getCardById(cardId);
-	}
-
-	public void removeCardById(String cardId) {
-		if (CollectionUtils.isEmpty(productDataColumn.getCards())) {
-			return;
-		}
-
-		productDataColumn.getCards().removeIf(e -> e.getId().equals(cardId));
-
-		for (int i = 0; i < getComponentCount(); i++) {
-			if (getComponentAt(i) instanceof CardComponent) {
-				CardComponent col = (CardComponent) getComponentAt(i);
-				if (col.getId().get().equals(cardId)) {
-					remove(col);
-					break;
-				}
-			}
-		}
 	}
 
 }
