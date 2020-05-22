@@ -12,8 +12,6 @@ import com.fo0.vaadin.scrumtool.data.table.ProjectData;
 import com.fo0.vaadin.scrumtool.data.table.ProjectDataColumn;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
-import com.fo0.vaadin.scrumtool.utils.UIUtils;
-import com.fo0.vaadin.scrumtool.utils.ProjectBoardViewLoader;
 import com.fo0.vaadin.scrumtool.views.components.CardComponent;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
