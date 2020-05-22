@@ -1,0 +1,25 @@
+:host(.theme-toggle-on-btn-custom) {
+	background-color: var(--material-background-color);
+	border-bottom-left-radius: 0;
+	border-top-left-radius: 0;
+	min-width: 55px !important;
+	padding: 2px !important;
+}
+
+:host(.theme-toggle-off-btn-custom) {
+	background-color: var(--material-background-color);
+	border-bottom-right-radius: 0;
+	border-top-right-radius: 0;
+	min-width: 55px !important;
+	padding: 2px !important;
+}
+
+:host(.theme-toggle-on-btn) {
+	border-bottom-left-radius: 0;
+	border-top-left-radius: 0;
+}
+
+:host(.theme-toggle-off-btn) {
+	border-bottom-right-radius: 0;
+	border-top-right-radius: 0;
+}
