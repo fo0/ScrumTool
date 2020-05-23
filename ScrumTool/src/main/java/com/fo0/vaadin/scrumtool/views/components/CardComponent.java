@@ -1,5 +1,6 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
+import com.fo0.vaadin.scrumtool.broadcast.BroadcasterCards;
 import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
@@ -8,11 +9,17 @@ import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.shared.Registration;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -33,6 +40,8 @@ public class CardComponent extends HorizontalLayout {
 	private String columnId;
 
 	private TextArea textArea;
+
+	private Registration broadcasterRegistration;
 
 	public CardComponent(KanbanView view, ColumnComponent column, String columnId, TKBCard card) {
 		this.card = card;
@@ -75,7 +84,7 @@ public class CardComponent extends HorizontalLayout {
 					TKBCard c = cardRepository.findById(getId().get()).get();
 					c.setText(savedText);
 					cardRepository.save(c);
-					reload();
+					BroadcasterCards.broadcast(getId().get(), "update");
 				}).open();
 			});
 			rightLayoutBottom.add(btnEdit);
@@ -92,6 +101,31 @@ public class CardComponent extends HorizontalLayout {
 		}
 
 		setAlignItems(Alignment.CENTER);
+	}
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+//		super.onAttach(attachEvent);
+		UI ui = UI.getCurrent();
+		broadcasterRegistration = BroadcasterCards.register(getId().get(), event -> {
+			ui.access(() -> {
+				if (Config.DEBUG) {
+					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
+				}
+				reload();
+			});
+		});
+	}
+
+	@Override
+	protected void onDetach(DetachEvent detachEvent) {
+//		super.onDetach(detachEvent);
+		if (broadcasterRegistration != null) {
+			broadcasterRegistration.remove();
+			broadcasterRegistration = null;
+		} else {
+			log.info("cannot remove broadcast, because it is null");
+		}
 	}
 
 	private void changeText(String text) {

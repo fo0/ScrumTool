@@ -1,5 +1,6 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
+import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.Utils;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
@@ -18,7 +19,8 @@ public class CreateColumnDialog extends Dialog {
 		Button b = new Button("Create");
 		b.addClickListener(e -> {
 			view.addColumn(Utils.randomId(), SessionUtils.getSessionId(), t.getValue());
-			view.reload();
+			BroadcasterBoard.broadcast(view.getId().get(), "update");
+//			view.reload();
 			close();
 		});
 

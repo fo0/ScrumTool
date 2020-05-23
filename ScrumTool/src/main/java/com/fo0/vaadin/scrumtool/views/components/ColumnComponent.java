@@ -4,6 +4,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
+import com.fo0.vaadin.scrumtool.broadcast.BroadcasterColumns;
 import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
@@ -19,6 +21,9 @@ import com.fo0.vaadin.scrumtool.utils.Utils;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.google.common.collect.Lists;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -29,6 +34,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.shared.Registration;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -50,6 +56,8 @@ public class ColumnComponent extends VerticalLayout {
 
 	private H3 h3;
 
+	private Registration broadcasterRegistration;
+
 	public ColumnComponent(KanbanView view, TKBColumn column) {
 		this.view = view;
 		this.data = column;
@@ -62,10 +70,11 @@ public class ColumnComponent extends VerticalLayout {
 		btn.addClickListener(e -> {
 			log.info("delete column: " + getId().get());
 			Notification.show("Deleting Column: " + column.getName(), Config.NOTIFICATION_DURATION, Position.MIDDLE);
-			TKBData c = dataRepository.findById(view.getBoardId()).get();
-			c.removeColumnById(getId().get());
+			TKBData c = dataRepository.findById(view.getId().get()).get();
 			dataRepository.save(c);
-			view.reload();
+			BroadcasterBoard.broadcast(view.getId().get(), "update");
+			c.removeColumnById(getId().get());
+//			view.reload();
 		});
 		HorizontalLayout captionLayout = new HorizontalLayout(h3, btn);
 		captionLayout.setWidthFull();
@@ -101,7 +110,8 @@ public class ColumnComponent extends VerticalLayout {
 		btnAdd.setWidthFull();
 		btnAdd.addClickListener(e -> {
 			addCard(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
-			reload();
+			BroadcasterColumns.broadcast(getId().get(), "update");
+//			reload();
 			area.clear();
 			area.focus();
 		});
@@ -116,6 +126,31 @@ public class ColumnComponent extends VerticalLayout {
 		btnLayout.setWidthFull();
 		layoutHeader.add(btnLayout);
 		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, h3);
+	}
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+//		super.onAttach(attachEvent);
+		UI ui = UI.getCurrent();
+		broadcasterRegistration = BroadcasterColumns.register(getId().get(), event -> {
+			ui.access(() -> {
+				if (Config.DEBUG) {
+					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
+				}
+				reload();
+			});
+		});
+	}
+
+	@Override
+	protected void onDetach(DetachEvent detachEvent) {
+//		super.onDetach(detachEvent);
+		if (broadcasterRegistration != null) {
+			broadcasterRegistration.remove();
+			broadcasterRegistration = null;
+		} else {
+			log.info("cannot remove broadcast, because it is null");
+		}
 	}
 
 	public void changeTitle(String string) {
@@ -144,7 +179,7 @@ public class ColumnComponent extends VerticalLayout {
 		data = repository.findById(data.getId()).get();
 
 		changeTitle(data.getName());
-		
+
 		// update layout with new missing data
 		data.getCards().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).forEachOrdered(pdc -> {
 			CardComponent card = getCardById(pdc.getId());

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.olli.ClipboardHelper;
 
+import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
@@ -22,6 +23,8 @@ import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.google.common.collect.Lists;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -34,6 +37,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -66,11 +70,10 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	private Button btnBoardId;
 
-	@Getter
-	private String boardId;
-
 	private Button btnDelete;
 	private ClipboardHelper btnBoardIdClipboard;
+
+	private Registration broadcasterRegistration;
 
 	private void init() {
 		log.info("init");
@@ -90,10 +93,9 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	@Override
 	public void setParameter(BeforeEvent event, String parameter) {
 		SessionUtils.createSessionIdIfExists();
+		setId(parameter);
 
-		boardId = parameter;
-
-		if (!repository.findById(boardId).isPresent()) {
+		if (!repository.findById(getId().get()).isPresent()) {
 			Button b = new Button("No Session Found -> Navigate to Dashbaord");
 			b.addClickListener(e -> UI.getCurrent().navigate(MainView.class));
 			add(b);
@@ -102,16 +104,41 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		init();
 		sync();
-		setSessionIdAtButton(boardId);
+		setSessionIdAtButton(getId().get());
+	}
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+//		super.onAttach(attachEvent);
+		UI ui = UI.getCurrent();
+		broadcasterRegistration = BroadcasterBoard.register(getId().get(), event -> {
+			ui.access(() -> {
+				if (Config.DEBUG) {
+					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
+				}
+				reload();
+			});
+		});
+	}
+
+	@Override
+	protected void onDetach(DetachEvent detachEvent) {
+//		super.onDetach(detachEvent);
+		if (broadcasterRegistration != null) {
+			broadcasterRegistration.remove();
+			broadcasterRegistration = null;
+		} else {
+			log.info("cannot remove broadcast, because it is null");
+		}
 	}
 
 	public void sync() {
-		log.info("sync & refreshing data: {}", boardId);
+		log.info("sync & refreshing data: {}", getId().get());
 		reload();
 	}
 
 	public void reload() {
-		TKBData tmp = repository.findById(boardId).get();
+		TKBData tmp = repository.findById(getId().get()).get();
 
 		// update layout with new missing data
 		tmp.getColumns().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).forEachOrdered(pdc -> {
@@ -136,7 +163,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		// reorder order columns
 		// TODO
-
 	}
 
 	public List<ColumnComponent> getColumnComponents() {
@@ -152,8 +178,9 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	public void addColumn(String id, String ownerId, String name) {
 		log.info("add column: {} ({})", name, id);
-		TKBData tmp = repository.findById(boardId).get();
-		tmp.addColumn(TKBColumn.builder().id(id).ownerId(ownerId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns())).name(name).build());
+		TKBData tmp = repository.findById(getId().get()).get();
+		tmp.addColumn(TKBColumn.builder().id(id).ownerId(ownerId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns())).name(name)
+				.build());
 		repository.save(tmp);
 	}
 
@@ -211,7 +238,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		btnDelete.addClickListener(e -> {
 			new ConfirmDialog("Delete", null, "Delete", ok -> {
 				UI.getCurrent().navigate(MainView.class);
-				repository.deleteById(boardId);
+				repository.deleteById(getId().get());
 			}).open();
 		});
 		layout.add(btnDelete);
@@ -226,7 +253,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	public void setSessionIdAtButton(String id) {
 		btnBoardId.setText("Board: " + id);
 		btnBoardIdClipboard.setContent(id);
-		if (!repository.findById(boardId).get().getOwnerId().equals(SessionUtils.getSessionId())) {
+		if (!repository.findById(getId().get()).get().getOwnerId().equals(SessionUtils.getSessionId())) {
 			btnDelete.setVisible(false);
 		}
 
