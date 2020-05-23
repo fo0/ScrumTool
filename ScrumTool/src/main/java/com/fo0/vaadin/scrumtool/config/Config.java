@@ -1,7 +1,9 @@
 package com.fo0.vaadin.scrumtool.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class Config {
 
 	public static boolean DEBUG;

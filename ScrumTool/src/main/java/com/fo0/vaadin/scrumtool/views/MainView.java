@@ -35,16 +35,16 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 	private KBDataRepository repository;
 
 	private HorizontalLayout root;
-	
+
 	@Getter
 	private ThemeToggleButton themeToggleButton;
 
 	public MainView() {
 		super();
-		
+
 		setSizeFull();
 		setJustifyContentMode(JustifyContentMode.CENTER);
-		
+
 		root = createRootLayout();
 		add(root);
 
@@ -54,9 +54,9 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 		Button btnJoin = createBtnJoin();
 		centerLayout.add(btnCreate);
 		centerLayout.add(btnJoin);
-		
+
 		themeToggleButton = new ThemeToggleButton();
-		
+
 		add(themeToggleButton);
 
 		root.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, centerLayout);
@@ -64,7 +64,7 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 	}
 
 	private Button createBtnJoin() {
-		Button btn = new Button("Beitreten");
+		Button btn = new Button("Join");
 		btn.getStyle().set("border", "1px solid black");
 		btn.setWidth("150px");
 		btn.setHeight("100px");
@@ -75,7 +75,7 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 	}
 
 	private Button createBtnCreate() {
-		Button btn = new Button("Erstellen");
+		Button btn = new Button("Create");
 		btn.getStyle().set("border", "1px solid black");
 		btn.addClickListener(e -> {
 			TKBData p = repository.save(TKBData.builder().ownerId(SessionUtils.getSessionId()).build());
@@ -95,7 +95,7 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 	private Dialog createJoinSessionDialog() {
 		Dialog d = new Dialog();
 		TextField t = new TextField("Session-ID");
-		Button b = new Button("Beitreten");
+		Button b = new Button("Join");
 
 		b.addClickListener(e -> {
 			TKBData p = repository.findById(t.getValue()).get();

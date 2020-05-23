@@ -143,6 +143,8 @@ public class ColumnComponent extends VerticalLayout {
 	public void reload() {
 		data = repository.findById(data.getId()).get();
 
+		changeTitle(data.getName());
+		
 		// update layout with new missing data
 		data.getCards().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).forEachOrdered(pdc -> {
 			CardComponent card = getCardById(pdc.getId());

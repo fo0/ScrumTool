@@ -1,6 +1,6 @@
 package com.fo0.vaadin.scrumtool.views.utils;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -32,7 +32,7 @@ public class KBViewUtils {
 		return layout;
 	}
 
-	public static int calculateNextPosition(List<? extends IDataOrder> items) {
+	public static int calculateNextPosition(Collection<? extends IDataOrder> items) {
 		if (CollectionUtils.isEmpty(items)) {
 			return 0;
 		}

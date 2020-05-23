@@ -1,7 +1,7 @@
 package com.fo0.vaadin.scrumtool.data.table;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -13,7 +13,7 @@ import javax.persistence.OneToMany;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,7 +44,7 @@ public class TKBColumn implements Serializable, IDataOrder {
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@Builder.Default
-	private List<TKBCard> cards = Lists.newArrayList();
+	private Set<TKBCard> cards = Sets.newHashSet();
 
 	public TKBCard getCardById(String id) {
 		if (CollectionUtils.isEmpty(cards)) {

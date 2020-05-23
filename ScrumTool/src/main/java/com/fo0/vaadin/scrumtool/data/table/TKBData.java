@@ -1,7 +1,7 @@
 package com.fo0.vaadin.scrumtool.data.table;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -13,7 +13,7 @@ import javax.persistence.OneToMany;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.fo0.vaadin.scrumtool.data.utils.IDataId;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +28,7 @@ import lombok.NonNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class TKBData implements IDataId, Serializable{
+public class TKBData implements IDataId, Serializable {
 
 	private static final long serialVersionUID = 3523289407526253761L;
 
@@ -40,7 +40,7 @@ public class TKBData implements IDataId, Serializable{
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@Builder.Default
-	private List<TKBColumn> columns = Lists.newArrayList();
+	private Set<TKBColumn> columns = Sets.newHashSet();
 
 	public TKBColumn getColumnById(@NonNull TKBColumn projectDataColumn) {
 		return getColumnById(projectDataColumn.getId());
