@@ -1,6 +1,7 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterCards;
+import com.fo0.vaadin.scrumtool.broadcast.BroadcasterColumns;
 import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
@@ -95,7 +96,7 @@ public class CardComponent extends HorizontalLayout {
 				TKBColumn c = columnRepository.findById(columnId).get();
 				c.removeCardById(getId().get());
 				columnRepository.save(c);
-				column.reload();
+				BroadcasterColumns.broadcast(column.getId().get(), "update");
 			});
 			rightLayoutBottom.add(btnDelete);
 		}

@@ -1,5 +1,6 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
+import com.fo0.vaadin.scrumtool.broadcast.BroadcasterCards;
 import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBCard;
@@ -32,7 +33,8 @@ public class LikeComponent extends HorizontalLayout {
 		btnLike.addClickListener(e -> {
 			if (!islikeAlreadyExistsByOwner(SessionUtils.getSessionId())) {
 				addLike(Utils.randomId(), SessionUtils.getSessionId());
-				reload();
+				BroadcasterCards.broadcast(cardId, "update");
+//				reload();
 			} else {
 				Notification.show("You already liked the card", Config.NOTIFICATION_DURATION, Position.MIDDLE);
 			}
