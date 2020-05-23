@@ -6,14 +6,12 @@ import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.fo0.vaadin.scrumtool.data.repository.KBDataListener;
 import com.fo0.vaadin.scrumtool.data.utils.IDataId;
 import com.google.common.collect.Lists;
 
@@ -30,7 +28,6 @@ import lombok.NonNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@EntityListeners(KBDataListener.class)
 public class TKBData implements IDataId, Serializable{
 
 	private static final long serialVersionUID = 3523289407526253761L;
