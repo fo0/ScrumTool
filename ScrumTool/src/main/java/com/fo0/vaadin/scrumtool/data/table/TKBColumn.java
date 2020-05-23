@@ -1,7 +1,7 @@
 package com.fo0.vaadin.scrumtool.data.table;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -12,7 +12,8 @@ import javax.persistence.OneToMany;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.google.common.collect.Sets;
+import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
+import com.google.common.collect.Lists;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +27,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class TKBColumn implements Serializable {
+public class TKBColumn implements Serializable, IDataOrder {
 
 	private static final long serialVersionUID = 5307688703528077543L;
 
@@ -38,9 +39,12 @@ public class TKBColumn implements Serializable {
 
 	private String name;
 
+	@Builder.Default
+	private int dataOrder = -1;
+
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@Builder.Default
-	private Set<TKBCard> cards = Sets.newHashSet();
+	private List<TKBCard> cards = Lists.newArrayList();
 
 	public TKBCard getCardById(String id) {
 		if (CollectionUtils.isEmpty(cards)) {

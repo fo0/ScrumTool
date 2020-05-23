@@ -22,7 +22,7 @@ public class TKBCardLikes {
 	 */
 	@Id
 	private String id;
-	
+
 	private String ownerId;
 
 	@Builder.Default

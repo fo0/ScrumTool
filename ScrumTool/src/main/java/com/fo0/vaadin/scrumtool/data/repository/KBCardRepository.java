@@ -9,3 +9,5 @@ import com.fo0.vaadin.scrumtool.data.table.TKBCard;
 public interface KBCardRepository extends CrudRepository<TKBCard, String> {
 
 }
+
+

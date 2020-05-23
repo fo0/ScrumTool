@@ -17,9 +17,11 @@ public class ChangeTextDialog extends Dialog {
 
 	private VerticalLayout layout;
 
-	public ChangeTextDialog(String caption, Consumer<String> text) {
+	public ChangeTextDialog(String caption, String initValue, Consumer<String> text) {
 		layout = new VerticalLayout();
 		add(layout);
+		setMinWidth("300px");
+		setMinWidth("200px");
 
 		H3 captionLabel = new H3(caption);
 		layout.add(captionLabel);
@@ -27,6 +29,7 @@ public class ChangeTextDialog extends Dialog {
 
 		TextArea area = new TextArea();
 		layout.add(area);
+		area.setValue(initValue);
 
 		Button save = new Button(VaadinIcon.CHECK.create());
 		save.setWidthFull();

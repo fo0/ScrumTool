@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
 import com.google.common.collect.Sets;
 
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class TKBCard implements Serializable {
+public class TKBCard implements Serializable, IDataOrder {
 
 	private static final long serialVersionUID = 652620276690725942L;
 
@@ -33,6 +34,9 @@ public class TKBCard implements Serializable {
 	private String id = UUID.randomUUID().toString();
 
 	private String ownerId;
+
+	@Builder.Default
+	private int dataOrder = -1;
 
 	private String text;
 
@@ -57,4 +61,5 @@ public class TKBCard implements Serializable {
 	public int countAllLikes() {
 		return likes.stream().mapToInt(TKBCardLikes::getLikeValue).sum();
 	}
+
 }

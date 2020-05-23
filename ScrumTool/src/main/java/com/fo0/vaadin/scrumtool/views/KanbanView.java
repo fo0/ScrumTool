@@ -1,22 +1,26 @@
 package com.fo0.vaadin.scrumtool.views;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.olli.ClipboardHelper;
 
+import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
+import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
+import com.fo0.vaadin.scrumtool.views.components.CreateColumnDialog;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
-import com.fo0.vaadin.scrumtool.views.utils.KanbanBoardViewUtils;
+import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.google.common.collect.Lists;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -71,13 +75,13 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private void init() {
 		log.info("init");
 		setSizeFull();
-		root = KanbanBoardViewUtils.createRootLayout();
+		root = KBViewUtils.createRootLayout();
 		add(root);
 
 		header = createHeaderLayout();
 		root.add(header);
 
-		columns = KanbanBoardViewUtils.createColumnLayout();
+		columns = KBViewUtils.createColumnLayout();
 		root.add(columns);
 
 		root.expand(columns);
@@ -110,32 +114,32 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		TKBData tmp = repository.findById(boardId).get();
 
 		// update layout with new missing data
-		tmp.getColumns().stream().forEachOrdered(pdc -> {
+		tmp.getColumns().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).forEachOrdered(pdc -> {
 			ColumnComponent column = getColumnLayoutById(pdc.getId());
 			if (column == null) {
 				// add card as new card
 				column = addColumnLayout(pdc);
 			}
 
-			if (column != null) {
-				column.reload();
-			} else {
-				log.info("ignore column reload");
-			}
+			column.reload();
 		});
 
 		// removes deleted columns
 		//@formatter:off
-		getCardComponents().stream()
+		getColumnComponents().stream()
 				.filter(e -> tmp.getColumns().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
 				.collect(Collectors.toList()).forEach(e -> {
 					log.info("remove column: " + e);
 					columns.remove(e);
 				});
 		//@formatter:on
+
+		// reorder order columns
+		// TODO
+
 	}
 
-	public List<ColumnComponent> getCardComponents() {
+	public List<ColumnComponent> getColumnComponents() {
 		List<ColumnComponent> components = Lists.newArrayList();
 		for (int i = 0; i < columns.getComponentCount(); i++) {
 			if (columns.getComponentAt(i) instanceof ColumnComponent) {
@@ -147,8 +151,9 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	}
 
 	public void addColumn(String id, String ownerId, String name) {
+		log.info("add column: {} ({})", name, id);
 		TKBData tmp = repository.findById(boardId).get();
-		tmp.addColumn(TKBColumn.builder().id(id).ownerId(ownerId).name(name).build());
+		tmp.addColumn(TKBColumn.builder().id(id).ownerId(ownerId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns())).name(name).build());
 		repository.save(tmp);
 	}
 
@@ -158,7 +163,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			return null;
 		}
 
-		ColumnComponent col = new ColumnComponent(this, column.getId(), column.getOwnerId(), column.getName());
+		ColumnComponent col = new ColumnComponent(this, column);
 		columns.add(col);
 		return col;
 	}
@@ -182,11 +187,11 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		Button b = new Button("Column", VaadinIcon.PLUS.create());
 		b.addClickListener(e -> {
 			if (columns.getComponentCount() >= KanbanConfig.MAX_COLUMNS) {
-				Notification.show("Column limit reached", 3000, Position.MIDDLE);
+				Notification.show("Column limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
 				return;
 			}
 
-			KanbanBoardViewUtils.createColumnDialog(this).open();
+			new CreateColumnDialog(this).open();
 		});
 		layout.add(b);
 

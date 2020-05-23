@@ -3,6 +3,7 @@ package com.fo0.vaadin.scrumtool.views;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
@@ -99,7 +100,7 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 		b.addClickListener(e -> {
 			TKBData p = repository.findById(t.getValue()).get();
 			if (p == null) {
-				Notification.show("No Board found", 5000, Position.MIDDLE);
+				Notification.show("No Board found", Config.NOTIFICATION_DURATION, Position.MIDDLE);
 				return;
 			}
 

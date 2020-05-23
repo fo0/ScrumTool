@@ -1,5 +1,6 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
+import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.data.table.TKBCardLikes;
@@ -7,7 +8,6 @@ import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.utils.Utils;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -22,29 +22,26 @@ public class LikeComponent extends HorizontalLayout {
 	private String cardId;
 
 	private Button btnLike;
-	private Label likesLabel;
 
 	public LikeComponent(String cardId) {
 		this.cardId = cardId;
 
-		likesLabel = new Label();
-		add(likesLabel);
-		changeText(0);
-
 		btnLike = new Button(VaadinIcon.THUMBS_UP.create());
+		btnLike.setText(String.valueOf(0));
+		btnLike.setWidthFull();
 		btnLike.addClickListener(e -> {
 			if (!islikeAlreadyExistsByOwner(SessionUtils.getSessionId())) {
 				addLike(Utils.randomId(), SessionUtils.getSessionId());
 				reload();
 			} else {
-				Notification.show("You already liked the card", 3000, Position.MIDDLE);
+				Notification.show("You already liked the card", Config.NOTIFICATION_DURATION, Position.MIDDLE);
 			}
 		});
 
 		add(btnLike);
 
-		getStyle().set("border", "1px solid black");
-		setAlignItems(Alignment.CENTER);
+		setAlignItems(Alignment.END);
+		setDefaultVerticalComponentAlignment(Alignment.CENTER);
 	}
 
 	public boolean islikeAlreadyExistsByOwner(String ownerId) {
@@ -58,7 +55,7 @@ public class LikeComponent extends HorizontalLayout {
 	}
 
 	public void changeText(int likes) {
-		likesLabel.setText(String.valueOf(likes));
+		btnLike.setText(String.valueOf(likes));
 	}
 
 	public void reload() {

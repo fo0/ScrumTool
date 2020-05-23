@@ -1,9 +1,12 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
+import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBCard;
@@ -14,6 +17,7 @@ import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.utils.Utils;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
+import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.google.common.collect.Lists;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
@@ -40,24 +44,24 @@ public class ColumnComponent extends VerticalLayout {
 	private KanbanView view;
 
 	@Getter
-	private TKBColumn productDataColumn;
-
-	@Getter
-	private String name;
+	private TKBColumn data;
 
 	private TextArea area;
 
-	public ColumnComponent(KanbanView view, String id, String ownerId, String name) {
-		this.name = name;
+	private H3 h3;
+
+	public ColumnComponent(KanbanView view, TKBColumn column) {
 		this.view = view;
-		setId(id);
-		H3 h3 = new H3(name);
+		this.data = column;
+		setId(column.getId());
+		h3 = new H3();
+		changeTitle(column.getName());
 		h3.getStyle().set("text-align", "center");
 		h3.setWidthFull();
 		Button btn = new Button(VaadinIcon.TRASH.create());
 		btn.addClickListener(e -> {
 			log.info("delete column: " + getId().get());
-			Notification.show("Deleting Column: " + name, 3000, Position.MIDDLE);
+			Notification.show("Deleting Column: " + column.getName(), Config.NOTIFICATION_DURATION, Position.MIDDLE);
 			TKBData c = dataRepository.findById(view.getBoardId()).get();
 			c.removeColumnById(getId().get());
 			dataRepository.save(c);
@@ -112,13 +116,19 @@ public class ColumnComponent extends VerticalLayout {
 		btnLayout.setWidthFull();
 		layoutHeader.add(btnLayout);
 		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, h3);
+	}
 
-		productDataColumn = TKBColumn.builder().id(id).ownerId(ownerId).name(name).build();
+	public void changeTitle(String string) {
+		if (Config.DEBUG)
+			h3.setText(string + " (" + data.getDataOrder() + ")");
+		else
+			h3.setText(string);
 	}
 
 	private void addCard(String randomId, String sessionId, String value) {
 		TKBColumn tmp = repository.findById(getId().get()).get();
-		TKBCard card = TKBCard.builder().id(randomId).ownerId(sessionId).text(value).build();
+		TKBCard card = TKBCard.builder().id(randomId).ownerId(sessionId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getCards()))
+				.text(value).build();
 		tmp.addCard(card);
 		repository.save(tmp);
 		log.info("add card: {}", randomId);
@@ -131,10 +141,10 @@ public class ColumnComponent extends VerticalLayout {
 	}
 
 	public void reload() {
-		TKBColumn tmp = repository.findById(productDataColumn.getId()).get();
+		data = repository.findById(data.getId()).get();
 
 		// update layout with new missing data
-		tmp.getCards().stream().forEachOrdered(pdc -> {
+		data.getCards().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).forEachOrdered(pdc -> {
 			CardComponent card = getCardById(pdc.getId());
 			if (card == null) {
 				// add card as new card
@@ -145,7 +155,7 @@ public class ColumnComponent extends VerticalLayout {
 		});
 
 		// remove old
-		getCardComponents().stream().filter(e -> tmp.getCards().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
+		getCardComponents().stream().filter(e -> data.getCards().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
 				.collect(Collectors.toList()).forEach(e -> {
 					remove(e);
 				});

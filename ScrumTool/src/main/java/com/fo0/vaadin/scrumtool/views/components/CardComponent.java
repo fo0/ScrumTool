@@ -1,5 +1,6 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
+import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBCard;
@@ -8,9 +9,10 @@ import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -30,7 +32,7 @@ public class CardComponent extends HorizontalLayout {
 
 	private String columnId;
 
-	private Label textLabel;
+	private TextArea textArea;
 
 	public CardComponent(KanbanView view, ColumnComponent column, String columnId, TKBCard card) {
 		this.card = card;
@@ -39,16 +41,36 @@ public class CardComponent extends HorizontalLayout {
 		setId(card.getId());
 		getStyle().set("border", "2px solid black");
 		setSpacing(true);
-		textLabel = new Label(card.getText());
-		add(textLabel);
+		textArea = new TextArea();
+		changeText(card.getText());
+		textArea.setReadOnly(true);
+		add(textArea);
+
+		VerticalLayout rightLayout = new VerticalLayout();
+		rightLayout.setWidthFull();
+		rightLayout.setSpacing(false);
+		rightLayout.setMargin(false);
+		HorizontalLayout rightLayoutTop = new HorizontalLayout();
+		rightLayoutTop.setWidthFull();
+		rightLayoutTop.setAlignItems(Alignment.STRETCH);
+		rightLayoutTop.setSpacing(false);
+		rightLayoutTop.setMargin(false);
+		HorizontalLayout rightLayoutBottom = new HorizontalLayout();
+		rightLayoutBottom.setWidthFull();
+		rightLayoutBottom.setSpacing(false);
+		rightLayoutBottom.setMargin(false);
+		rightLayoutBottom.setAlignItems(Alignment.STRETCH);
+		rightLayout.add(rightLayoutTop, rightLayoutBottom);
+		add(rightLayout);
 
 		likeComponent = new LikeComponent(card.getId());
-		add(likeComponent);
+		rightLayoutTop.add(likeComponent);
+		likeComponent.setWidthFull();
 
 		if (card.getOwnerId().equals(SessionUtils.getSessionId())) {
 			Button btnEdit = new Button(VaadinIcon.EDIT.create());
 			btnEdit.addClickListener(e -> {
-				new ChangeTextDialog("Edit Text", savedText -> {
+				new ChangeTextDialog("Edit Text", textArea.getValue(), savedText -> {
 					log.info("edit card: " + getId().get());
 					TKBCard c = cardRepository.findById(getId().get()).get();
 					c.setText(savedText);
@@ -56,7 +78,7 @@ public class CardComponent extends HorizontalLayout {
 					reload();
 				}).open();
 			});
-			add(btnEdit);
+			rightLayoutBottom.add(btnEdit);
 
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			btnDelete.addClickListener(e -> {
@@ -66,19 +88,26 @@ public class CardComponent extends HorizontalLayout {
 				columnRepository.save(c);
 				column.reload();
 			});
-			add(btnDelete);
+			rightLayoutBottom.add(btnDelete);
 		}
 
 		setAlignItems(Alignment.CENTER);
 	}
 
-	public void reload() {
-		TKBCard tmp = cardRepository.findById(getId().get()).get();
+	private void changeText(String text) {
+		if (Config.DEBUG)
+			textArea.setValue(card.getText() + " (" + card.getDataOrder() + ")");
+		else
+			textArea.setValue(card.getText());
+	}
 
-		textLabel.setText(tmp.getText());
+	public void reload() {
+		card = cardRepository.findById(getId().get()).get();
+
+		changeText(card.getText());
 
 		// update layout with new missing data
-		likeComponent.changeText(tmp.countAllLikes());
+		likeComponent.changeText(card.countAllLikes());
 	}
 
 }
