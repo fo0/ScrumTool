@@ -71,9 +71,9 @@ public class ColumnComponent extends VerticalLayout {
 			log.info("delete column: " + getId().get());
 			Notification.show("Deleting Column: " + column.getName(), Config.NOTIFICATION_DURATION, Position.MIDDLE);
 			TKBData c = dataRepository.findById(view.getId().get()).get();
+			c.removeColumnById(getId().get());
 			dataRepository.save(c);
 			BroadcasterBoard.broadcast(view.getId().get(), "update");
-			c.removeColumnById(getId().get());
 //			view.reload();
 		});
 		HorizontalLayout captionLayout = new HorizontalLayout(h3, btn);
