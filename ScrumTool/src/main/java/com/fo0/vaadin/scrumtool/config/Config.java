@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class Config {
 
-	public static boolean DEBUG = true;
+	public static boolean DEBUG;
 
 	public static int NOTIFICATION_DURATION = 2000;
 
