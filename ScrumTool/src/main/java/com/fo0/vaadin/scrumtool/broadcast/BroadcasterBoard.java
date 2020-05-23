@@ -22,7 +22,9 @@ public class BroadcasterBoard {
 	private static final Map<String, List<Consumer<String>>> listeners = Maps.newLinkedHashMap();
 
 	public static synchronized Registration register(String id, Consumer<String> listener) {
-		log.info("registering board consumer for: " + id);
+		if (Config.DEBUG) {
+			log.info("registering board consumer for: " + id);
+		}
 
 		if (BroadcasterBoard.listeners.get(id) == null) {
 			BroadcasterBoard.listeners.put(id, Lists.newLinkedList());

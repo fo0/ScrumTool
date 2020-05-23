@@ -22,8 +22,10 @@ public class BroadcasterColumns {
 	private static final Map<String, List<Consumer<String>>> listeners = Maps.newLinkedHashMap();
 
 	public static synchronized Registration register(String id, Consumer<String> listener) {
-		log.info("registering column consumer for: " + id);
-		
+		if (Config.DEBUG) {
+			log.info("registering column consumer for: " + id);
+		}
+
 		if (BroadcasterColumns.listeners.get(id) == null) {
 			BroadcasterColumns.listeners.put(id, Lists.newLinkedList());
 		}

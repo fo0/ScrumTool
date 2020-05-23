@@ -22,8 +22,9 @@ public class BroadcasterCards {
 	private static final Map<String, List<Consumer<String>>> listeners = Maps.newLinkedHashMap();
 
 	public static synchronized Registration register(String id, Consumer<String> listener) {
-		log.info("registering card consumer for: " + id);
-
+		if (Config.DEBUG) {
+			log.info("registering card consumer for: " + id);
+		}
 		if (BroadcasterCards.listeners.get(id) == null) {
 			BroadcasterCards.listeners.put(id, Lists.newLinkedList());
 		}
