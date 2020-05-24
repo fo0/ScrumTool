@@ -39,7 +39,7 @@ public class BroadcasterCards {
 	}
 
 	public static synchronized void broadcast(String id, String message) {
-		StreamUtils.stream(listeners.get(id)).forEach(e -> {
+		StreamUtils.parallelStream(listeners.get(id)).forEach(e -> {
 			if (Config.DEBUG) {
 				log.info("broadcast message '{}' to id '{}'", message, id);
 			}
