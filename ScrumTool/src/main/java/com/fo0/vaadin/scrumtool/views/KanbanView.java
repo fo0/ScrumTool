@@ -287,11 +287,5 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	public void setSessionIdAtButton(String id) {
 		btnBoardId.setText("Board: " + id);
 		btnBoardIdClipboard.setContent(id);
-		if (!repository.findById(getId().get()).get().getOwnerId().equals(SessionUtils.getSessionId())) {
-			if (btnDelete != null) {
-				btnDelete.setVisible(false);
-			}
-		}
-
 	}
 }
