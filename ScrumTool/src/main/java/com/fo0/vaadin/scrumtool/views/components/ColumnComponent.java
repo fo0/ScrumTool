@@ -1,5 +1,6 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,10 +67,26 @@ public class ColumnComponent extends VerticalLayout {
 		changeTitle(column.getName());
 		h3.getStyle().set("text-align", "center");
 		h3.setWidthFull();
-		
+
 		HorizontalLayout captionLayout = new HorizontalLayout(h3);
+		captionLayout.setMargin(false);
+		captionLayout.setSpacing(false);
 
 		if (KBViewUtils.isComponentAllowedToDisplay(view.getOptions(), data.getOwnerId())) {
+			Button btnShuffle = new Button(VaadinIcon.RANDOM.create());
+			btnShuffle.addClickListener(e -> {
+				//@formatter:off
+				List<TKBCard> toShuffle = data.getCards()
+						.stream()
+						.sorted(Comparator.comparing(IDataOrder::getDataOrder))
+						.collect(Collectors.toList());
+				
+				Collections.shuffle(toShuffle);
+				//@formatter:on
+			});
+			captionLayout.add(btnShuffle);
+			captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btnShuffle);
+
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			btnDelete.addClickListener(e -> {
 				log.info("delete column: " + getId().get());
@@ -82,7 +99,7 @@ public class ColumnComponent extends VerticalLayout {
 			captionLayout.add(btnDelete);
 			captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btnDelete);
 		}
-		
+
 		captionLayout.setWidthFull();
 		captionLayout.setVerticalComponentAlignment(Alignment.CENTER, h3);
 
@@ -117,7 +134,6 @@ public class ColumnComponent extends VerticalLayout {
 		btnAdd.addClickListener(e -> {
 			addCard(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
 			BroadcasterColumns.broadcast(getId().get(), "update");
-//			reload();
 			area.clear();
 			area.focus();
 		});
@@ -128,7 +144,7 @@ public class ColumnComponent extends VerticalLayout {
 			area.clear();
 		});
 
-		HorizontalLayout btnLayout = new HorizontalLayout(btnAdd, btnCancel);
+		HorizontalLayout btnLayout = new HorizontalLayout(btnCancel, btnAdd);
 		btnLayout.setWidthFull();
 		layoutHeader.add(btnLayout);
 		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, h3);
