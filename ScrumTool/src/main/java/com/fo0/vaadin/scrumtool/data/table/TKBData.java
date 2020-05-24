@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -37,6 +38,9 @@ public class TKBData implements IDataId, Serializable {
 	private String id = UUID.randomUUID().toString();
 
 	private String ownerId;
+
+	@Embedded
+	private TKBOptions options; 
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@Builder.Default

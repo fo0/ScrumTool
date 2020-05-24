@@ -14,6 +14,7 @@ import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.data.table.TKBData;
+import com.fo0.vaadin.scrumtool.data.table.TKBOptions;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
@@ -73,6 +74,11 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private Button btnDelete;
 	private ClipboardHelper btnBoardIdClipboard;
 
+	@Getter
+	private TKBOptions options;
+
+	private String ownerId;
+
 	private Registration broadcasterRegistration;
 
 	private void init() {
@@ -100,6 +106,15 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			b.addClickListener(e -> UI.getCurrent().navigate(MainView.class));
 			add(b);
 			return;
+		}
+
+		TKBData tmp = repository.findById(getId().get()).get();
+		if (options == null) {
+			options = tmp.getOptions();
+			if (options == null) {
+				options = new TKBOptions();
+			}
+			ownerId = tmp.getOwnerId();
 		}
 
 		init();
@@ -233,15 +248,17 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 		layout.add(btnSync);
 
-		btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
-		btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
-		btnDelete.addClickListener(e -> {
-			new ConfirmDialog("Delete", null, "Delete", ok -> {
-				UI.getCurrent().navigate(MainView.class);
-				repository.deleteById(getId().get());
-			}).open();
-		});
-		layout.add(btnDelete);
+		if (getOptions().isOptionPermissionSystem() || ownerId.equals(SessionUtils.getSessionId())) {
+			btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
+			btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
+			btnDelete.addClickListener(e -> {
+				new ConfirmDialog("Delete", null, "Delete", ok -> {
+					UI.getCurrent().navigate(MainView.class);
+					repository.deleteById(getId().get());
+				}).open();
+			});
+			layout.add(btnDelete);
+		}
 
 		themeToggleButton = new ThemeToggleButton(false);
 
@@ -254,7 +271,9 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		btnBoardId.setText("Board: " + id);
 		btnBoardIdClipboard.setContent(id);
 		if (!repository.findById(getId().get()).get().getOwnerId().equals(SessionUtils.getSessionId())) {
-			btnDelete.setVisible(false);
+			if (btnDelete != null) {
+				btnDelete.setVisible(false);
+			}
 		}
 
 	}

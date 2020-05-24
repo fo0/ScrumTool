@@ -66,20 +66,26 @@ public class ColumnComponent extends VerticalLayout {
 		changeTitle(column.getName());
 		h3.getStyle().set("text-align", "center");
 		h3.setWidthFull();
-		Button btn = new Button(VaadinIcon.TRASH.create());
-		btn.addClickListener(e -> {
-			log.info("delete column: " + getId().get());
-			Notification.show("Deleting Column: " + column.getName(), Config.NOTIFICATION_DURATION, Position.MIDDLE);
-			TKBData c = dataRepository.findById(view.getId().get()).get();
-			c.removeColumnById(getId().get());
-			dataRepository.save(c);
-			BroadcasterBoard.broadcast(view.getId().get(), "update");
-//			view.reload();
-		});
-		HorizontalLayout captionLayout = new HorizontalLayout(h3, btn);
+		
+		HorizontalLayout captionLayout = new HorizontalLayout(h3);
+
+		if (view.getOptions().isOptionPermissionSystem() || data.getOwnerId().equals(SessionUtils.getSessionId())) {
+			Button btnDelete = new Button(VaadinIcon.TRASH.create());
+			btnDelete.addClickListener(e -> {
+				log.info("delete column: " + getId().get());
+				Notification.show("Deleting Column: " + column.getName(), Config.NOTIFICATION_DURATION, Position.MIDDLE);
+				TKBData c = dataRepository.findById(view.getId().get()).get();
+				c.removeColumnById(getId().get());
+				dataRepository.save(c);
+				BroadcasterBoard.broadcast(view.getId().get(), "update");
+			});
+			captionLayout.add(btnDelete);
+			captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btnDelete);
+		}
+		
 		captionLayout.setWidthFull();
 		captionLayout.setVerticalComponentAlignment(Alignment.CENTER, h3);
-		captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btn);
+
 		add(captionLayout);
 		setMinWidth("400px");
 		setWidth("400px");

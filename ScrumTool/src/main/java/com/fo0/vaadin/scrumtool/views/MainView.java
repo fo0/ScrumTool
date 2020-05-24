@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBData;
-import com.fo0.vaadin.scrumtool.session.SessionUtils;
+import com.fo0.vaadin.scrumtool.views.components.CreateBoardDialog;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
@@ -78,8 +78,7 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 		Button btn = new Button("Create");
 		btn.getStyle().set("border", "1px solid black");
 		btn.addClickListener(e -> {
-			TKBData p = repository.save(TKBData.builder().ownerId(SessionUtils.getSessionId()).build());
-			UI.getCurrent().navigate(KanbanView.class, p.getId());
+			new CreateBoardDialog().open();
 		});
 		btn.setWidth("150px");
 		btn.setHeight("100px");

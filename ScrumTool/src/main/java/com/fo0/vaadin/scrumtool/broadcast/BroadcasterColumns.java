@@ -17,34 +17,31 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BroadcasterColumns {
 
-	static Executor executor = Executors.newSingleThreadExecutor();
-
-	private static final Map<String, List<Consumer<String>>> listeners = Maps.newLinkedHashMap();
+	private static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
+	private static final Map<String, List<Consumer<String>>> LISTENERS = Maps.newLinkedHashMap();
 
 	public static synchronized Registration register(String id, Consumer<String> listener) {
 		if (Config.DEBUG) {
 			log.info("registering column consumer for: " + id);
 		}
 
-		if (BroadcasterColumns.listeners.get(id) == null) {
-			BroadcasterColumns.listeners.put(id, Lists.newLinkedList());
-		}
-
-		BroadcasterColumns.listeners.get(id).add(listener);
+		LISTENERS.putIfAbsent(id, Lists.newLinkedList());
+		LISTENERS.get(id).add(listener);
 
 		return () -> {
 			synchronized (BroadcasterColumns.class) {
-				listeners.remove(id);
+				LISTENERS.remove(id);
 			}
 		};
 	}
 
 	public static synchronized void broadcast(String id, String message) {
-		StreamUtils.parallelStream(listeners.get(id)).forEach(e -> {
+		StreamUtils.parallelStream(LISTENERS.get(id)).forEach(e -> {
 			if (Config.DEBUG) {
 				log.info("broadcast message '{}' to id '{}'", message, id);
 			}
-			executor.execute(() -> e.accept(message));
+
+			EXECUTOR.execute(() -> e.accept(message));
 		});
 	}
 

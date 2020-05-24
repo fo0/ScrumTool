@@ -77,7 +77,7 @@ public class CardComponent extends HorizontalLayout {
 		rightLayoutTop.add(likeComponent);
 		likeComponent.setWidthFull();
 
-		if (card.getOwnerId().equals(SessionUtils.getSessionId())) {
+		if (view.getOptions().isOptionPermissionSystem() || card.getOwnerId().equals(SessionUtils.getSessionId())) {
 			Button btnEdit = new Button(VaadinIcon.EDIT.create());
 			btnEdit.addClickListener(e -> {
 				new ChangeTextDialog("Edit Text", textArea.getValue(), savedText -> {
