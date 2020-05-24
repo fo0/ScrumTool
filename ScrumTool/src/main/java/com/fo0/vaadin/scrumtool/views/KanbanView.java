@@ -251,7 +251,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 		layout.add(btnSync);
 
-		if (KBViewUtils.isComponentAllowedToDisplay(options, ownerId)) {
+		if (KBViewUtils.isAllowed(options, ownerId)) {
 			btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
 			btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
 			btnDelete.addClickListener(e -> {

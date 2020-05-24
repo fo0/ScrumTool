@@ -76,7 +76,7 @@ public class ColumnComponent extends VerticalLayout {
 		captionLayout.setMargin(false);
 		captionLayout.setSpacing(false);
 
-		if (KBViewUtils.isComponentAllowedToDisplay(view.getOptions(), data.getOwnerId())) {
+		if (KBViewUtils.isAllowed(view.getOptions(), data.getOwnerId())) {
 			Button btnShuffle = new Button(VaadinIcon.RANDOM.create());
 			btnShuffle.addClickListener(e -> {
 				//@formatter:off

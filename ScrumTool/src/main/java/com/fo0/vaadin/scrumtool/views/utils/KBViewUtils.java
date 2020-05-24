@@ -14,8 +14,16 @@ import com.vaadin.flow.component.textfield.TextArea;
 
 public class KBViewUtils {
 
-	public static boolean isComponentAllowedToDisplay(TKBOptions options, String ownerId) {
-		return options.isOptionPermissionSystem() || ownerId.equals(SessionUtils.getSessionId());
+	public static boolean isAllowed(TKBOptions options, String ownerId) {
+		if (options.isOptionPermissionSystem()) {
+			if (ownerId.equals(SessionUtils.getSessionId())) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return true;
+		}
 	}
 
 	public static HorizontalLayout createColumnLayout() {
