@@ -7,3 +7,6 @@ Just download the latest app (via releases) and start it via
 ```
 java -jar ScrumTool-VERSION.jar
 ``` 
+
+### info for devs
+add property `app.debug=true` to your i.e. eclipse run-configuration via `Override Properties` to see more informations
