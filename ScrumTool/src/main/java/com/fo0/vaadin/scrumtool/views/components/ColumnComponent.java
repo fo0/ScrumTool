@@ -69,7 +69,7 @@ public class ColumnComponent extends VerticalLayout {
 		
 		HorizontalLayout captionLayout = new HorizontalLayout(h3);
 
-		if (view.getOptions().isOptionPermissionSystem() || data.getOwnerId().equals(SessionUtils.getSessionId())) {
+		if (KBViewUtils.isComponentAllowedToDisplay(view.getOptions(), data.getOwnerId())) {
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			btnDelete.addClickListener(e -> {
 				log.info("delete column: " + getId().get());

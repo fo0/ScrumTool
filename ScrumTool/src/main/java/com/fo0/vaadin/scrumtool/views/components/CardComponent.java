@@ -10,6 +10,7 @@ import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
+import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -77,7 +78,7 @@ public class CardComponent extends HorizontalLayout {
 		rightLayoutTop.add(likeComponent);
 		likeComponent.setWidthFull();
 
-		if (view.getOptions().isOptionPermissionSystem() || card.getOwnerId().equals(SessionUtils.getSessionId())) {
+		if (KBViewUtils.isComponentAllowedToDisplay(view.getOptions(), card.getOwnerId())) {
 			Button btnEdit = new Button(VaadinIcon.EDIT.create());
 			btnEdit.addClickListener(e -> {
 				new ChangeTextDialog("Edit Text", textArea.getValue(), savedText -> {

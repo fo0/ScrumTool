@@ -5,12 +5,18 @@ import java.util.Collection;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
+import com.fo0.vaadin.scrumtool.data.table.TKBOptions;
+import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 
 public class KBViewUtils {
+
+	public static boolean isComponentAllowedToDisplay(TKBOptions options, String ownerId) {
+		return options.isOptionPermissionSystem() || ownerId.equals(SessionUtils.getSessionId());
+	}
 
 	public static HorizontalLayout createColumnLayout() {
 		HorizontalLayout layout = new HorizontalLayout();

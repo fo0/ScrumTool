@@ -24,12 +24,15 @@ import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.google.common.collect.Lists;
+import com.google.gson.GsonBuilder;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -248,7 +251,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 		layout.add(btnSync);
 
-		if (getOptions().isOptionPermissionSystem() || ownerId.equals(SessionUtils.getSessionId())) {
+		if (KBViewUtils.isComponentAllowedToDisplay(options, ownerId)) {
 			btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
 			btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
 			btnDelete.addClickListener(e -> {
@@ -261,8 +264,22 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		}
 
 		themeToggleButton = new ThemeToggleButton(false);
-
 		layout.add(themeToggleButton);
+
+		if (Config.DEBUG) {
+			Button btnDebug = new Button("Debug", VaadinIcon.INFO.create());
+			btnDebug.addClickListener(e -> {
+				Dialog d = new Dialog();
+				d.setWidth("500px");
+				d.setHeight("500px");
+				Label t = new Label(new GsonBuilder().setPrettyPrinting().create().toJson(repository.findById(getId().get())));
+				t.getStyle().set("white-space", "pre-wrap");
+				t.setSizeFull();
+				d.add(t);
+				d.open();
+			});
+			layout.add(btnDebug);
+		}
 
 		return layout;
 	}
