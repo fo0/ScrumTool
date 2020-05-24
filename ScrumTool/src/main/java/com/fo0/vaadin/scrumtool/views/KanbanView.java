@@ -1,29 +1,38 @@
 package com.fo0.vaadin.scrumtool.views;
 
-import java.util.function.Function;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.olli.ClipboardHelper;
 
+import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
+import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.config.KanbanConfig;
-import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
-import com.fo0.vaadin.scrumtool.data.table.ProjectData;
-import com.fo0.vaadin.scrumtool.data.table.ProjectDataCard;
+import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
+import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
+import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
+import com.fo0.vaadin.scrumtool.data.table.TKBData;
+import com.fo0.vaadin.scrumtool.data.table.TKBOptions;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
-import com.fo0.vaadin.scrumtool.utils.ProjectBoardViewLoader;
-import com.fo0.vaadin.scrumtool.views.components.CardComponent;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
+import com.fo0.vaadin.scrumtool.views.components.CreateColumnDialog;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
-import com.fo0.vaadin.scrumtool.views.utils.ProjectBoardViewUtils;
+import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
+import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -32,6 +41,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -48,16 +58,14 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private static final long serialVersionUID = 8874200985319706829L;
 
 	@Autowired
-	private ProjectDataRepository repository;
+	private KBDataRepository repository;
 
 	@Getter
 	private VerticalLayout root;
 
 	@Getter
 	private HorizontalLayout header;
-	private HorizontalLayout headerLeft;
-	private HorizontalLayout headerRight;
-	
+
 	@Getter
 	private ThemeToggleButton themeToggleButton;
 
@@ -65,21 +73,27 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	public HorizontalLayout columns;
 
 	private Button btnBoardId;
-	private String boardId;
 
 	private Button btnDelete;
 	private ClipboardHelper btnBoardIdClipboard;
 
+	@Getter
+	private TKBOptions options;
+
+	private String ownerId;
+
+	private Registration broadcasterRegistration;
+
 	private void init() {
 		log.info("init");
 		setSizeFull();
-		root = ProjectBoardViewUtils.createRootLayout();
+		root = KBViewUtils.createRootLayout();
 		add(root);
 
 		header = createHeaderLayout();
 		root.add(header);
 
-		columns = ProjectBoardViewUtils.createColumnLayout();
+		columns = KBViewUtils.createColumnLayout();
 		root.add(columns);
 
 		root.expand(columns);
@@ -88,72 +102,115 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	@Override
 	public void setParameter(BeforeEvent event, String parameter) {
 		SessionUtils.createSessionIdIfExists();
+		setId(parameter);
 
-		boardId = parameter;
-
-		if (!repository.findById(boardId).isPresent()) {
+		if (!repository.findById(getId().get()).isPresent()) {
 			Button b = new Button("No Session Found -> Navigate to Dashbaord");
 			b.addClickListener(e -> UI.getCurrent().navigate(MainView.class));
 			add(b);
 			return;
 		}
 
+		TKBData tmp = repository.findById(getId().get()).get();
+		if (options == null) {
+			options = tmp.getOptions();
+			if (options == null) {
+				options = new TKBOptions();
+			}
+			ownerId = tmp.getOwnerId();
+		}
+
 		init();
 		sync();
-		setSessionIdAtButton(boardId);
+		setSessionIdAtButton(getId().get());
 	}
 
-//	@Scheduled(fixedRate = 1000 * 5)
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+//		super.onAttach(attachEvent);
+		UI ui = UI.getCurrent();
+		broadcasterRegistration = BroadcasterBoard.register(getId().get(), event -> {
+			ui.access(() -> {
+				if (Config.DEBUG) {
+					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
+				}
+				reload();
+			});
+		});
+	}
+
+	@Override
+	protected void onDetach(DetachEvent detachEvent) {
+//		super.onDetach(detachEvent);
+		if (broadcasterRegistration != null) {
+			broadcasterRegistration.remove();
+			broadcasterRegistration = null;
+		} else {
+			log.info("cannot remove broadcast, because it is null");
+		}
+	}
+
 	public void sync() {
-		ProjectData pd = repository.findById(boardId).orElse(null);
-		if (pd == null) {
-			log.info("no data in repository found");
-			return;
+		log.info("sync & refreshing data: {}", getId().get());
+		reload();
+	}
+
+	public void reload() {
+		TKBData tmp = repository.findById(getId().get()).get();
+
+		// update layout with new missing data
+		tmp.getColumns().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).forEachOrdered(pdc -> {
+			ColumnComponent column = getColumnLayoutById(pdc.getId());
+			if (column == null) {
+				// add card as new card
+				column = addColumnLayout(pdc);
+			}
+
+			column.reload();
+		});
+
+		// removes deleted columns
+		//@formatter:off
+		getColumnComponents().stream()
+				.filter(e -> tmp.getColumns().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
+				.collect(Collectors.toList()).forEach(e -> {
+					log.info("remove column: " + e.getId());
+					columns.remove(e);
+				});
+		//@formatter:on
+
+		// reorder order columns
+		// TODO
+	}
+
+	public List<ColumnComponent> getColumnComponents() {
+		List<ColumnComponent> components = Lists.newArrayList();
+		for (int i = 0; i < columns.getComponentCount(); i++) {
+			if (columns.getComponentAt(i) instanceof ColumnComponent) {
+				components.add((ColumnComponent) columns.getComponentAt(i));
+			}
 		}
-		
-		log.info("sync & refreshing data: {}", pd.getId());
-		ProjectBoardViewLoader.loadData(this, pd, SessionUtils.getSessionId());
+
+		return components;
 	}
 
-	public void printProjectData() {
-		System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(getData()));
+	public void addColumn(String id, String ownerId, String name) {
+		log.info("add column: {} ({})", name, id);
+		TKBData tmp = repository.findById(getId().get()).get();
+		tmp.addColumn(TKBColumn.builder().id(id).ownerId(ownerId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns())).name(name)
+				.build());
+		repository.save(tmp);
 	}
 
-	public void saveData(Function<ProjectData, ProjectData> save) {
-		ProjectData tmp = repository.findById(boardId).get();
-		tmp = save.apply(tmp);
-		tmp = repository.save(tmp);
-		log.info("save data: {}", tmp.getId());
-//		printProjectData();
-	}
-
-	public ProjectData getData() {
-		return repository.findById(boardId).get();
-	}
-
-	public ColumnComponent addColumn(String id, String ownerId, String name, boolean saveToDb) {
-		if (columns.getComponentCount() >= KanbanConfig.MAX_COLUMNS) {
-			Notification.show("Column limit reached", 3000, Position.MIDDLE);
+	public ColumnComponent addColumnLayout(TKBColumn column) {
+		if (getColumnLayoutById(column.getId()) != null) {
+			log.warn("column already exists: {} - {}", column.getId(), column.getName());
 			return null;
 		}
 
-		if (getColumnLayoutById(id) != null) {
-			log.warn("column already exists: {} - {}", id, name);
-			return null;
-		}
-
-		ColumnComponent col = createColumn(this, id, ownerId, name);
+		ColumnComponent col = new ColumnComponent(this, column);
 		columns.add(col);
-		saveData(data -> data.addColumn(col.getProductDataColumn()));
 		return col;
-	}
-
-	public ColumnComponent addColumn(String id, String name, boolean saveToDb) {
-		return addColumn(id, SessionUtils.getSessionId(), name, saveToDb);
-	}
-
-	public ColumnComponent createColumn(KanbanView view, String id, String ownerId, String name) {
-		return new ColumnComponent(view, id, ownerId, name);
 	}
 
 	public ColumnComponent getColumnLayoutById(String columnId) {
@@ -167,57 +224,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		return null;
 	}
 
-	public ColumnComponent getColumn(String columnId) {
-		for (int i = 0; i < columns.getComponentCount(); i++) {
-			ColumnComponent col = (ColumnComponent) columns.getComponentAt(i);
-			if (col.getId().get().equals(columnId)) {
-				return col;
-			}
-		}
-
-		return null;
-	}
-
-	public void addCard(String columnId, String cardId, String ownerId, String message, boolean saveToDb) {
-		ColumnComponent cc = getColumn(columnId);
-		if (cc == null) {
-			return;
-		}
-
-		if (CollectionUtils.size(cc.getProductDataColumn().getCards()) >= KanbanConfig.MAX_CARDS) {
-			Notification.show("Card limit reached", 5000, Position.MIDDLE);
-			return;
-		}
-
-		ProjectDataCard pdc = cc.getCardById(cardId);
-		if (pdc != null) {
-			log.warn("card already exists: {} - {}", cardId, message);
-			return;
-		}
-
-		CardComponent ccc = cc.addCard(cardId, ownerId, message);
-		saveData(data -> data.addCard(columnId, ccc.getCard()));
-	}
-
-	public ProjectDataCard getCardLayoutById(String columnId, String cardId) {
-		ColumnComponent col = getColumnLayoutById(columnId);
-		return col.getCardById(cardId);
-	}
-
-	public CardComponent createCard(String columnId, String cardId, String ownerId, String name) {
-		return new CardComponent(this, columnId, cardId, ownerId, name);
-	}
-
-	public void removeCard(String columnId, String cardId) {
-		ColumnComponent cc = getColumn(columnId);
-		if (cc == null) {
-			return;
-		}
-		log.info("[CARD] remove card " + cardId);
-		cc.removeCardById(cardId);
-		saveData(data -> data.removeCardById(columnId, cardId));
-	}
-
 	public HorizontalLayout createHeaderLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
 		layout.getStyle().set("border", "0.5px solid black");
@@ -225,7 +231,12 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		Button b = new Button("Column", VaadinIcon.PLUS.create());
 		b.addClickListener(e -> {
-			ProjectBoardViewUtils.createColumnDialog(this).open();
+			if (columns.getComponentCount() >= KanbanConfig.MAX_COLUMNS) {
+				Notification.show("Column limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
+				return;
+			}
+
+			new CreateColumnDialog(this).open();
 		});
 		layout.add(b);
 
@@ -240,29 +251,41 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 		layout.add(btnSync);
 
-		btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
-		btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
-		btnDelete.addClickListener(e -> {
-			new ConfirmDialog("Delete", null, "Delete", ok -> {
-				UI.getCurrent().navigate(MainView.class);
-				repository.deleteById(boardId);
-			}).open();
-		});
-		layout.add(btnDelete);
-		
+		if (KBViewUtils.isComponentAllowedToDisplay(options, ownerId)) {
+			btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
+			btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
+			btnDelete.addClickListener(e -> {
+				new ConfirmDialog("Delete", null, "Delete", ok -> {
+					UI.getCurrent().navigate(MainView.class);
+					repository.deleteById(getId().get());
+				}).open();
+			});
+			layout.add(btnDelete);
+		}
+
 		themeToggleButton = new ThemeToggleButton(false);
-		
 		layout.add(themeToggleButton);
+
+		if (Config.DEBUG) {
+			Button btnDebug = new Button("Debug", VaadinIcon.INFO.create());
+			btnDebug.addClickListener(e -> {
+				Dialog d = new Dialog();
+				d.setWidth("500px");
+				d.setHeight("500px");
+				Label t = new Label(new GsonBuilder().setPrettyPrinting().create().toJson(repository.findById(getId().get())));
+				t.getStyle().set("white-space", "pre-wrap");
+				t.setSizeFull();
+				d.add(t);
+				d.open();
+			});
+			layout.add(btnDebug);
+		}
 
 		return layout;
 	}
 
 	public void setSessionIdAtButton(String id) {
 		btnBoardId.setText("Board: " + id);
-		log.info("projectdata ownerId: {} | SessionID: {}", getData().getOwnerId(), SessionUtils.getSessionId());
-		if (!getData().getOwnerId().equals(SessionUtils.getSessionId())) {
-			btnDelete.setVisible(false);
-		}
 		btnBoardIdClipboard.setContent(id);
 	}
 }

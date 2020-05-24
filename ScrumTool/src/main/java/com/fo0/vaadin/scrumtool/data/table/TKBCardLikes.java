@@ -1,8 +1,5 @@
 package com.fo0.vaadin.scrumtool.data.table;
 
-import java.io.Serializable;
-import java.util.UUID;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -18,16 +15,17 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectDataCard implements Serializable {
+public class TKBCardLikes {
 
-	private static final long serialVersionUID = 652620276690725942L;
-
+	/**
+	 * ID = OwnerId
+	 */
 	@Id
-	@Builder.Default
-	private String id = UUID.randomUUID().toString();
-	
+	private String id;
+
 	private String ownerId;
 
-	private String text;
+	@Builder.Default
+	private int likeValue = 1;
 
 }

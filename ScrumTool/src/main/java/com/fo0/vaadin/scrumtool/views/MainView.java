@@ -3,9 +3,10 @@ package com.fo0.vaadin.scrumtool.views;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fo0.vaadin.scrumtool.data.repository.ProjectDataRepository;
-import com.fo0.vaadin.scrumtool.data.table.ProjectData;
-import com.fo0.vaadin.scrumtool.session.SessionUtils;
+import com.fo0.vaadin.scrumtool.config.Config;
+import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
+import com.fo0.vaadin.scrumtool.data.table.TKBData;
+import com.fo0.vaadin.scrumtool.views.components.CreateBoardDialog;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
@@ -31,19 +32,19 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 	private static final long serialVersionUID = 8874200985319706829L;
 
 	@Autowired
-	private ProjectDataRepository repository;
+	private KBDataRepository repository;
 
 	private HorizontalLayout root;
-	
+
 	@Getter
 	private ThemeToggleButton themeToggleButton;
 
 	public MainView() {
 		super();
-		
+
 		setSizeFull();
 		setJustifyContentMode(JustifyContentMode.CENTER);
-		
+
 		root = createRootLayout();
 		add(root);
 
@@ -53,9 +54,9 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 		Button btnJoin = createBtnJoin();
 		centerLayout.add(btnCreate);
 		centerLayout.add(btnJoin);
-		
+
 		themeToggleButton = new ThemeToggleButton();
-		
+
 		add(themeToggleButton);
 
 		root.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, centerLayout);
@@ -63,7 +64,7 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 	}
 
 	private Button createBtnJoin() {
-		Button btn = new Button("Beitreten");
+		Button btn = new Button("Join");
 		btn.getStyle().set("border", "1px solid black");
 		btn.setWidth("150px");
 		btn.setHeight("100px");
@@ -74,11 +75,10 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 	}
 
 	private Button createBtnCreate() {
-		Button btn = new Button("Erstellen");
+		Button btn = new Button("Create");
 		btn.getStyle().set("border", "1px solid black");
 		btn.addClickListener(e -> {
-			ProjectData p = repository.save(ProjectData.builder().ownerId(SessionUtils.getSessionId()).build());
-			UI.getCurrent().navigate(KanbanView.class, p.getId());
+			new CreateBoardDialog().open();
 		});
 		btn.setWidth("150px");
 		btn.setHeight("100px");
@@ -94,12 +94,12 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 	private Dialog createJoinSessionDialog() {
 		Dialog d = new Dialog();
 		TextField t = new TextField("Session-ID");
-		Button b = new Button("Beitreten");
+		Button b = new Button("Join");
 
 		b.addClickListener(e -> {
-			ProjectData p = repository.findById(t.getValue()).get();
+			TKBData p = repository.findById(t.getValue()).get();
 			if (p == null) {
-				Notification.show("No Board found", 5000, Position.MIDDLE);
+				Notification.show("No Board found", Config.NOTIFICATION_DURATION, Position.MIDDLE);
 				return;
 			}
 

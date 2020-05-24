@@ -24,6 +24,38 @@ public class StreamUtils {
 		return Stream.of(values).unordered().parallel().distinct();
 	}
 
+	/**
+	 * parallelization of optimized streaming
+	 * 
+	 * @param <T>
+	 * @param values
+	 * @return unordered stream result
+	 * @Created 08.09.2019 - 22:30:01
+	 * @author Thomas Euringer (GH:fo0)
+	 */
+	@SafeVarargs
+	public static <T> Stream<T> parallelStream(T... values) {
+		return Stream.of(values).parallel();
+	}
+
+	/**
+	 * parallelization of optimized streaming
+	 * 
+	 * @param <T>
+	 * @param values
+	 * @return unordered stream result
+	 * @Created 08.09.2019 - 22:30:01
+	 * @author Thomas Euringer (GH:fo0)
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Stream<T> parallelStream(Collection<T> values) {
+		if (CollectionUtils.isEmpty(values)) {
+			return (Stream<T>) Lists.newArrayList().parallelStream();
+		}
+
+		return values.parallelStream();
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <T> Stream<T> stream(T... values) {
 		if (ArrayUtils.isEmpty(values)) {

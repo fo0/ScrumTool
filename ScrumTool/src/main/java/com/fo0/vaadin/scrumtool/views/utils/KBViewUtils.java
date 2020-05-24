@@ -1,16 +1,22 @@
 package com.fo0.vaadin.scrumtool.views.utils;
 
-import com.fo0.vaadin.scrumtool.utils.Utils;
-import com.fo0.vaadin.scrumtool.views.KanbanView;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dialog.Dialog;
+import java.util.Collection;
+
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
+import com.fo0.vaadin.scrumtool.data.table.TKBOptions;
+import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
 
-public class ProjectBoardViewUtils {
+public class KBViewUtils {
+
+	public static boolean isComponentAllowedToDisplay(TKBOptions options, String ownerId) {
+		return options.isOptionPermissionSystem() || ownerId.equals(SessionUtils.getSessionId());
+	}
 
 	public static HorizontalLayout createColumnLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
@@ -32,20 +38,12 @@ public class ProjectBoardViewUtils {
 		return layout;
 	}
 
-	public static Dialog createColumnDialog(KanbanView view) {
-		Dialog d = new Dialog();
-		TextField t = new TextField("Name");
-		t.focus();
-		Button b = new Button("Erstellen");
-		b.addClickListener(e -> {
-			view.addColumn(Utils.randomId(), t.getValue(), true);
-			d.close();
-		});
+	public static int calculateNextPosition(Collection<? extends IDataOrder> items) {
+		if (CollectionUtils.isEmpty(items)) {
+			return 0;
+		}
 
-		HorizontalLayout l = new HorizontalLayout(t, b);
-		l.setMargin(true);
-		d.add(l);
-		return d;
+		return items.stream().map(IDataOrder::getDataOrder).max(Integer::compare).get() + 1;
 	}
 
 }
