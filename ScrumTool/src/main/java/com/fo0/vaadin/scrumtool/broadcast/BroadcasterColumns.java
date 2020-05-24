@@ -17,6 +17,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BroadcasterColumns {
 
+	public static final String MESSAGE_SHUFFLE = "shuffle";
+
 	private static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
 	private static final Map<String, List<Consumer<String>>> LISTENERS = Maps.newLinkedHashMap();
 

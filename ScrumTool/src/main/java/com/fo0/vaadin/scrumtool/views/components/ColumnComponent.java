@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterColumns;
@@ -22,6 +23,7 @@ import com.fo0.vaadin.scrumtool.utils.Utils;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -59,6 +61,8 @@ public class ColumnComponent extends VerticalLayout {
 
 	private Registration broadcasterRegistration;
 
+	private VerticalLayout cards;
+
 	public ColumnComponent(KanbanView view, TKBColumn column) {
 		this.view = view;
 		this.data = column;
@@ -76,12 +80,23 @@ public class ColumnComponent extends VerticalLayout {
 			Button btnShuffle = new Button(VaadinIcon.RANDOM.create());
 			btnShuffle.addClickListener(e -> {
 				//@formatter:off
-				List<TKBCard> toShuffle = data.getCards()
+				TKBColumn tmp = repository.findById(getId().get()).get();
+				
+				List<TKBCard> toShuffle = tmp.getCards()
 						.stream()
-						.sorted(Comparator.comparing(IDataOrder::getDataOrder))
 						.collect(Collectors.toList());
 				
 				Collections.shuffle(toShuffle);
+				
+				// fix order
+				IntStream.range(0, toShuffle.size()).forEachOrdered(counter -> {
+					TKBCard cc = toShuffle.get(counter);
+					cc.setDataOrder(counter);
+				});
+				
+				tmp.setCards(Sets.newHashSet(toShuffle));
+				tmp = repository.save(tmp);
+				BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.MESSAGE_SHUFFLE);
 				//@formatter:on
 			});
 			captionLayout.add(btnShuffle);
@@ -148,6 +163,11 @@ public class ColumnComponent extends VerticalLayout {
 		btnLayout.setWidthFull();
 		layoutHeader.add(btnLayout);
 		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, h3);
+
+		cards = new VerticalLayout();
+		cards.setMargin(false);
+		cards.setPadding(false);
+		add(cards);
 	}
 
 	@Override
@@ -159,7 +179,18 @@ public class ColumnComponent extends VerticalLayout {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
 				}
-				reload();
+
+				switch (event) {
+				case BroadcasterColumns.MESSAGE_SHUFFLE:
+					ColumnComponent.this.cards.removeAll();
+					ColumnComponent.this.reload();
+					break;
+
+				default:
+					reload();
+					break;
+				}
+
 			});
 		});
 	}
@@ -193,12 +224,12 @@ public class ColumnComponent extends VerticalLayout {
 
 	private CardComponent addCardLayout(TKBCard card) {
 		CardComponent cc = new CardComponent(view, this, getId().get(), card);
-		add(cc);
+		cards.add(cc);
 		return cc;
 	}
 
 	public void reload() {
-		data = repository.findById(data.getId()).get();
+		data = repository.findById(getId().get()).get();
 
 		changeTitle(data.getName());
 
@@ -222,19 +253,18 @@ public class ColumnComponent extends VerticalLayout {
 
 	public List<CardComponent> getCardComponents() {
 		List<CardComponent> components = Lists.newArrayList();
-		for (int i = 0; i < getComponentCount(); i++) {
-			if (getComponentAt(i) instanceof CardComponent) {
-				components.add((CardComponent) getComponentAt(i));
+		for (int i = 0; i < cards.getComponentCount(); i++) {
+			if (cards.getComponentAt(i) instanceof CardComponent) {
+				components.add((CardComponent) cards.getComponentAt(i));
 			}
 		}
-
 		return components;
 	}
 
 	public CardComponent getCardById(String cardId) {
-		for (int i = 0; i < getComponentCount(); i++) {
-			if (getComponentAt(i) instanceof CardComponent) {
-				CardComponent card = (CardComponent) getComponentAt(i);
+		for (int i = 0; i < cards.getComponentCount(); i++) {
+			if (cards.getComponentAt(i) instanceof CardComponent) {
+				CardComponent card = (CardComponent) cards.getComponentAt(i);
 				if (card.getId().get().equals(cardId)) {
 					return card;
 				}
