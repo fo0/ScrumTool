@@ -8,10 +8,10 @@ Just download the latest app (via releases) and start it via
 java -jar ScrumTool-VERSION.jar
 ``` 
 
-### info for devs
+## info for devs
 add property `app.debug=true` to your i.e. eclipse run-configuration via `Override Properties` to see more informations
 
-### read the database
+## read the database
 You can easy read the h2-database file which is default located in the same directory like your `ScrumTool-VERSION.jar`
 To access the file you just need to download the latest h2 client from the official site: https://h2database.com/h2-2019-10-14.zip
 Unzip the .zip and use the client `h2-VERSION-.jar` from the `bin` directory.
