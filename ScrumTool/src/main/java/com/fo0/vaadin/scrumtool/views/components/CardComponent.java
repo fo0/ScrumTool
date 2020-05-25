@@ -7,7 +7,6 @@ import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
-import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
@@ -50,7 +49,7 @@ public class CardComponent extends HorizontalLayout {
 		this.columnId = columnId;
 
 		setId(card.getId());
-		getStyle().set("border", "2px solid black");
+		getStyle().set("border", "0.5px solid black");
 		setSpacing(true);
 		textArea = new TextArea();
 		changeText(card.getText());

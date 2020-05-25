@@ -16,6 +16,7 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 
 public class CreateBoardDialog extends Dialog {
 
@@ -26,9 +27,15 @@ public class CreateBoardDialog extends Dialog {
 
 	private Checkbox chkOptPermissionSystem;
 
+	private TextField txtColumns;
+
+	private TextField txtCards;
+
+	private TextField txtCardTextLength;
+
 	public CreateBoardDialog() {
-		setWidth("400px");
-		setHeight("200px");
+		setWidth("600px");
+		setHeight("450px");
 
 		H3 title = new H3("Configure Board");
 		title.getStyle().set("text-align", "center");
@@ -44,6 +51,21 @@ public class CreateBoardDialog extends Dialog {
 		VerticalLayout options = new VerticalLayout();
 		options.setWidthFull();
 		add(options);
+
+		txtColumns = new TextField("Max Columns");
+		txtColumns.setValue("0");
+		txtColumns.setWidthFull();
+		options.add(txtColumns);
+
+		txtCards = new TextField("Max Cards");
+		txtCards.setValue("0");
+		txtCards.setWidthFull();
+		options.add(txtCards);
+
+		txtCardTextLength = new TextField("Max Card Text Length");
+		txtCardTextLength.setValue("0");
+		txtCardTextLength.setWidthFull();
+		options.add(txtCardTextLength);
 
 		chkOptPermissionSystem = new Checkbox("Permissionsystem");
 		chkOptPermissionSystem.setWidthFull();
@@ -65,7 +87,12 @@ public class CreateBoardDialog extends Dialog {
 			//@formatter:off
 			TKBData p = repository.save(TKBData.builder()
 					.ownerId(SessionUtils.getSessionId())
-					.options(TKBOptions.builder().optionPermissionSystem(chkOptPermissionSystem.getValue()).build())
+					.options(TKBOptions.builder()
+							.optionPermissionSystem(chkOptPermissionSystem.getValue())
+							.maxColumns(Integer.valueOf(txtColumns.getValue()))
+							.maxCards(Integer.valueOf(txtCards.getValue()))
+							.maxCardTextLength(Integer.valueOf(txtCardTextLength.getValue()))
+							.build())
 					.build());
 			UI.getCurrent().navigate(KanbanView.class, p.getId());
 			close();

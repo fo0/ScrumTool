@@ -9,7 +9,6 @@ import java.util.stream.IntStream;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterColumns;
 import com.fo0.vaadin.scrumtool.config.Config;
-import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
@@ -133,20 +132,31 @@ public class ColumnComponent extends VerticalLayout {
 
 		area = new TextArea();
 		area.setSizeFull();
-		area.setMaxLength(KanbanConfig.MAX_CARD_TEXT_LENGTH);
-		area.setValueChangeMode(ValueChangeMode.EAGER);
-		area.addValueChangeListener(e -> {
-			if (e.getSource().getValue().length() >= KanbanConfig.MAX_CARD_TEXT_LENGTH) {
-				layoutHeader.getStyle().set("border-color", STYLES.COLOR_RED_500);
-			} else {
-				layoutHeader.getStyle().remove("border-color");
-			}
-		});
+
+		if (view.getOptions().getMaxCardTextLength() > 0) {
+			area.setMaxLength(view.getOptions().getMaxCardTextLength());
+			area.setValueChangeMode(ValueChangeMode.EAGER);
+			area.addValueChangeListener(e -> {
+				if (e.getSource().getValue().length() > view.getOptions().getMaxCardTextLength()) {
+					layoutHeader.getStyle().set("border-color", STYLES.COLOR_RED_500);
+				} else {
+					layoutHeader.getStyle().remove("border-color");
+				}
+			});
+		}
+
 		layoutHeader.add(area);
 
 		Button btnAdd = new Button("Note", VaadinIcon.PLUS.create());
 		btnAdd.setWidthFull();
 		btnAdd.addClickListener(e -> {
+			if (view.getOptions().getMaxCards() > 0) {
+				if (cards.getComponentCount() > view.getOptions().getMaxCards()) {
+					Notification.show("Card limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
+					return;
+				}
+			}
+			
 			addCard(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
 			BroadcasterColumns.broadcast(getId().get(), "update");
 			area.clear();
@@ -167,6 +177,9 @@ public class ColumnComponent extends VerticalLayout {
 		cards = new VerticalLayout();
 		cards.setMargin(false);
 		cards.setPadding(false);
+		cards.setSpacing(false);
+		cards.getStyle().set("overflow-y", "auto");
+		cards.getStyle().set("overflow-x", "hidden");
 		add(cards);
 	}
 

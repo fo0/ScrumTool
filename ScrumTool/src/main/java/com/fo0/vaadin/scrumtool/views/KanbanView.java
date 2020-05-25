@@ -9,7 +9,6 @@ import org.vaadin.olli.ClipboardHelper;
 
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.config.Config;
-import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
@@ -232,9 +231,11 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		Button b = new Button("Column", VaadinIcon.PLUS.create());
 		b.addClickListener(e -> {
-			if (columns.getComponentCount() >= KanbanConfig.MAX_COLUMNS) {
-				Notification.show("Column limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
-				return;
+			if (options.getMaxColumns() > 0) {
+				if (columns.getComponentCount() >= options.getMaxColumns()) {
+					Notification.show("Column limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
+					return;
+				}
 			}
 
 			new CreateColumnDialog(this).open();

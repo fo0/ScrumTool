@@ -1,10 +1,12 @@
 package com.fo0.vaadin.scrumtool.views.components;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.vaadin.maxime.MarkdownArea;
 
+import com.fo0.vaadin.scrumtool.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.data.table.TKBData;
 import com.google.common.collect.Lists;
@@ -35,7 +37,7 @@ public class MarkDownDialog extends Dialog {
 		List<String> list = Lists.newArrayList();
 		list.add("# Kanban Board");
 		list.add("");
-		data.getColumns().stream().forEachOrdered(column -> {
+		data.getColumns().stream().sorted(Comparator.comparing(TKBColumn::getDataOrder)).forEachOrdered(column -> {
 			list.addAll(createColumn(column));
 			list.add("");
 		});
@@ -47,7 +49,7 @@ public class MarkDownDialog extends Dialog {
 		list.add("### " + column.getName());
 		list.add("| No | Likes | Description |");
 		list.add("| :---: | :----: | :------ |");
-		column.getCards().stream().forEachOrdered(card -> {
+		column.getCards().stream().sorted(Comparator.comparing(TKBCard::getDataOrder)).forEachOrdered(card -> {
 			list.add(String.format("| %d | %d | %s |", card.getDataOrder(), card.countAllLikes(), card.getText()));
 		});
 		return list;
