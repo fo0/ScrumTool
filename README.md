@@ -25,3 +25,16 @@ To print all Boards just execute the following statement
 ``` sql
 java -cp h2*.jar org.h2.tools.Shell -url jdbc:h2:file:./database -user sa -password sa -sql "show * from tkbdata"
 ```
+
+To empty the entire database (maybe outdated, check the tables), you can use the following command
+```sql
+java -cp h2*.jar org.h2.tools.Shell -url jdbc:h2:file:./database -user sa -password sa -sql \
+"SET REFERENTIAL_INTEGRITY FALSE;\
+truncate table tkbdata_tkbcolumn;\
+truncate table tkbdata;\
+truncate table tkbcolumn_tkbcard;\
+truncate table tkbcolumn;\
+truncate table tkbcard_tkbcardlikes;\
+truncate table tkbcardlikes;\
+truncate table tkbcard"
+```
