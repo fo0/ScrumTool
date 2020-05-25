@@ -19,6 +19,7 @@ import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
 import com.fo0.vaadin.scrumtool.views.components.CreateColumnDialog;
+import com.fo0.vaadin.scrumtool.views.components.MarkDownDialog;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
@@ -240,7 +241,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 		layout.add(b);
 
-		btnBoardId = new Button("Board: Unknown", VaadinIcon.GROUP.create());
+		btnBoardId = new Button("Board-ID: Unknown", VaadinIcon.GROUP.create());
 		btnBoardId.getStyle().set("vertical-align", "0");
 		btnBoardIdClipboard = new ClipboardHelper("", btnBoardId);
 		layout.add(btnBoardIdClipboard);
@@ -250,6 +251,12 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			sync();
 		});
 		layout.add(btnSync);
+
+		Button btnExportToMarkDown = new Button("Export Markdown", VaadinIcon.SHARE.create());
+		btnExportToMarkDown.addClickListener(e -> {
+			new MarkDownDialog(repository.findById(getId().get()).get()).open();
+		});
+		layout.add(btnExportToMarkDown);
 
 		if (KBViewUtils.isAllowed(options, ownerId)) {
 			btnDelete = new Button("Delete", VaadinIcon.TRASH.create());

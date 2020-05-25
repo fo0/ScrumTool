@@ -157,6 +157,11 @@
 			<artifactId>clipboardhelper</artifactId>
 			<version>${clipboardhelper.vaadin.addon.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.vaadin.maxime</groupId>
+			<artifactId>markdown-area</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>
