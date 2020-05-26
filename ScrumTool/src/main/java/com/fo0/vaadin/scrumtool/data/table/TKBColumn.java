@@ -58,20 +58,8 @@ public class TKBColumn implements Serializable, IDataOrder {
 		return cards.add(note);
 	}
 
-	public boolean removeCard(TKBCard note) {
-		return cards.remove(note);
-	}
-
 	public boolean removeCardById(String id) {
 		return cards.removeIf(e -> e.getId().equals(id));
 	}
 
-	public int likeCardById(String id, String ownerId) {
-		TKBCard card = getCardById(id);
-		if (card == null) {
-			return 0;
-		}
-
-		return card.doLike(ownerId);
-	}
 }

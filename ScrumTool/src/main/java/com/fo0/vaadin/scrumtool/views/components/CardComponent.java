@@ -9,6 +9,7 @@ import com.fo0.vaadin.scrumtool.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
+import com.fo0.vaadin.scrumtool.views.dialogs.ChangeTextDialog;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -32,16 +33,11 @@ public class CardComponent extends HorizontalLayout {
 
 	private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
 	private KBColumnRepository columnRepository = SpringContext.getBean(KBColumnRepository.class);
-
 	@Getter
 	private TKBCard card;
-
 	private LikeComponent likeComponent;
-
 	private String columnId;
-
 	private TextArea textArea;
-
 	private Registration broadcasterRegistration;
 
 	public CardComponent(KanbanView view, ColumnComponent column, String columnId, TKBCard card) {
@@ -73,7 +69,7 @@ public class CardComponent extends HorizontalLayout {
 		rightLayout.add(rightLayoutTop, rightLayoutBottom);
 		add(rightLayout);
 
-		likeComponent = new LikeComponent(card.getId());
+		likeComponent = new LikeComponent(view.getId().get(), card.getId(), card.countAllLikes());
 		rightLayoutTop.add(likeComponent);
 		likeComponent.setWidthFull();
 
@@ -142,7 +138,7 @@ public class CardComponent extends HorizontalLayout {
 		changeText(card.getText());
 
 		// update layout with new missing data
-		likeComponent.changeText(card.countAllLikes());
+//		likeComponent.changeText(card.countAllLikes());
 	}
 
 }

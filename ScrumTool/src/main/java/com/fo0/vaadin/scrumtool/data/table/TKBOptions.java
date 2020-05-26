@@ -23,5 +23,6 @@ public class TKBOptions implements Serializable {
 	private int maxColumns;
 	private int maxCards;
 	private int maxCardTextLength;
+	private int maxLikesPerUser;
 
 }

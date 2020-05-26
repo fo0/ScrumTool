@@ -17,10 +17,10 @@ import com.fo0.vaadin.scrumtool.data.table.TKBOptions;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
-import com.fo0.vaadin.scrumtool.views.components.CreateColumnDialog;
-import com.fo0.vaadin.scrumtool.views.components.MarkDownDialog;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
+import com.fo0.vaadin.scrumtool.views.dialogs.CreateColumnDialog;
+import com.fo0.vaadin.scrumtool.views.dialogs.MarkDownDialog;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.google.common.collect.Lists;
@@ -59,29 +59,20 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Autowired
 	private KBDataRepository repository;
-
 	@Getter
 	private VerticalLayout root;
-
 	@Getter
 	private HorizontalLayout header;
-
 	@Getter
 	private ThemeToggleButton themeToggleButton;
-
 	@Getter
 	public HorizontalLayout columns;
-
 	private Button btnBoardId;
-
 	private Button btnDelete;
 	private ClipboardHelper btnBoardIdClipboard;
-
 	@Getter
 	private TKBOptions options;
-
 	private String ownerId;
-
 	private Registration broadcasterRegistration;
 
 	private void init() {

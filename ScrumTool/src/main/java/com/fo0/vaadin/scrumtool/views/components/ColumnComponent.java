@@ -260,7 +260,7 @@ public class ColumnComponent extends VerticalLayout {
 		// remove old
 		getCardComponents().stream().filter(e -> data.getCards().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
 				.collect(Collectors.toList()).forEach(e -> {
-					remove(e);
+					cards.remove(e);
 				});
 	}
 
