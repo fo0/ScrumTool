@@ -10,6 +10,7 @@ import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterColumns;
 import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
+import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBCard;
@@ -47,19 +48,15 @@ public class ColumnComponent extends VerticalLayout {
 	private static final long serialVersionUID = 8415434953831247614L;
 
 	private KBDataRepository dataRepository = SpringContext.getBean(KBDataRepository.class);
+	private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
 	private KBColumnRepository repository = SpringContext.getBean(KBColumnRepository.class);
-
-	private KanbanView view;
 
 	@Getter
 	private TKBColumn data;
-
+	private KanbanView view;
 	private TextArea area;
-
 	private H3 h3;
-
 	private Registration broadcasterRegistration;
-
 	private VerticalLayout cards;
 
 	public ColumnComponent(KanbanView view, TKBColumn column) {
@@ -156,7 +153,7 @@ public class ColumnComponent extends VerticalLayout {
 					return;
 				}
 			}
-			
+
 			addCard(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
 			BroadcasterColumns.broadcast(getId().get(), "update");
 			area.clear();
@@ -230,6 +227,7 @@ public class ColumnComponent extends VerticalLayout {
 		TKBColumn tmp = repository.findById(getId().get()).get();
 		TKBCard card = TKBCard.builder().id(randomId).ownerId(sessionId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getCards()))
 				.text(value).build();
+		cardRepository.save(card);
 		tmp.addCard(card);
 		repository.save(tmp);
 		log.info("add card: {}", randomId);

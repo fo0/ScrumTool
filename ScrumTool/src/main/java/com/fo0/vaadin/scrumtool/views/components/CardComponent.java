@@ -136,9 +136,6 @@ public class CardComponent extends HorizontalLayout {
 		card = cardRepository.findById(getId().get()).get();
 
 		changeText(card.getText());
-
-		// update layout with new missing data
-//		likeComponent.changeText(card.countAllLikes());
 	}
 
 }

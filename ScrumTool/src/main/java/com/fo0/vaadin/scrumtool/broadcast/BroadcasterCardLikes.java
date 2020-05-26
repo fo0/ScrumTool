@@ -22,7 +22,7 @@ public class BroadcasterCardLikes {
 
 	public static synchronized Registration register(String id, Consumer<String> listener) {
 		if (Config.DEBUG) {
-			log.info("registering card consumer for: " + id);
+			log.info("registering cardlikes consumer for: " + id);
 		}
 
 		LISTENERS.putIfAbsent(id, Lists.newLinkedList());
