@@ -126,10 +126,13 @@ public class CardComponent extends HorizontalLayout {
 	}
 
 	private void changeText(String text) {
-		if (Config.DEBUG)
-			textArea.setValue(card.getText() + " (" + card.getDataOrder() + ")");
-		else
+		if (!textArea.getValue().equals(text)) {
 			textArea.setValue(card.getText());
+		}
+		
+		if (Config.DEBUG) {
+			textArea.setValue(card.getText() + " (" + card.getDataOrder() + ")");
+		}
 	}
 
 	public void reload() {

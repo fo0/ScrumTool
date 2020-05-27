@@ -40,7 +40,7 @@ public class TKBCard implements Serializable, IDataOrder {
 
 	private String text;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private Set<TKBCardLikes> likes = Sets.newHashSet();
 

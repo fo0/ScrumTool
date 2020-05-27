@@ -42,7 +42,7 @@ public class TKBColumn implements Serializable, IDataOrder {
 	@Builder.Default
 	private int dataOrder = -1;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private Set<TKBCard> cards = Sets.newHashSet();
 

@@ -117,7 +117,9 @@ public class LikeComponent extends HorizontalLayout {
 	}
 
 	public void changeText(int likes) {
-		btnLike.setText(String.valueOf(likes));
+		if (!btnLike.getText().equals(String.valueOf(likes))) {
+			btnLike.setText(String.valueOf(likes));
+		}
 	}
 
 	private void changeLikeButtonIconToLiked(boolean liked) {

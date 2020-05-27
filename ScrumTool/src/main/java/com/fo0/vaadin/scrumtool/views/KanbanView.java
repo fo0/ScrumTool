@@ -165,7 +165,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		getColumnComponents().stream()
 				.filter(e -> tmp.getColumns().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
 				.collect(Collectors.toList()).forEach(e -> {
-					log.info("remove column: " + e.getId());
 					columns.remove(e);
 				});
 		//@formatter:on

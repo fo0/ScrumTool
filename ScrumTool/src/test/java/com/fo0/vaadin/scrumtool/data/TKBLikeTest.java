@@ -1,4 +1,4 @@
-package com.fo0.vaadin.scrumtool.test.data;
+package com.fo0.vaadin.scrumtool.data;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

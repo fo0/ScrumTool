@@ -17,7 +17,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BroadcasterCards {
 
-	private static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
+	private static final Executor EXECUTOR = Executors.newCachedThreadPool();
 	private static final Map<String, List<Consumer<String>>> LISTENERS = Maps.newLinkedHashMap();
 
 	public static synchronized Registration register(String id, Consumer<String> listener) {

@@ -10,6 +10,7 @@ import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterColumns;
 import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
+import com.fo0.vaadin.scrumtool.data.repository.KBCardLikesRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
@@ -50,6 +51,7 @@ public class ColumnComponent extends VerticalLayout {
 	private KBDataRepository dataRepository = SpringContext.getBean(KBDataRepository.class);
 	private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
 	private KBColumnRepository repository = SpringContext.getBean(KBColumnRepository.class);
+	private KBCardLikesRepository likeRepository = SpringContext.getBean(KBCardLikesRepository.class);
 
 	@Getter
 	private TKBColumn data;
@@ -154,8 +156,8 @@ public class ColumnComponent extends VerticalLayout {
 				}
 			}
 
-			addCard(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
-			BroadcasterColumns.broadcast(getId().get(), "update");
+			TKBColumn col = addCard(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
+			BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.ADD_COLUMN + col.getId());
 			area.clear();
 			area.focus();
 		});
@@ -190,10 +192,16 @@ public class ColumnComponent extends VerticalLayout {
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
 				}
 
-				switch (event) {
+				String[] cmd = event.split("\\.");
+
+				switch (cmd[0]) {
 				case BroadcasterColumns.MESSAGE_SHUFFLE:
 					ColumnComponent.this.cards.removeAll();
 					ColumnComponent.this.reload();
+					break;
+
+				case BroadcasterColumns.ADD_COLUMN:
+					ColumnComponent.this.reloadAddCard(cmd[1]);
 					break;
 
 				default:
@@ -217,20 +225,22 @@ public class ColumnComponent extends VerticalLayout {
 	}
 
 	public void changeTitle(String string) {
+		if (!h3.getText().equals(string)) {
+			h3.setText(string);
+		}
+
 		if (Config.DEBUG)
 			h3.setText(string + " (" + data.getDataOrder() + ")");
-		else
-			h3.setText(string);
 	}
 
-	private void addCard(String randomId, String sessionId, String value) {
+	private TKBColumn addCard(String randomId, String sessionId, String value) {
 		TKBColumn tmp = repository.findById(getId().get()).get();
 		TKBCard card = TKBCard.builder().id(randomId).ownerId(sessionId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getCards()))
 				.text(value).build();
-		cardRepository.save(card);
 		tmp.addCard(card);
 		repository.save(tmp);
 		log.info("add card: {}", randomId);
+		return tmp;
 	}
 
 	private CardComponent addCardLayout(TKBCard card) {
@@ -239,9 +249,18 @@ public class ColumnComponent extends VerticalLayout {
 		return cc;
 	}
 
+	public void reloadAddCard(String cardId) {
+		TKBCard pdc = cardRepository.findById(cardId).get();
+		CardComponent card = getCardById(pdc.getId());
+		if (card == null) {
+			card = addCardLayout(pdc);
+		}
+
+		card.reload();
+	}
+
 	public void reload() {
 		data = repository.findById(getId().get()).get();
-
 		changeTitle(data.getName());
 
 		// update layout with new missing data
