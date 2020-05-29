@@ -1,4 +1,4 @@
-package com.fo0.vaadin.scrumtool.views.components;
+package com.fo0.vaadin.scrumtool.views.dialogs;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,6 +16,8 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextField;
 
 public class CreateBoardDialog extends Dialog {
 
@@ -25,10 +27,16 @@ public class CreateBoardDialog extends Dialog {
 	private KBDataRepository repository = SpringContext.getBean(KBDataRepository.class);
 
 	private Checkbox chkOptPermissionSystem;
+	private TextField txtColumnsMax;
+	private TextField txtCardsMax;
+	private TextField txtCardTextLengthMax;
+	private TextField txtLikeMaxPerOwner;
+
+	private NumberField nmbCardLikesMaxPerOwner;
 
 	public CreateBoardDialog() {
-		setWidth("400px");
-		setHeight("200px");
+		setWidth("600px");
+		setHeight("500px");
 
 		H3 title = new H3("Configure Board");
 		title.getStyle().set("text-align", "center");
@@ -44,6 +52,28 @@ public class CreateBoardDialog extends Dialog {
 		VerticalLayout options = new VerticalLayout();
 		options.setWidthFull();
 		add(options);
+
+		txtColumnsMax = new TextField("Max Columns");
+		txtColumnsMax.setValue("0");
+		txtColumnsMax.setWidthFull();
+		options.add(txtColumnsMax);
+
+		txtCardsMax = new TextField("Max Cards");
+		txtCardsMax.setValue("0");
+		txtCardsMax.setWidthFull();
+		options.add(txtCardsMax);
+
+		txtCardTextLengthMax = new TextField("Max Card Text Length");
+		txtCardTextLengthMax.setValue("0");
+		txtCardTextLengthMax.setWidthFull();
+		options.add(txtCardTextLengthMax);
+
+		nmbCardLikesMaxPerOwner = new NumberField();
+		nmbCardLikesMaxPerOwner.setValue(0d);
+		nmbCardLikesMaxPerOwner.setHasControls(true);
+		nmbCardLikesMaxPerOwner.setMin(0);
+		nmbCardLikesMaxPerOwner.setMax(Integer.MAX_VALUE);
+		options.add(nmbCardLikesMaxPerOwner);
 
 		chkOptPermissionSystem = new Checkbox("Permissionsystem");
 		chkOptPermissionSystem.setWidthFull();
@@ -65,7 +95,13 @@ public class CreateBoardDialog extends Dialog {
 			//@formatter:off
 			TKBData p = repository.save(TKBData.builder()
 					.ownerId(SessionUtils.getSessionId())
-					.options(TKBOptions.builder().optionPermissionSystem(chkOptPermissionSystem.getValue()).build())
+					.options(TKBOptions.builder()
+							.optionPermissionSystem(chkOptPermissionSystem.getValue())
+							.maxColumns(Integer.valueOf(txtColumnsMax.getValue()))
+							.maxCards(Integer.valueOf(txtCardsMax.getValue()))
+							.maxCardTextLength(Integer.valueOf(txtCardTextLengthMax.getValue()))
+							.maxLikesPerUser(nmbCardLikesMaxPerOwner.getValue().intValue())
+							.build())
 					.build());
 			UI.getCurrent().navigate(KanbanView.class, p.getId());
 			close();

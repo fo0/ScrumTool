@@ -1,4 +1,4 @@
-package com.fo0.vaadin.scrumtool.views.components;
+package com.fo0.vaadin.scrumtool.views.dialogs;
 
 import java.util.function.Consumer;
 

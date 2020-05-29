@@ -4,12 +4,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterColumns;
 import com.fo0.vaadin.scrumtool.config.Config;
-import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
+import com.fo0.vaadin.scrumtool.data.repository.KBCardLikesRepository;
+import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBCard;
@@ -22,6 +24,7 @@ import com.fo0.vaadin.scrumtool.utils.Utils;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -46,18 +49,17 @@ public class ColumnComponent extends VerticalLayout {
 	private static final long serialVersionUID = 8415434953831247614L;
 
 	private KBDataRepository dataRepository = SpringContext.getBean(KBDataRepository.class);
+	private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
 	private KBColumnRepository repository = SpringContext.getBean(KBColumnRepository.class);
-
-	private KanbanView view;
+	private KBCardLikesRepository likeRepository = SpringContext.getBean(KBCardLikesRepository.class);
 
 	@Getter
 	private TKBColumn data;
-
+	private KanbanView view;
 	private TextArea area;
-
 	private H3 h3;
-
 	private Registration broadcasterRegistration;
+	private VerticalLayout cards;
 
 	public ColumnComponent(KanbanView view, TKBColumn column) {
 		this.view = view;
@@ -72,16 +74,27 @@ public class ColumnComponent extends VerticalLayout {
 		captionLayout.setMargin(false);
 		captionLayout.setSpacing(false);
 
-		if (KBViewUtils.isComponentAllowedToDisplay(view.getOptions(), data.getOwnerId())) {
+		if (KBViewUtils.isAllowed(view.getOptions(), data.getOwnerId())) {
 			Button btnShuffle = new Button(VaadinIcon.RANDOM.create());
 			btnShuffle.addClickListener(e -> {
 				//@formatter:off
-				List<TKBCard> toShuffle = data.getCards()
+				TKBColumn tmp = repository.findById(getId().get()).get();
+				
+				List<TKBCard> toShuffle = tmp.getCards()
 						.stream()
-						.sorted(Comparator.comparing(IDataOrder::getDataOrder))
 						.collect(Collectors.toList());
 				
 				Collections.shuffle(toShuffle);
+				
+				// fix order
+				IntStream.range(0, toShuffle.size()).forEachOrdered(counter -> {
+					TKBCard cc = toShuffle.get(counter);
+					cc.setDataOrder(counter);
+				});
+				
+				tmp.setCards(Sets.newHashSet(toShuffle));
+				tmp = repository.save(tmp);
+				BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.MESSAGE_SHUFFLE);
 				//@formatter:on
 			});
 			captionLayout.add(btnShuffle);
@@ -118,22 +131,33 @@ public class ColumnComponent extends VerticalLayout {
 
 		area = new TextArea();
 		area.setSizeFull();
-		area.setMaxLength(KanbanConfig.MAX_CARD_TEXT_LENGTH);
-		area.setValueChangeMode(ValueChangeMode.EAGER);
-		area.addValueChangeListener(e -> {
-			if (e.getSource().getValue().length() >= KanbanConfig.MAX_CARD_TEXT_LENGTH) {
-				layoutHeader.getStyle().set("border-color", STYLES.COLOR_RED_500);
-			} else {
-				layoutHeader.getStyle().remove("border-color");
-			}
-		});
+
+		if (view.getOptions().getMaxCardTextLength() > 0) {
+			area.setMaxLength(view.getOptions().getMaxCardTextLength());
+			area.setValueChangeMode(ValueChangeMode.EAGER);
+			area.addValueChangeListener(e -> {
+				if (e.getSource().getValue().length() > view.getOptions().getMaxCardTextLength()) {
+					layoutHeader.getStyle().set("border-color", STYLES.COLOR_RED_500);
+				} else {
+					layoutHeader.getStyle().remove("border-color");
+				}
+			});
+		}
+
 		layoutHeader.add(area);
 
 		Button btnAdd = new Button("Note", VaadinIcon.PLUS.create());
 		btnAdd.setWidthFull();
 		btnAdd.addClickListener(e -> {
-			addCard(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
-			BroadcasterColumns.broadcast(getId().get(), "update");
+			if (view.getOptions().getMaxCards() > 0) {
+				if (cards.getComponentCount() > view.getOptions().getMaxCards()) {
+					Notification.show("Card limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
+					return;
+				}
+			}
+
+			TKBColumn col = addCard(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
+			BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.ADD_COLUMN + col.getId());
 			area.clear();
 			area.focus();
 		});
@@ -148,6 +172,14 @@ public class ColumnComponent extends VerticalLayout {
 		btnLayout.setWidthFull();
 		layoutHeader.add(btnLayout);
 		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, h3);
+
+		cards = new VerticalLayout();
+		cards.setMargin(false);
+		cards.setPadding(false);
+		cards.setSpacing(false);
+		cards.getStyle().set("overflow-y", "auto");
+		cards.getStyle().set("overflow-x", "hidden");
+		add(cards);
 	}
 
 	@Override
@@ -159,7 +191,24 @@ public class ColumnComponent extends VerticalLayout {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
 				}
-				reload();
+
+				String[] cmd = event.split("\\.");
+
+				switch (cmd[0]) {
+				case BroadcasterColumns.MESSAGE_SHUFFLE:
+					ColumnComponent.this.cards.removeAll();
+					ColumnComponent.this.reload();
+					break;
+
+				case BroadcasterColumns.ADD_COLUMN:
+					ColumnComponent.this.reloadAddCard(cmd[1]);
+					break;
+
+				default:
+					reload();
+					break;
+				}
+
 			});
 		});
 	}
@@ -176,30 +225,42 @@ public class ColumnComponent extends VerticalLayout {
 	}
 
 	public void changeTitle(String string) {
+		if (!h3.getText().equals(string)) {
+			h3.setText(string);
+		}
+
 		if (Config.DEBUG)
 			h3.setText(string + " (" + data.getDataOrder() + ")");
-		else
-			h3.setText(string);
 	}
 
-	private void addCard(String randomId, String sessionId, String value) {
+	private TKBColumn addCard(String randomId, String sessionId, String value) {
 		TKBColumn tmp = repository.findById(getId().get()).get();
 		TKBCard card = TKBCard.builder().id(randomId).ownerId(sessionId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getCards()))
 				.text(value).build();
 		tmp.addCard(card);
 		repository.save(tmp);
 		log.info("add card: {}", randomId);
+		return tmp;
 	}
 
 	private CardComponent addCardLayout(TKBCard card) {
 		CardComponent cc = new CardComponent(view, this, getId().get(), card);
-		add(cc);
+		cards.add(cc);
 		return cc;
 	}
 
-	public void reload() {
-		data = repository.findById(data.getId()).get();
+	public void reloadAddCard(String cardId) {
+		TKBCard pdc = cardRepository.findById(cardId).get();
+		CardComponent card = getCardById(pdc.getId());
+		if (card == null) {
+			card = addCardLayout(pdc);
+		}
 
+		card.reload();
+	}
+
+	public void reload() {
+		data = repository.findById(getId().get()).get();
 		changeTitle(data.getName());
 
 		// update layout with new missing data
@@ -216,25 +277,24 @@ public class ColumnComponent extends VerticalLayout {
 		// remove old
 		getCardComponents().stream().filter(e -> data.getCards().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
 				.collect(Collectors.toList()).forEach(e -> {
-					remove(e);
+					cards.remove(e);
 				});
 	}
 
 	public List<CardComponent> getCardComponents() {
 		List<CardComponent> components = Lists.newArrayList();
-		for (int i = 0; i < getComponentCount(); i++) {
-			if (getComponentAt(i) instanceof CardComponent) {
-				components.add((CardComponent) getComponentAt(i));
+		for (int i = 0; i < cards.getComponentCount(); i++) {
+			if (cards.getComponentAt(i) instanceof CardComponent) {
+				components.add((CardComponent) cards.getComponentAt(i));
 			}
 		}
-
 		return components;
 	}
 
 	public CardComponent getCardById(String cardId) {
-		for (int i = 0; i < getComponentCount(); i++) {
-			if (getComponentAt(i) instanceof CardComponent) {
-				CardComponent card = (CardComponent) getComponentAt(i);
+		for (int i = 0; i < cards.getComponentCount(); i++) {
+			if (cards.getComponentAt(i) instanceof CardComponent) {
+				CardComponent card = (CardComponent) cards.getComponentAt(i);
 				if (card.getId().get().equals(cardId)) {
 					return card;
 				}

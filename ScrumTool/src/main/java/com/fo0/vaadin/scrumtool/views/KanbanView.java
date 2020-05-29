@@ -9,7 +9,6 @@ import org.vaadin.olli.ClipboardHelper;
 
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.config.Config;
-import com.fo0.vaadin.scrumtool.config.KanbanConfig;
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
@@ -18,9 +17,10 @@ import com.fo0.vaadin.scrumtool.data.table.TKBOptions;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
-import com.fo0.vaadin.scrumtool.views.components.CreateColumnDialog;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
+import com.fo0.vaadin.scrumtool.views.dialogs.CreateColumnDialog;
+import com.fo0.vaadin.scrumtool.views.dialogs.MarkDownDialog;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.google.common.collect.Lists;
@@ -59,29 +59,20 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Autowired
 	private KBDataRepository repository;
-
 	@Getter
 	private VerticalLayout root;
-
 	@Getter
 	private HorizontalLayout header;
-
 	@Getter
 	private ThemeToggleButton themeToggleButton;
-
 	@Getter
 	public HorizontalLayout columns;
-
 	private Button btnBoardId;
-
 	private Button btnDelete;
 	private ClipboardHelper btnBoardIdClipboard;
-
 	@Getter
 	private TKBOptions options;
-
 	private String ownerId;
-
 	private Registration broadcasterRegistration;
 
 	private void init() {
@@ -174,7 +165,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		getColumnComponents().stream()
 				.filter(e -> tmp.getColumns().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
 				.collect(Collectors.toList()).forEach(e -> {
-					log.info("remove column: " + e.getId());
 					columns.remove(e);
 				});
 		//@formatter:on
@@ -231,16 +221,18 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		Button b = new Button("Column", VaadinIcon.PLUS.create());
 		b.addClickListener(e -> {
-			if (columns.getComponentCount() >= KanbanConfig.MAX_COLUMNS) {
-				Notification.show("Column limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
-				return;
+			if (options.getMaxColumns() > 0) {
+				if (columns.getComponentCount() >= options.getMaxColumns()) {
+					Notification.show("Column limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
+					return;
+				}
 			}
 
 			new CreateColumnDialog(this).open();
 		});
 		layout.add(b);
 
-		btnBoardId = new Button("Board: Unknown", VaadinIcon.GROUP.create());
+		btnBoardId = new Button("Board-ID: Unknown", VaadinIcon.GROUP.create());
 		btnBoardId.getStyle().set("vertical-align", "0");
 		btnBoardIdClipboard = new ClipboardHelper("", btnBoardId);
 		layout.add(btnBoardIdClipboard);
@@ -251,7 +243,13 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 		layout.add(btnSync);
 
-		if (KBViewUtils.isComponentAllowedToDisplay(options, ownerId)) {
+		Button btnExportToMarkDown = new Button("Export Markdown", VaadinIcon.SHARE.create());
+		btnExportToMarkDown.addClickListener(e -> {
+			new MarkDownDialog(repository.findById(getId().get()).get()).open();
+		});
+		layout.add(btnExportToMarkDown);
+
+		if (KBViewUtils.isAllowed(options, ownerId)) {
 			btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
 			btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
 			btnDelete.addClickListener(e -> {

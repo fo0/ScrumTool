@@ -7,9 +7,9 @@ import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
-import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
+import com.fo0.vaadin.scrumtool.views.dialogs.ChangeTextDialog;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -33,16 +33,11 @@ public class CardComponent extends HorizontalLayout {
 
 	private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
 	private KBColumnRepository columnRepository = SpringContext.getBean(KBColumnRepository.class);
-
 	@Getter
 	private TKBCard card;
-
 	private LikeComponent likeComponent;
-
 	private String columnId;
-
 	private TextArea textArea;
-
 	private Registration broadcasterRegistration;
 
 	public CardComponent(KanbanView view, ColumnComponent column, String columnId, TKBCard card) {
@@ -50,7 +45,7 @@ public class CardComponent extends HorizontalLayout {
 		this.columnId = columnId;
 
 		setId(card.getId());
-		getStyle().set("border", "2px solid black");
+		getStyle().set("border", "0.5px solid black");
 		setSpacing(true);
 		textArea = new TextArea();
 		changeText(card.getText());
@@ -74,11 +69,11 @@ public class CardComponent extends HorizontalLayout {
 		rightLayout.add(rightLayoutTop, rightLayoutBottom);
 		add(rightLayout);
 
-		likeComponent = new LikeComponent(card.getId());
+		likeComponent = new LikeComponent(view.getId().get(), card.getId(), card.countAllLikes());
 		rightLayoutTop.add(likeComponent);
 		likeComponent.setWidthFull();
 
-		if (KBViewUtils.isComponentAllowedToDisplay(view.getOptions(), card.getOwnerId())) {
+		if (KBViewUtils.isAllowed(view.getOptions(), card.getOwnerId())) {
 			Button btnEdit = new Button(VaadinIcon.EDIT.create());
 			btnEdit.addClickListener(e -> {
 				new ChangeTextDialog("Edit Text", textArea.getValue(), savedText -> {
@@ -131,19 +126,19 @@ public class CardComponent extends HorizontalLayout {
 	}
 
 	private void changeText(String text) {
-		if (Config.DEBUG)
-			textArea.setValue(card.getText() + " (" + card.getDataOrder() + ")");
-		else
+		if (!textArea.getValue().equals(text)) {
 			textArea.setValue(card.getText());
+		}
+		
+		if (Config.DEBUG) {
+			textArea.setValue(card.getText() + " (" + card.getDataOrder() + ")");
+		}
 	}
 
 	public void reload() {
 		card = cardRepository.findById(getId().get()).get();
 
 		changeText(card.getText());
-
-		// update layout with new missing data
-		likeComponent.changeText(card.countAllLikes());
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.fo0.vaadin.scrumtool.views.components;
+package com.fo0.vaadin.scrumtool.views.dialogs;
 
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;

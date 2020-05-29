@@ -3,6 +3,8 @@ package com.fo0.vaadin.scrumtool.data.table;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import com.fo0.vaadin.scrumtool.utils.Utils;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,11 +23,12 @@ public class TKBCardLikes {
 	 * ID = OwnerId
 	 */
 	@Id
-	private String id;
+	@Builder.Default
+	private String id = Utils.randomId();
 
 	private String ownerId;
 
 	@Builder.Default
-	private int likeValue = 1;
+	private int likeValue = 0;
 
 }

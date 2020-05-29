@@ -40,11 +40,16 @@ public class TKBData implements IDataId, Serializable {
 	private String ownerId;
 
 	@Embedded
-	private TKBOptions options; 
+	private TKBOptions options;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private Set<TKBColumn> columns = Sets.newHashSet();
+
+	public int cardLikesByOwnerId(String ownerId) {
+		return columns.stream().flatMap(e -> e.getCards().stream()).flatMap(e -> e.getLikes().stream())
+				.filter(e -> e.getOwnerId().equals(ownerId)).mapToInt(TKBCardLikes::getLikeValue).sum();
+	}
 
 	public TKBColumn getColumnById(@NonNull TKBColumn projectDataColumn) {
 		return getColumnById(projectDataColumn.getId());
@@ -80,20 +85,6 @@ public class TKBData implements IDataId, Serializable {
 		}
 
 		pdc.removeCardById(cardId);
-		return this;
-	}
-
-	public TKBData likeCard(String columnId, String cardId, String ownerId) {
-		if (CollectionUtils.isEmpty(columns)) {
-			return this;
-		}
-
-		TKBColumn pdc = getColumnById(columnId);
-		if (pdc == null) {
-			return this;
-		}
-
-		pdc.likeCardById(cardId, ownerId);
 		return this;
 	}
 

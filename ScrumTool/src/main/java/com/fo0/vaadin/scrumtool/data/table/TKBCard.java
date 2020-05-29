@@ -40,24 +40,15 @@ public class TKBCard implements Serializable, IDataOrder {
 
 	private String text;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private Set<TKBCardLikes> likes = Sets.newHashSet();
 
-	/**
-	 * 
-	 * @return new like value
-	 */
-	public int doLike(String ownerId) {
-		if (likes.stream().anyMatch(e -> e.getId().equals(ownerId))) {
-			return countAllLikes();
-		}
 
-		likes.add(TKBCardLikes.builder().id(ownerId).build());
-
-		return countAllLikes();
+	public int cardLikesByOwnerId(String ownerId) {
+		return likes.stream().filter(e -> e.getOwnerId().equals(ownerId)).mapToInt(TKBCardLikes::getLikeValue).sum();
 	}
-
+	
 	public int countAllLikes() {
 		return likes.stream().mapToInt(TKBCardLikes::getLikeValue).sum();
 	}

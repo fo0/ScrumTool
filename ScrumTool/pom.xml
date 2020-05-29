@@ -157,6 +157,17 @@
 			<artifactId>clipboardhelper</artifactId>
 			<version>${clipboardhelper.vaadin.addon.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.vaadin.maxime</groupId>
+			<artifactId>markdown-area</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<version>${spring.version}</version>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>

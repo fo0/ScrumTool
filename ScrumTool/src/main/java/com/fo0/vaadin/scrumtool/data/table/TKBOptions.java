@@ -19,5 +19,10 @@ public class TKBOptions implements Serializable {
 	private static final long serialVersionUID = 3951230846648440224L;
 	
 	private boolean optionPermissionSystem;
+	
+	private int maxColumns;
+	private int maxCards;
+	private int maxCardTextLength;
+	private int maxLikesPerUser;
 
 }
