@@ -15,12 +15,12 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.shared.Registration;
 
 import lombok.Getter;
@@ -37,7 +37,7 @@ public class CardComponent extends HorizontalLayout {
 	private TKBCard card;
 	private LikeComponent likeComponent;
 	private String columnId;
-	private TextArea textArea;
+	private Label label;
 	private Registration broadcasterRegistration;
 
 	public CardComponent(KanbanView view, ColumnComponent column, String columnId, TKBCard card) {
@@ -45,38 +45,29 @@ public class CardComponent extends HorizontalLayout {
 		this.columnId = columnId;
 
 		setId(card.getId());
-		getStyle().set("border", "0.5px solid black");
+		getStyle().set("box-shadow", "0.5px solid black");
 		setSpacing(true);
-		textArea = new TextArea();
+		setPadding(true);
+		label = new Label();
+		label.getStyle().set("word-break", "break-word");
 		changeText(card.getText());
-		textArea.setReadOnly(true);
-		add(textArea);
+		label.setWidthFull();
+		add(label);
 
-		VerticalLayout rightLayout = new VerticalLayout();
-		rightLayout.setWidthFull();
-		rightLayout.setSpacing(false);
-		rightLayout.setMargin(false);
-		HorizontalLayout rightLayoutTop = new HorizontalLayout();
-		rightLayoutTop.setWidthFull();
-		rightLayoutTop.setAlignItems(Alignment.STRETCH);
-		rightLayoutTop.setSpacing(false);
-		rightLayoutTop.setMargin(false);
-		HorizontalLayout rightLayoutBottom = new HorizontalLayout();
-		rightLayoutBottom.setWidthFull();
-		rightLayoutBottom.setSpacing(false);
-		rightLayoutBottom.setMargin(false);
-		rightLayoutBottom.setAlignItems(Alignment.STRETCH);
-		rightLayout.add(rightLayoutTop, rightLayoutBottom);
-		add(rightLayout);
+		VerticalLayout btnLayout = new VerticalLayout();
+		btnLayout.setWidth("unset");
+		btnLayout.setSpacing(false);
+		btnLayout.setMargin(false);
+		btnLayout.setPadding(false);
+		add(btnLayout);
 
 		likeComponent = new LikeComponent(view.getId().get(), card.getId(), card.countAllLikes());
-		rightLayoutTop.add(likeComponent);
-		likeComponent.setWidthFull();
+		btnLayout.add(likeComponent);
 
 		if (KBViewUtils.isAllowed(view.getOptions(), card.getOwnerId())) {
 			Button btnEdit = new Button(VaadinIcon.EDIT.create());
 			btnEdit.addClickListener(e -> {
-				new ChangeTextDialog("Edit Text", textArea.getValue(), savedText -> {
+				new ChangeTextDialog("Edit Text", label.getText(), savedText -> {
 					log.info("edit card: " + getId().get());
 					TKBCard c = cardRepository.findById(getId().get()).get();
 					c.setText(savedText);
@@ -84,20 +75,23 @@ public class CardComponent extends HorizontalLayout {
 					BroadcasterCards.broadcast(getId().get(), "update");
 				}).open();
 			});
-			rightLayoutBottom.add(btnEdit);
+			btnLayout.add(btnEdit);
 
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			btnDelete.addClickListener(e -> {
-				log.info("edit card: " + getId().get());
+				log.info("delete card: " + getId().get());
 				TKBColumn c = columnRepository.findById(columnId).get();
 				c.removeCardById(getId().get());
 				columnRepository.save(c);
 				BroadcasterColumns.broadcast(column.getId().get(), "update");
 			});
-			rightLayoutBottom.add(btnDelete);
+			btnLayout.add(btnDelete);
 		}
-
-		setAlignItems(Alignment.CENTER);
+		
+		setFlexGrow(1, label);
+		setWidthFull();
+		getStyle().set("border-radius", "10px");
+		getStyle().set("border", "1px solid var(--material-disabled-text-color)");
 	}
 
 	@Override
@@ -126,12 +120,12 @@ public class CardComponent extends HorizontalLayout {
 	}
 
 	private void changeText(String text) {
-		if (!textArea.getValue().equals(text)) {
-			textArea.setValue(card.getText());
+		if (!label.getText().equals(text)) {
+			label.setText(card.getText());
 		}
 		
 		if (Config.DEBUG) {
-			textArea.setValue(card.getText() + " (" + card.getDataOrder() + ")");
+			label.setText(card.getText() + " (" + card.getDataOrder() + ")");
 		}
 	}
 
