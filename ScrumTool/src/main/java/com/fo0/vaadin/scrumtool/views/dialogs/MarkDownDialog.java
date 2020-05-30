@@ -26,7 +26,7 @@ public class MarkDownDialog extends Dialog {
 
 	private void init() {
 		setWidth("800px");
-		setWidth("600px");
+		setHeight("600px");
 
 		MarkdownArea area = new MarkdownArea();
 		area.setValue(generateMarkDown(data).stream().collect(Collectors.joining("\n")));
