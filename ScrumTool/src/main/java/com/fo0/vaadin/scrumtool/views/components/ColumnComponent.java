@@ -65,6 +65,12 @@ public class ColumnComponent extends VerticalLayout {
 		this.view = view;
 		this.data = column;
 		setId(column.getId());
+
+		setWidth("400px");
+		getStyle().set("box-shadow", "var(--material-shadow-elevation-4dp)");
+		setSpacing(true);
+		setMargin(false);
+
 		h3 = new H3();
 		h3.getStyle().set("margin", "unset");
 		changeTitle(column.getName());
@@ -117,11 +123,6 @@ public class ColumnComponent extends VerticalLayout {
 		captionLayout.setVerticalComponentAlignment(Alignment.CENTER, h3);
 
 		add(captionLayout);
-		setMinWidth("400px");
-		setWidth("400px");
-		getStyle().set("box-shadow", "var(--material-shadow-elevation-4dp)");
-		setSpacing(true);
-		setMargin(true);
 
 		VerticalLayout layoutHeader = new VerticalLayout();
 		layoutHeader.getStyle().set("flex-shrink", "0");
@@ -188,8 +189,7 @@ public class ColumnComponent extends VerticalLayout {
 		cards.setPadding(false);
 		cards.setSpacing(true);
 		add(cards);
-		
-		
+
 	}
 
 	@Override

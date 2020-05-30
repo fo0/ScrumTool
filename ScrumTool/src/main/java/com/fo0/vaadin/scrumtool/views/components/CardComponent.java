@@ -48,6 +48,7 @@ public class CardComponent extends HorizontalLayout {
 		getStyle().set("box-shadow", "0.5px solid black");
 		setSpacing(true);
 		setPadding(true);
+		setMargin(false);
 		label = new Label();
 		label.getStyle().set("word-break", "break-word");
 		changeText(card.getText());
