@@ -67,7 +67,6 @@ public class CreateBoardDialog extends Dialog {
 		nmbMaxPerOwner = createNumberField(layout,"Max-Likes per User", 0, 0, Integer.MAX_VALUE, true);
 		nmbCardLikesMaxPerOwner = createNumberField(layout,"Max Card Likes per User", 0, 0, Integer.MAX_VALUE, true);
 		
-
 		chkOptPermissionSystem = new Checkbox("Permissionsystem");
 		chkOptPermissionSystem.setWidthFull();
 		layout.add(chkOptPermissionSystem);
