@@ -17,7 +17,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.TextField;
 
 public class CreateBoardDialog extends Dialog {
 
@@ -27,17 +26,16 @@ public class CreateBoardDialog extends Dialog {
 	private KBDataRepository repository = SpringContext.getBean(KBDataRepository.class);
 
 	private Checkbox chkOptPermissionSystem;
-	private TextField txtColumnsMax;
-	private TextField txtCardsMax;
-	private TextField txtCardTextLengthMax;
-	private TextField txtLikeMaxPerOwner;
+	private NumberField nmbColumnsMax;
+	private NumberField nmbCardsMax;
+	private NumberField nmbCardTextLengthMax;
 
 	private NumberField nmbCardLikesMaxPerOwner;
 
 	public CreateBoardDialog() {
-		setWidth("600px");
-		setHeight("500px");
-
+		setWidth("400px");
+		setHeight("530px");
+		
 		H3 title = new H3("Configure Board");
 		title.getStyle().set("text-align", "center");
 		title.setWidthFull();
@@ -53,26 +51,44 @@ public class CreateBoardDialog extends Dialog {
 		options.setWidthFull();
 		add(options);
 
-		txtColumnsMax = new TextField("Max-Columns");
-		txtColumnsMax.setValue("0");
-		txtColumnsMax.setWidthFull();
-		options.add(txtColumnsMax);
+		nmbColumnsMax = new NumberField("Max-Columns");
+		nmbColumnsMax.setValue(0d);
+		nmbColumnsMax.setHasControls(true);
+		nmbColumnsMax.setMin(0);
+		nmbColumnsMax.setMax(Integer.MAX_VALUE);
+		nmbColumnsMax.setWidthFull();
+		options.add(nmbColumnsMax);
 
-		txtCardsMax = new TextField("Max-Cards");
-		txtCardsMax.setValue("0");
-		txtCardsMax.setWidthFull();
-		options.add(txtCardsMax);
+		nmbCardsMax = new NumberField("Max-Cards");
+		nmbCardsMax.setValue(0d);
+		nmbCardsMax.setHasControls(true);
+		nmbCardsMax.setMin(0);
+		nmbCardsMax.setMax(Integer.MAX_VALUE);
+		nmbCardsMax.setWidthFull();
+		options.add(nmbCardsMax);
 
-		txtCardTextLengthMax = new TextField("Max Card Text Length");
-		txtCardTextLengthMax.setValue("0");
-		txtCardTextLengthMax.setWidthFull();
-		options.add(txtCardTextLengthMax);
+		nmbCardTextLengthMax = new NumberField("Max Card Text Length");
+		nmbCardTextLengthMax.setValue(0d);
+		nmbCardTextLengthMax.setHasControls(true);
+		nmbCardTextLengthMax.setMin(0);
+		nmbCardTextLengthMax.setMax(Integer.MAX_VALUE);
+		nmbCardTextLengthMax.setWidthFull();
+		options.add(nmbCardTextLengthMax);
 
-		nmbCardLikesMaxPerOwner = new NumberField("Owner-Likes");
+		nmbCardLikesMaxPerOwner = new NumberField("Max-Likes per User");
 		nmbCardLikesMaxPerOwner.setValue(0d);
 		nmbCardLikesMaxPerOwner.setHasControls(true);
 		nmbCardLikesMaxPerOwner.setMin(0);
 		nmbCardLikesMaxPerOwner.setMax(Integer.MAX_VALUE);
+		nmbCardLikesMaxPerOwner.setWidthFull();
+		options.add(nmbCardLikesMaxPerOwner);
+		
+		nmbCardLikesMaxPerOwner = new NumberField("Max Card Likes per User");
+		nmbCardLikesMaxPerOwner.setValue(0d);
+		nmbCardLikesMaxPerOwner.setHasControls(true);
+		nmbCardLikesMaxPerOwner.setMin(0);
+		nmbCardLikesMaxPerOwner.setMax(Integer.MAX_VALUE);
+		nmbCardLikesMaxPerOwner.setWidthFull();
 		options.add(nmbCardLikesMaxPerOwner);
 
 		chkOptPermissionSystem = new Checkbox("Permissionsystem");
@@ -97,10 +113,11 @@ public class CreateBoardDialog extends Dialog {
 					.ownerId(SessionUtils.getSessionId())
 					.options(TKBOptions.builder()
 							.optionPermissionSystem(chkOptPermissionSystem.getValue())
-							.maxColumns(Integer.valueOf(txtColumnsMax.getValue()))
-							.maxCards(Integer.valueOf(txtCardsMax.getValue()))
-							.maxCardTextLength(Integer.valueOf(txtCardTextLengthMax.getValue()))
+							.maxColumns(nmbColumnsMax.getValue().intValue())
+							.maxCards(nmbCardsMax.getValue().intValue())
+							.maxCardTextLength(nmbCardTextLengthMax.getValue().intValue())
 							.maxLikesPerUser(nmbCardLikesMaxPerOwner.getValue().intValue())
+							.maxLikesPerUserPerCard(nmbCardLikesMaxPerOwner.getValue().intValue())
 							.build())
 					.build());
 			UI.getCurrent().navigate(KanbanView.class, p.getId());

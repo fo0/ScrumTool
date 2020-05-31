@@ -90,7 +90,10 @@ public class LikeComponent extends HorizontalLayout {
 	}
 
 	public boolean islikeAlreadyExistsByOwner(String ownerId) {
-		return repository.findById(cardId).get().getLikes().stream().anyMatch(e -> e.getOwnerId().equals(ownerId));
+		TKBData data = repositoryData.findById(boardId).get();
+
+		return repository.findById(cardId).get().getLikes().stream().filter(e -> e.getOwnerId().equals(ownerId)).count() >= data
+				.getOptions().getMaxLikesPerUserPerCard();
 	}
 
 	public boolean isLikeLimitReachedByOwner(String ownerId) {

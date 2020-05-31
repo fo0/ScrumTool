@@ -20,6 +20,7 @@ import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.dialogs.CreateColumnDialog;
+import com.fo0.vaadin.scrumtool.views.dialogs.DeleteBoardDialog;
 import com.fo0.vaadin.scrumtool.views.dialogs.MarkDownDialog;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
@@ -252,10 +253,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
 			btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
 			btnDelete.addClickListener(e -> {
-				new ConfirmDialog("Delete", null, "Delete", ok -> {
-					UI.getCurrent().navigate(MainView.class);
-					repository.deleteById(getId().get());
-				}).open();
+				new DeleteBoardDialog(this).open();
 			});
 			layout.add(btnDelete);
 		}
