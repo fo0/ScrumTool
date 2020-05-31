@@ -8,6 +8,7 @@ import com.fo0.vaadin.scrumtool.data.table.TKBOptions;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
+import com.fo0.vaadin.scrumtool.views.components.CustomNumberField;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -17,7 +18,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.TextFieldVariant;
 
 public class CreateBoardDialog extends Dialog {
 
@@ -61,11 +61,11 @@ public class CreateBoardDialog extends Dialog {
 		layout.setFlexGrow(1);
 		add(layout);
 
-		nmbColumnsMax = createNumberField(layout, "Max-Columns", 0, 0, Integer.MAX_VALUE, true);
-		nmbCardsMax = createNumberField(layout,"Max-Cards", 0, 0, Integer.MAX_VALUE, true);
-		nmbCardTextLengthMax = createNumberField(layout,"Max Card Text Length", 0, 0, Integer.MAX_VALUE, true);
-		nmbMaxPerOwner = createNumberField(layout,"Max-Likes per User", 0, 0, Integer.MAX_VALUE, true);
-		nmbCardLikesMaxPerOwner = createNumberField(layout,"Max Card Likes per User", 0, 0, Integer.MAX_VALUE, true);
+		nmbColumnsMax = createNumberField(layout, "Max-Columns", 0, 0, Integer.MAX_VALUE);
+		nmbCardsMax = createNumberField(layout, "Max-Cards", 0, 0, Integer.MAX_VALUE);
+		nmbCardTextLengthMax = createNumberField(layout, "Max Card Text Length", 0, 0, Integer.MAX_VALUE);
+		nmbMaxPerOwner = createNumberField(layout, "Max-Likes per User", 0, 0, Integer.MAX_VALUE);
+		nmbCardLikesMaxPerOwner = createNumberField(layout, "Max Card Likes per User", 0, 0, Integer.MAX_VALUE);
 		
 		chkOptPermissionSystem = new Checkbox("Permissionsystem");
 		chkOptPermissionSystem.setWidthFull();
@@ -85,27 +85,9 @@ public class CreateBoardDialog extends Dialog {
 	 * @Created 31.05.2020 - 21:10:01
 	 * @author KaesDingeling
 	 */
-	private NumberField createNumberField(VerticalLayout layout, String title, int defaultValue, int min, int max, boolean zeroIsInfinite) {
-		NumberField numberField = new NumberField("Max Card Likes per User");
-		numberField.setHasControls(true);
-		numberField.setMin(0);
-		numberField.setMax(Integer.MAX_VALUE);
+	private NumberField createNumberField(VerticalLayout layout, String title, int defaultValue, int min, int max) {
+		CustomNumberField numberField = new CustomNumberField(title, min, max, defaultValue, true);
 		numberField.setWidthFull();
-		numberField.addThemeVariants(TextFieldVariant.MATERIAL_ALWAYS_FLOAT_LABEL);
-
-		if (zeroIsInfinite) {
-			numberField.setPlaceholder("∞");
-			numberField.setValue(null);
-			numberField.addValueChangeListener(e -> {
-				if (e.getValue() != null && e.getValue() == 0) {
-					e.getSource().setValue(null);
-				}
-			});
-		}
-
-		if (!(defaultValue >= min && defaultValue <= max && min <= max)) {
-			throw new IllegalStateException("Invalid parameters: min(" + min + ") max(" + max + ") defaultValue(" + defaultValue + ")");
-		}
 
 		layout.add(numberField);
 		
