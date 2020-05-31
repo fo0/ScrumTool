@@ -18,6 +18,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 
 public class CreateBoardDialog extends Dialog {
 
@@ -79,9 +80,26 @@ public class CreateBoardDialog extends Dialog {
 	 * @author KaesDingeling
 	 */
 	private NumberField createNumberField(String title, int defaultValue, int min, int max, boolean zeroIsInfinite) {
-		CustomNumberField numberField = new CustomNumberField(title, min, max, defaultValue, zeroIsInfinite);
-		
+		CustomNumberField numberField = new CustomNumberField("Max Card Likes per User", 0, Integer.MAX_VALUE, 0, true);
+		numberField.setHasControls(true);
+		numberField.setMin(0);
+		numberField.setMax(Integer.MAX_VALUE);
 		numberField.setWidthFull();
+		numberField.addThemeVariants(TextFieldVariant.MATERIAL_ALWAYS_FLOAT_LABEL);
+		
+		if (zeroIsInfinite) {
+			numberField.setPlaceholder("∞");
+			numberField.setValue(null);
+			numberField.addValueChangeListener(e -> {
+				if (e.getValue() != null && e.getValue() == 0) {
+					e.getSource().setValue(null);
+				}
+			});
+		}
+		
+		if (!(defaultValue >= min && defaultValue <= max && min <= max)) {
+			throw new IllegalStateException("Invalid parameters: min(" + min + ") max(" + max + ") defaultValue(" + defaultValue + ")");
+		}
 		
 		options.add(numberField);
 		
