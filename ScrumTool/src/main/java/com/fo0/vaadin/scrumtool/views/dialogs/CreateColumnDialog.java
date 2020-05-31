@@ -15,6 +15,7 @@ public class CreateColumnDialog extends Dialog {
 	private static final long serialVersionUID = 3959841920378174696L;
 
 	public CreateColumnDialog(KanbanView view) {
+		setWidth("340px");
 		TextField t = new TextField("Name");
 		t.focus();
 		Button b = new Button("Create");
@@ -22,11 +23,11 @@ public class CreateColumnDialog extends Dialog {
 		b.addClickListener(e -> {
 			view.addColumn(Utils.randomId(), SessionUtils.getSessionId(), t.getValue());
 			BroadcasterBoard.broadcast(view.getId().get(), "update");
-//			view.reload();
 			close();
 		});
 
 		HorizontalLayout l = new HorizontalLayout(t, b);
+		l.setFlexGrow(1);
 		l.setMargin(true);
 		add(l);
 	}
