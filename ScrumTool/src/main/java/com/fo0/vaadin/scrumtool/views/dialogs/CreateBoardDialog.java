@@ -53,12 +53,12 @@ public class CreateBoardDialog extends Dialog {
 		options.setWidthFull();
 		add(options);
 
-		txtColumnsMax = new TextField("Max Columns");
+		txtColumnsMax = new TextField("Max-Columns");
 		txtColumnsMax.setValue("0");
 		txtColumnsMax.setWidthFull();
 		options.add(txtColumnsMax);
 
-		txtCardsMax = new TextField("Max Cards");
+		txtCardsMax = new TextField("Max-Cards");
 		txtCardsMax.setValue("0");
 		txtCardsMax.setWidthFull();
 		options.add(txtCardsMax);
@@ -68,7 +68,7 @@ public class CreateBoardDialog extends Dialog {
 		txtCardTextLengthMax.setWidthFull();
 		options.add(txtCardTextLengthMax);
 
-		nmbCardLikesMaxPerOwner = new NumberField();
+		nmbCardLikesMaxPerOwner = new NumberField("Owner-Likes");
 		nmbCardLikesMaxPerOwner.setValue(0d);
 		nmbCardLikesMaxPerOwner.setHasControls(true);
 		nmbCardLikesMaxPerOwner.setMin(0);

@@ -78,6 +78,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private void init() {
 		log.info("init");
 		setSizeFull();
+		
 		root = KBViewUtils.createRootLayout();
 		add(root);
 
@@ -86,8 +87,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		columns = KBViewUtils.createColumnLayout();
 		root.add(columns);
-
-		root.expand(columns);
 	}
 
 	@Override

@@ -20,14 +20,15 @@ public class ChangeTextDialog extends Dialog {
 	public ChangeTextDialog(String caption, String initValue, Consumer<String> text) {
 		layout = new VerticalLayout();
 		add(layout);
-		setMinWidth("300px");
-		setMinWidth("200px");
+		setWidth("400px");
+		setMinHeight("300px");
 
 		H3 captionLabel = new H3(caption);
 		layout.add(captionLabel);
 		layout.setAlignSelf(Alignment.CENTER, captionLabel);
 
 		TextArea area = new TextArea();
+		area.setWidthFull();
 		layout.add(area);
 		area.setValue(initValue);
 

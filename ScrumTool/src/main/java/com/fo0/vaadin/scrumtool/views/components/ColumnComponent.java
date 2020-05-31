@@ -65,9 +65,15 @@ public class ColumnComponent extends VerticalLayout {
 		this.view = view;
 		this.data = column;
 		setId(column.getId());
+
+		setWidth("400px");
+		getStyle().set("box-shadow", "var(--material-shadow-elevation-4dp)");
+		setSpacing(true);
+		setMargin(false);
+
 		h3 = new H3();
+		h3.getStyle().set("margin", "unset");
 		changeTitle(column.getName());
-		h3.getStyle().set("text-align", "center");
 		h3.setWidthFull();
 
 		HorizontalLayout captionLayout = new HorizontalLayout(h3);
@@ -117,20 +123,18 @@ public class ColumnComponent extends VerticalLayout {
 		captionLayout.setVerticalComponentAlignment(Alignment.CENTER, h3);
 
 		add(captionLayout);
-		setMinWidth("400px");
-		setWidth("400px");
-		getStyle().set("border", "2px solid black");
-		setSpacing(true);
-		setMargin(true);
 
 		VerticalLayout layoutHeader = new VerticalLayout();
+		layoutHeader.getStyle().set("flex-shrink", "0");
 		layoutHeader.getStyle().set("border", "2px solid black");
+		layoutHeader.getStyle().set("overflow", "auto");
 		layoutHeader.setWidthFull();
 		layoutHeader.setHeight("200px");
 		add(layoutHeader);
 
 		area = new TextArea();
-		area.setSizeFull();
+		area.setWidthFull();
+		area.getStyle().set("flex-grow", "1");
 
 		if (view.getOptions().getMaxCardTextLength() > 0) {
 			area.setMaxLength(view.getOptions().getMaxCardTextLength());
@@ -144,7 +148,13 @@ public class ColumnComponent extends VerticalLayout {
 			});
 		}
 
-		layoutHeader.add(area);
+		VerticalLayout txtLayout = new VerticalLayout(area);
+		txtLayout.setWidthFull();
+		txtLayout.setPadding(false);
+		txtLayout.getStyle().set("overflow-y", "auto");
+		txtLayout.getStyle().set("flex-grow", "1");
+
+		layoutHeader.add(txtLayout);
 
 		Button btnAdd = new Button("Note", VaadinIcon.PLUS.create());
 		btnAdd.setWidthFull();
@@ -174,12 +184,12 @@ public class ColumnComponent extends VerticalLayout {
 		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, h3);
 
 		cards = new VerticalLayout();
+		cards.getStyle().set("overflow", "auto");
 		cards.setMargin(false);
 		cards.setPadding(false);
-		cards.setSpacing(false);
-		cards.getStyle().set("overflow-y", "auto");
-		cards.getStyle().set("overflow-x", "hidden");
+		cards.setSpacing(true);
 		add(cards);
+
 	}
 
 	@Override

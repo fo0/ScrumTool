@@ -28,9 +28,10 @@ public class KBViewUtils {
 
 	public static HorizontalLayout createColumnLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
+		layout.setWidthFull();
+		layout.setHeight("1px");
+		layout.getStyle().set("flex-grow", "1");
 		layout.setSpacing(true);
-//		layout.getStyle().set("border", "0.5px solid black");
-		layout.setSizeFull();
 		return layout;
 	}
 
