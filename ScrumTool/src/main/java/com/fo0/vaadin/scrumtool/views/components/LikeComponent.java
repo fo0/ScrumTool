@@ -10,6 +10,7 @@ import com.fo0.vaadin.scrumtool.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.utils.Utils;
+import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -27,6 +28,8 @@ public class LikeComponent extends HorizontalLayout {
 
 	private static final long serialVersionUID = -2483871323771596716L;
 
+	private KanbanView view;
+
 	private KBCardRepository repository = SpringContext.getBean(KBCardRepository.class);
 	private KBDataRepository repositoryData = SpringContext.getBean(KBDataRepository.class);
 
@@ -37,7 +40,8 @@ public class LikeComponent extends HorizontalLayout {
 
 	private Registration broadcasterRegistration;
 
-	public LikeComponent(String boardId, String cardId, int likes) {
+	public LikeComponent(KanbanView view, String boardId, String cardId, int likes) {
+		this.view = view;
 		this.boardId = boardId;
 		this.cardId = cardId;
 		setId(cardId);
@@ -90,9 +94,12 @@ public class LikeComponent extends HorizontalLayout {
 	}
 
 	public boolean islikeAlreadyExistsByOwner(String ownerId) {
+		if (view.getOptions().getMaxLikesPerUserPerCard() == 0) {
+			return false;
+		}
+		
 		TKBData data = repositoryData.findById(boardId).get();
-
-		return repository.findById(cardId).get().getLikes().stream().filter(e -> e.getOwnerId().equals(ownerId)).count() >= data
+		return repository.findById(cardId).get().getLikes().stream().filter(e -> e.getOwnerId().equals(ownerId)).count() >= view
 				.getOptions().getMaxLikesPerUserPerCard();
 	}
 

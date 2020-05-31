@@ -34,7 +34,7 @@ public class CreateBoardDialog extends Dialog {
 
 	public CreateBoardDialog() {
 		setWidth("400px");
-		setHeight("530px");
+		setHeight("630px");
 		
 		H3 title = new H3("Configure Board");
 		title.getStyle().set("text-align", "center");

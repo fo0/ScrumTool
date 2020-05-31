@@ -62,7 +62,7 @@ public class CardComponent extends HorizontalLayout {
 		btnLayout.setPadding(false);
 		add(btnLayout);
 
-		likeComponent = new LikeComponent(view.getId().get(), card.getId(), card.countAllLikes());
+		likeComponent = new LikeComponent(view, view.getId().get(), card.getId(), card.countAllLikes());
 		btnLayout.add(likeComponent);
 
 		if (KBViewUtils.isAllowed(view.getOptions(), card.getOwnerId())) {
