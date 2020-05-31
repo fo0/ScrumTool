@@ -29,8 +29,8 @@ public class CreateBoardDialog extends Dialog {
 	private NumberField nmbColumnsMax;
 	private NumberField nmbCardsMax;
 	private NumberField nmbCardTextLengthMax;
-
-	private NumberField nmbCardLikesMaxPerOwner;
+	private NumberField nmbMaxLikesPerUser;
+	private NumberField nmbCardLikesMaxPerUser;
 
 	public CreateBoardDialog() {
 		setWidth("400px");
@@ -75,21 +75,21 @@ public class CreateBoardDialog extends Dialog {
 		nmbCardTextLengthMax.setWidthFull();
 		options.add(nmbCardTextLengthMax);
 
-		nmbCardLikesMaxPerOwner = new NumberField("Max-Likes per User");
-		nmbCardLikesMaxPerOwner.setValue(0d);
-		nmbCardLikesMaxPerOwner.setHasControls(true);
-		nmbCardLikesMaxPerOwner.setMin(0);
-		nmbCardLikesMaxPerOwner.setMax(Integer.MAX_VALUE);
-		nmbCardLikesMaxPerOwner.setWidthFull();
-		options.add(nmbCardLikesMaxPerOwner);
+		nmbMaxLikesPerUser = new NumberField("Max-Likes per User");
+		nmbMaxLikesPerUser.setValue(0d);
+		nmbMaxLikesPerUser.setHasControls(true);
+		nmbMaxLikesPerUser.setMin(0);
+		nmbMaxLikesPerUser.setMax(Integer.MAX_VALUE);
+		nmbMaxLikesPerUser.setWidthFull();
+		options.add(nmbMaxLikesPerUser);
 		
-		nmbCardLikesMaxPerOwner = new NumberField("Max Card Likes per User");
-		nmbCardLikesMaxPerOwner.setValue(0d);
-		nmbCardLikesMaxPerOwner.setHasControls(true);
-		nmbCardLikesMaxPerOwner.setMin(0);
-		nmbCardLikesMaxPerOwner.setMax(Integer.MAX_VALUE);
-		nmbCardLikesMaxPerOwner.setWidthFull();
-		options.add(nmbCardLikesMaxPerOwner);
+		nmbCardLikesMaxPerUser = new NumberField("Max Card Likes per User");
+		nmbCardLikesMaxPerUser.setValue(1d);
+		nmbCardLikesMaxPerUser.setHasControls(true);
+		nmbCardLikesMaxPerUser.setMin(0);
+		nmbCardLikesMaxPerUser.setMax(Integer.MAX_VALUE);
+		nmbCardLikesMaxPerUser.setWidthFull();
+		options.add(nmbCardLikesMaxPerUser);
 
 		chkOptPermissionSystem = new Checkbox("Permissionsystem");
 		chkOptPermissionSystem.setWidthFull();
@@ -116,8 +116,8 @@ public class CreateBoardDialog extends Dialog {
 							.maxColumns(nmbColumnsMax.getValue().intValue())
 							.maxCards(nmbCardsMax.getValue().intValue())
 							.maxCardTextLength(nmbCardTextLengthMax.getValue().intValue())
-							.maxLikesPerUser(nmbCardLikesMaxPerOwner.getValue().intValue())
-							.maxLikesPerUserPerCard(nmbCardLikesMaxPerOwner.getValue().intValue())
+							.maxLikesPerUser(nmbMaxLikesPerUser.getValue().intValue())
+							.maxLikesPerUserPerCard(nmbCardLikesMaxPerUser.getValue().intValue())
 							.build())
 					.build());
 			UI.getCurrent().navigate(KanbanView.class, p.getId());

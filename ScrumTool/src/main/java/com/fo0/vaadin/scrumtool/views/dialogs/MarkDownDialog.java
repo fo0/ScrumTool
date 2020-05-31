@@ -4,13 +4,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.vaadin.maxime.MarkdownArea;
-
 import com.fo0.vaadin.scrumtool.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.data.table.TKBData;
 import com.google.common.collect.Lists;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.textfield.TextArea;
 
 public class MarkDownDialog extends Dialog {
 
@@ -27,10 +29,31 @@ public class MarkDownDialog extends Dialog {
 	private void init() {
 		setWidth("800px");
 		setHeight("600px");
+		
+		Tabs tabs = new Tabs();
+		tabs.setWidthFull();
+		tabs.setFlexGrowForEnclosedTabs(1);
+	
+		tabs.add(createMarkDownTab());
+		
+		VerticalLayout layout = new VerticalLayout(tabs);
+		layout.setSizeFull();
+		add(layout);
+	}
+	
 
-		MarkdownArea area = new MarkdownArea();
+	private Tab createMarkDownTab() {
+		TextArea area = new TextArea();
+		area.setSizeFull();
 		area.setValue(generateMarkDown(data).stream().collect(Collectors.joining("\n")));
-		add(area);
+		
+		VerticalLayout layout = new VerticalLayout(area);
+		layout.setSizeFull();
+		
+		Tab tab = new Tab(layout);
+		tab.setFlexGrow(1);
+		tab.setLabel("Markdown");
+		return tab;
 	}
 
 	public List<String> generateMarkDown(TKBData data) {
