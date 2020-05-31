@@ -41,6 +41,7 @@ public class LikeComponent extends HorizontalLayout {
 	private Registration broadcasterRegistration;
 
 	public LikeComponent(KanbanView view, String boardId, String cardId, int likes) {
+		this.view = view;
 		this.boardId = boardId;
 		this.cardId = cardId;
 		setId(cardId);
