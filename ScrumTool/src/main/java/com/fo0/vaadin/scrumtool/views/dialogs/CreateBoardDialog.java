@@ -32,41 +32,49 @@ public class CreateBoardDialog extends Dialog {
 	private NumberField nmbCardTextLengthMax;
 	private NumberField nmbMaxPerOwner;
 	private NumberField nmbCardLikesMaxPerOwner;
-	
-	private VerticalLayout options;
 
 	public CreateBoardDialog() {
-		setWidth("400px");
-		setHeight("630px");
-		
+		setWidth("450px");
+		setHeight("650px");
+
+		VerticalLayout layout = new VerticalLayout();
+		layout.setWidthFull();
+		layout.setFlexGrow(1);
+		add(layout);
+
+		layout.add(createTitle());
+		layout.add(createOptionsLayout());
+		layout.add(createBottomLayout());
+
+	}
+
+	private H3 createTitle() {
 		H3 title = new H3("Configure Board");
 		title.getStyle().set("text-align", "center");
 		title.setWidthFull();
-		add(title);
-
-		add(createOptionsLayout());
-
-		add(createBottomLayout());
+		return title;
 	}
 
 	private VerticalLayout createOptionsLayout() {
-		options = new VerticalLayout();
-		options.setWidthFull();
-		add(options);
+		VerticalLayout layout = new VerticalLayout();
+		layout.setWidthFull();
+		layout.setFlexGrow(1);
+		add(layout);
+
+		nmbColumnsMax = createNumberField(layout, "Max-Columns", 0, 0, Integer.MAX_VALUE, true);
+		nmbCardsMax = createNumberField(layout,"Max-Cards", 0, 0, Integer.MAX_VALUE, true);
+		nmbCardTextLengthMax = createNumberField(layout,"Max Card Text Length", 0, 0, Integer.MAX_VALUE, true);
+		nmbMaxPerOwner = createNumberField(layout,"Max-Likes per User", 0, 0, Integer.MAX_VALUE, true);
+		nmbCardLikesMaxPerOwner = createNumberField(layout,"Max Card Likes per User", 0, 0, Integer.MAX_VALUE, true);
 		
-		nmbColumnsMax = createNumberField("Max-Columns", 0, 0, Integer.MAX_VALUE, true);
-		nmbCardsMax = createNumberField("Max-Cards", 0, 0, Integer.MAX_VALUE, true);
-		nmbCardTextLengthMax = createNumberField("Max Card Text Length", 0, 0, Integer.MAX_VALUE, true);
-		nmbMaxPerOwner = createNumberField("Max-Likes per User", 0, 0, Integer.MAX_VALUE, true);
-		nmbCardLikesMaxPerOwner = createNumberField("Max Card Likes per User", 0, 0, Integer.MAX_VALUE, true);
 
 		chkOptPermissionSystem = new Checkbox("Permissionsystem");
 		chkOptPermissionSystem.setWidthFull();
-		options.add(chkOptPermissionSystem);
+		layout.add(chkOptPermissionSystem);
 
-		return options;
+		return layout;
 	}
-	
+
 	/**
 	 * 
 	 * @param title
@@ -78,14 +86,14 @@ public class CreateBoardDialog extends Dialog {
 	 * @Created 31.05.2020 - 21:10:01
 	 * @author KaesDingeling
 	 */
-	private NumberField createNumberField(String title, int defaultValue, int min, int max, boolean zeroIsInfinite) {
+	private NumberField createNumberField(VerticalLayout layout, String title, int defaultValue, int min, int max, boolean zeroIsInfinite) {
 		NumberField numberField = new NumberField("Max Card Likes per User");
 		numberField.setHasControls(true);
 		numberField.setMin(0);
 		numberField.setMax(Integer.MAX_VALUE);
 		numberField.setWidthFull();
 		numberField.addThemeVariants(TextFieldVariant.MATERIAL_ALWAYS_FLOAT_LABEL);
-		
+
 		if (zeroIsInfinite) {
 			numberField.setPlaceholder("∞");
 			numberField.setValue(null);
@@ -95,12 +103,12 @@ public class CreateBoardDialog extends Dialog {
 				}
 			});
 		}
-		
+
 		if (!(defaultValue >= min && defaultValue <= max && min <= max)) {
 			throw new IllegalStateException("Invalid parameters: min(" + min + ") max(" + max + ") defaultValue(" + defaultValue + ")");
 		}
-		
-		options.add(numberField);
+
+		layout.add(numberField);
 		
 		return numberField;
 	}
