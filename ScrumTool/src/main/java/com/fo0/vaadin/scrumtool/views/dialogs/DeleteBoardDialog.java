@@ -1,7 +1,5 @@
 package com.fo0.vaadin.scrumtool.views.dialogs;
 
-import org.apache.commons.collections4.list.GrowthList;
-
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
