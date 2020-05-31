@@ -17,6 +17,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 
 public class CreateBoardDialog extends Dialog {
 
@@ -29,8 +30,10 @@ public class CreateBoardDialog extends Dialog {
 	private NumberField nmbColumnsMax;
 	private NumberField nmbCardsMax;
 	private NumberField nmbCardTextLengthMax;
-
+	private NumberField nmbMaxPerOwner;
 	private NumberField nmbCardLikesMaxPerOwner;
+	
+	private VerticalLayout options;
 
 	public CreateBoardDialog() {
 		setWidth("400px");
@@ -47,55 +50,59 @@ public class CreateBoardDialog extends Dialog {
 	}
 
 	private VerticalLayout createOptionsLayout() {
-		VerticalLayout options = new VerticalLayout();
+		options = new VerticalLayout();
 		options.setWidthFull();
 		add(options);
-
-		nmbColumnsMax = new NumberField("Max-Columns");
-		nmbColumnsMax.setValue(0d);
-		nmbColumnsMax.setHasControls(true);
-		nmbColumnsMax.setMin(0);
-		nmbColumnsMax.setMax(Integer.MAX_VALUE);
-		nmbColumnsMax.setWidthFull();
-		options.add(nmbColumnsMax);
-
-		nmbCardsMax = new NumberField("Max-Cards");
-		nmbCardsMax.setValue(0d);
-		nmbCardsMax.setHasControls(true);
-		nmbCardsMax.setMin(0);
-		nmbCardsMax.setMax(Integer.MAX_VALUE);
-		nmbCardsMax.setWidthFull();
-		options.add(nmbCardsMax);
-
-		nmbCardTextLengthMax = new NumberField("Max Card Text Length");
-		nmbCardTextLengthMax.setValue(0d);
-		nmbCardTextLengthMax.setHasControls(true);
-		nmbCardTextLengthMax.setMin(0);
-		nmbCardTextLengthMax.setMax(Integer.MAX_VALUE);
-		nmbCardTextLengthMax.setWidthFull();
-		options.add(nmbCardTextLengthMax);
-
-		nmbCardLikesMaxPerOwner = new NumberField("Max-Likes per User");
-		nmbCardLikesMaxPerOwner.setValue(0d);
-		nmbCardLikesMaxPerOwner.setHasControls(true);
-		nmbCardLikesMaxPerOwner.setMin(0);
-		nmbCardLikesMaxPerOwner.setMax(Integer.MAX_VALUE);
-		nmbCardLikesMaxPerOwner.setWidthFull();
-		options.add(nmbCardLikesMaxPerOwner);
 		
-		nmbCardLikesMaxPerOwner = new NumberField("Max Card Likes per User");
-		nmbCardLikesMaxPerOwner.setValue(0d);
-		nmbCardLikesMaxPerOwner.setHasControls(true);
-		nmbCardLikesMaxPerOwner.setMin(0);
-		nmbCardLikesMaxPerOwner.setMax(Integer.MAX_VALUE);
-		nmbCardLikesMaxPerOwner.setWidthFull();
-		options.add(nmbCardLikesMaxPerOwner);
+		nmbColumnsMax = createNumberField("Max-Columns", 0, 0, Integer.MAX_VALUE, true);
+		nmbCardsMax = createNumberField("Max-Cards", 0, 0, Integer.MAX_VALUE, true);
+		nmbCardTextLengthMax = createNumberField("Max Card Text Length", 0, 0, Integer.MAX_VALUE, true);
+		nmbMaxPerOwner = createNumberField("Max-Likes per User", 0, 0, Integer.MAX_VALUE, true);
+		nmbCardLikesMaxPerOwner = createNumberField("Max Card Likes per User", 0, 0, Integer.MAX_VALUE, true);
 
 		chkOptPermissionSystem = new Checkbox("Permissionsystem");
 		chkOptPermissionSystem.setWidthFull();
 		options.add(chkOptPermissionSystem);
 
 		return options;
+	}
+	
+	/**
+	 * 
+	 * @param title
+	 * @param defaultValue
+	 * @param min
+	 * @param max
+	 * @param zeroIsInfinite
+	 * @return
+	 * @Created 31.05.2020 - 21:10:01
+	 * @author KaesDingeling
+	 */
+	private NumberField createNumberField(String title, int defaultValue, int min, int max, boolean zeroIsInfinite) {
+		NumberField numberField = new NumberField("Max Card Likes per User");
+		numberField.setHasControls(true);
+		numberField.setMin(0);
+		numberField.setMax(Integer.MAX_VALUE);
+		numberField.setWidthFull();
+		numberField.addThemeVariants(TextFieldVariant.MATERIAL_ALWAYS_FLOAT_LABEL);
+		
+		if (zeroIsInfinite) {
+			numberField.setPlaceholder("∞");
+			numberField.setValue(null);
+			numberField.addValueChangeListener(e -> {
+				if (e.getValue() != null && e.getValue() == 0) {
+					e.getSource().setValue(null);
+				}
+			});
+		}
+		
+		if (!(defaultValue >= min && defaultValue <= max && min <= max)) {
+			throw new IllegalStateException("Invalid parameters: min(" + min + ") max(" + max + ") defaultValue(" + defaultValue + ")");
+		}
+		
+		options.add(numberField);
+		
+		return numberField;
 	}
 
 	private HorizontalLayout createBottomLayout() {
@@ -116,7 +123,7 @@ public class CreateBoardDialog extends Dialog {
 							.maxColumns(nmbColumnsMax.getValue().intValue())
 							.maxCards(nmbCardsMax.getValue().intValue())
 							.maxCardTextLength(nmbCardTextLengthMax.getValue().intValue())
-							.maxLikesPerUser(nmbCardLikesMaxPerOwner.getValue().intValue())
+							.maxLikesPerUser(nmbMaxPerOwner.getValue().intValue())
 							.maxLikesPerUserPerCard(nmbCardLikesMaxPerOwner.getValue().intValue())
 							.build())
 					.build());
