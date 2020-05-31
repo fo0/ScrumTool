@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.olli.ClipboardHelper;
 
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
+import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoardTimer;
 import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
@@ -17,6 +18,7 @@ import com.fo0.vaadin.scrumtool.data.table.TKBOptions;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
+import com.fo0.vaadin.scrumtool.views.components.MySimpleTimer;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.dialogs.CreateColumnDialog;
@@ -74,11 +76,14 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private TKBOptions options;
 	private String ownerId;
 	private Registration broadcasterRegistration;
+	private Registration broadcasterTimerRegistration;
+
+	private MySimpleTimer timer;
 
 	private void init() {
 		log.info("init");
 		setSizeFull();
-		
+
 		root = KBViewUtils.createRootLayout();
 		add(root);
 
@@ -125,6 +130,29 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
 				}
 				reload();
+			});
+		});
+
+		broadcasterTimerRegistration = BroadcasterBoardTimer.register(getId().get(), event -> {
+			ui.access(() -> {
+				if (Config.DEBUG) {
+					Notification.show("receiving broadcast for timer", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
+				}
+
+				String[] cmd = event.split("\\.");
+				switch (cmd[0]) {
+				case "start":
+					timer.setStartTime(Long.valueOf(cmd[1]));
+					timer.start();
+					break;
+
+				case "stop":
+					timer.reset();
+					break;
+
+				default:
+					break;
+				}
 			});
 		});
 	}
@@ -275,7 +303,36 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			layout.add(btnDebug);
 		}
 
+		layout.add(createTimer());
+
 		return layout;
+	}
+
+	private HorizontalLayout createTimer() {
+		timer = new MySimpleTimer();
+		timer.setStartTime(180);
+
+		timer.addStartListener(e -> {
+		});
+
+		timer.addStopListener(e -> {
+		});
+
+		timer.addTimerEndEvent(e -> {
+			Notification.show("Timer ends", 5000, Position.MIDDLE);
+		});
+
+		Button btnStart = new Button(VaadinIcon.PLAY.create());
+		btnStart.addClickListener(e -> {
+			BroadcasterBoardTimer.broadcast(getId().get(), String.format("start.%s", timer.getTime()));
+		});
+
+		Button btnStop = new Button(VaadinIcon.STOP.create());
+		btnStop.addClickListener(e -> {
+			BroadcasterBoardTimer.broadcast(getId().get(), String.format("stop.%s", timer.getTime()));
+		});
+
+		return new HorizontalLayout(timer, btnStart, btnStop);
 	}
 
 	public void setSessionIdAtButton(String id) {

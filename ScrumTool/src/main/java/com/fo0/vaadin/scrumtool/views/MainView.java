@@ -62,7 +62,7 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 		root.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, centerLayout);
 		root.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 	}
-
+	
 	private Button createBtnJoin() {
 		Button btn = new Button("Join");
 		btn.getStyle().set("border", "1px solid black");
