@@ -310,7 +310,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			TKBData data = repository.findById(getId().get()).get();
 			data.resetLikes();
 			repository.save(data);
-			reload();
+			BroadcasterBoard.broadcast(getId().get(), "update");
 		});
 		layout.add(btnResetLikes);
 
