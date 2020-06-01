@@ -73,12 +73,6 @@ public class MarkDownDialog extends Dialog {
 		add(layout);
 	}
 	
-	/**
-	 * 
-	 * @return
-	 * @Created 01.06.2020 - 01:12:07
-	 * @author KaesDingeling
-	 */
 	private TextArea createMarkDownTab() {
 		TextArea textArea = new TextArea();
 		textArea.setSizeFull();
@@ -88,13 +82,6 @@ public class MarkDownDialog extends Dialog {
 		return textArea;
 	}
 
-	/**
-	 * 
-	 * @param data
-	 * @return
-	 * @Created 01.06.2020 - 01:12:11
-	 * @author KaesDingeling
-	 */
 	public List<String> generateMarkDown(TKBData data) {
 		List<String> list = Lists.newArrayList();
 		
@@ -109,13 +96,6 @@ public class MarkDownDialog extends Dialog {
 		return list;
 	}
 
-	/**
-	 * 
-	 * @param column
-	 * @return
-	 * @Created 01.06.2020 - 01:12:17
-	 * @author KaesDingeling
-	 */
 	public List<String> createColumn(TKBColumn column) {
 		List<String> list = Lists.newArrayList();
 		
