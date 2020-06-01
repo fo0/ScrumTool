@@ -42,12 +42,6 @@ public class MarkDownDialog extends Dialog {
 		init();
 	}
 
-	/**
-	 * 
-	 * 
-	 * @Created 01.06.2020 - 00:56:45
-	 * @author KaesDingeling
-	 */
 	private void init() {
 		setWidth("800px");
 		setHeight("600px");
