@@ -19,21 +19,14 @@ import lombok.Getter;
 public class MarkDownDialog extends Dialog {
 	private static final long serialVersionUID = -7507633592046504527L;
 
-	// Data
 	@Getter
 	private TKBData data;
 	
-	// Layout
 	private Tabs tabs;
 	private Tab tabMarkdown;
 	
-	// Tab - Markdown
 	private TextArea markdownOutput;
 
-	/**
-	 * 
-	 * @param data
-	 */
 	public MarkDownDialog(TKBData data) {
 		super();
 		
@@ -48,9 +41,7 @@ public class MarkDownDialog extends Dialog {
 		
 		tabs = new Tabs();
 		tabs.setWidthFull();
-		tabs.setFlexGrowForEnclosedTabs(1);
 		
-		// Tab - Markdown
 		tabMarkdown = new Tab("Markdown");
 		markdownOutput = createMarkDownTab();
 	
@@ -61,7 +52,8 @@ public class MarkDownDialog extends Dialog {
 		tabs.setSelectedTab(tabMarkdown);
 		
 		VerticalLayout layout = new VerticalLayout();
-		layout.setSizeFull();
+		layout.getStyle().set("overflow", "unset");
+		layout.setWidthFull();
 		layout.add(tabs, markdownOutput);
 		
 		add(layout);
@@ -69,7 +61,7 @@ public class MarkDownDialog extends Dialog {
 	
 	private TextArea createMarkDownTab() {
 		TextArea textArea = new TextArea();
-		textArea.setSizeFull();
+		textArea.setWidthFull();
 		textArea.setValue(generateMarkDown(data).stream().collect(Collectors.joining("\n")));
 		textArea.setReadOnly(true);
 		
