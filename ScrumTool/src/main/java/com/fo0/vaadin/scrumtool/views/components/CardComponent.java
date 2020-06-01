@@ -134,6 +134,8 @@ public class CardComponent extends HorizontalLayout {
 		card = cardRepository.findById(getId().get()).get();
 
 		changeText(card.getText());
+		
+		likeComponent.reload();
 	}
 
 }

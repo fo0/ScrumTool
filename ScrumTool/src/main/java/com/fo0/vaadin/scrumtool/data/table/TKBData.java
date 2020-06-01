@@ -46,6 +46,10 @@ public class TKBData implements IDataId, Serializable {
 	@Builder.Default
 	private Set<TKBColumn> columns = Sets.newHashSet();
 
+	public void resetLikes() {
+		columns.stream().flatMap(e -> e.getCards().stream()).forEach(e -> e.getLikes().clear());
+	}
+
 	public int cardLikesByOwnerId(String ownerId) {
 		return columns.stream().flatMap(e -> e.getCards().stream()).flatMap(e -> e.getLikes().stream())
 				.filter(e -> e.getOwnerId().equals(ownerId)).mapToInt(TKBCardLikes::getLikeValue).sum();

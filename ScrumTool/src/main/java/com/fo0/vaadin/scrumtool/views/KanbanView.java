@@ -304,6 +304,15 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		}
 
 		layout.add(createTimer());
+		
+		Button btnResetLikes = new Button("Likes", VaadinIcon.REFRESH.create());
+		btnResetLikes.addClickListener(e -> {
+			TKBData data = repository.findById(getId().get()).get();
+			data.resetLikes();
+			repository.save(data);
+			reload();
+		});
+		layout.add(btnResetLikes);
 
 		return layout;
 	}
