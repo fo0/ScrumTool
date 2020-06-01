@@ -38,6 +38,7 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
@@ -303,8 +304,21 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			layout.add(btnDebug);
 		}
 
-		layout.add(createTimer());
+		Button btnResetLikes = new Button("Likes", VaadinIcon.REFRESH.create());
+		btnResetLikes.getStyle().set("color", STYLES.COLOR_RED_500);
+		btnResetLikes.addClickListener(e -> {
+			TKBData data = repository.findById(getId().get()).get();
+			data.resetLikes();
+			repository.save(data);
+			BroadcasterBoard.broadcast(getId().get(), "update");
+		});
+		layout.add(btnResetLikes);
 
+		HorizontalLayout timer = createTimer();
+		layout.add(timer);
+
+		layout.setAlignSelf(FlexComponent.Alignment.END, timer);
+		
 		return layout;
 	}
 
@@ -332,7 +346,10 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			BroadcasterBoardTimer.broadcast(getId().get(), String.format("stop.%s", timer.getTime()));
 		});
 
-		return new HorizontalLayout(timer, btnStart, btnStop);
+		HorizontalLayout layout = new HorizontalLayout(btnStart, timer, btnStop);
+		layout.setSpacing(false);
+		layout.getStyle().set("border", "2px solid black");
+		return layout;
 	}
 
 	public void setSessionIdAtButton(String id) {
