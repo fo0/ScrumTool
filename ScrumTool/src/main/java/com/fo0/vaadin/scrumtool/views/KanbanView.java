@@ -270,7 +270,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 		layout.add(btnSync);
 
-		Button btnExportToMarkDown = new Button("Export Markdown", VaadinIcon.SHARE.create());
+		Button btnExportToMarkDown = new Button("Export", VaadinIcon.SHARE.create());
 		btnExportToMarkDown.addClickListener(e -> {
 			new MarkDownDialog(repository.findById(getId().get()).get()).open();
 		});
