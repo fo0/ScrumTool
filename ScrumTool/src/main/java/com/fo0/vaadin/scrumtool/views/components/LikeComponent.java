@@ -18,13 +18,13 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class LikeComponent extends HorizontalLayout {
+public class LikeComponent extends VerticalLayout {
 
 	private static final long serialVersionUID = -2483871323771596716L;
 
@@ -37,6 +37,7 @@ public class LikeComponent extends HorizontalLayout {
 	private String cardId;
 
 	private Button btnLike;
+	private Button btnDislike;
 
 	private Registration broadcasterRegistration;
 
@@ -50,7 +51,7 @@ public class LikeComponent extends HorizontalLayout {
 		btnLike.setText(String.valueOf(likes));
 		btnLike.setWidthFull();
 		btnLike.addClickListener(e -> {
-			if (islikeAlreadyExistsByOwner(SessionUtils.getSessionId())) {
+			if (islikeLimitAlreadyExistsByOwner(SessionUtils.getSessionId())) {
 				Notification.show("You already liked the card", Config.NOTIFICATION_DURATION, Position.MIDDLE);
 				return;
 			}
@@ -63,11 +64,24 @@ public class LikeComponent extends HorizontalLayout {
 			addLike(Utils.randomId(), SessionUtils.getSessionId());
 			BroadcasterCardLikes.broadcast(cardId, "update");
 		});
-
 		add(btnLike);
 
-		setAlignItems(Alignment.END);
-		setDefaultVerticalComponentAlignment(Alignment.CENTER);
+		btnDislike = new Button(VaadinIcon.THUMBS_DOWN_O.create());
+		btnDislike.setText(String.valueOf(getCurrentLikesByOwner()));
+		btnDislike.setWidthFull();
+		btnDislike.addClickListener(e -> {
+			if (!isLikedByOwner(SessionUtils.getSessionId())) {
+				Notification.show("You must like the card, bevor remove", Config.NOTIFICATION_DURATION, Position.MIDDLE);
+				return;
+			}
+
+			removeLike(SessionUtils.getSessionId());
+			BroadcasterCardLikes.broadcast(cardId, "update");
+		});
+		add(btnDislike);
+		setMargin(false);
+		setPadding(false);
+		setSpacing(false);
 	}
 
 	@Override
@@ -78,6 +92,7 @@ public class LikeComponent extends HorizontalLayout {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
 				}
+
 				reload();
 			});
 		});
@@ -93,12 +108,11 @@ public class LikeComponent extends HorizontalLayout {
 		}
 	}
 
-	public boolean islikeAlreadyExistsByOwner(String ownerId) {
+	public boolean islikeLimitAlreadyExistsByOwner(String ownerId) {
 		if (view.getOptions().getMaxLikesPerUserPerCard() == 0) {
 			return false;
 		}
-		
-		TKBData data = repositoryData.findById(boardId).get();
+
 		return repository.findById(cardId).get().getLikes().stream().filter(e -> e.getOwnerId().equals(ownerId)).count() >= view
 				.getOptions().getMaxLikesPerUserPerCard();
 	}
@@ -112,9 +126,20 @@ public class LikeComponent extends HorizontalLayout {
 		return data.cardLikesByOwnerId(ownerId) >= data.getOptions().getMaxLikesPerUser();
 	}
 
+	public int getCurrentLikesByOwner() {
+		TKBCard tmp = repository.findById(cardId).get();
+		return tmp.cardLikesByOwnerId(SessionUtils.getSessionId());
+	}
+	
 	public void addLike(String id, String ownerId) {
 		TKBCard tmp = repository.findById(cardId).get();
 		tmp.getLikes().add(TKBCardLikes.builder().id(id).ownerId(ownerId).likeValue(1).build());
+		repository.save(tmp);
+	}
+
+	public void removeLike(String ownerId) {
+		TKBCard tmp = repository.findById(cardId).get();
+		tmp.removeLikeByOwnerId(ownerId);
 		repository.save(tmp);
 	}
 
@@ -123,16 +148,23 @@ public class LikeComponent extends HorizontalLayout {
 
 		// update layout with new missing data
 		changeText(tmp.countAllLikes());
-		changeLikeButtonIconToLiked(tmp.cardLikesByOwnerId(SessionUtils.getSessionId()) != 0);
+		changeButtonIconToLiked(tmp.cardLikesByOwnerId(SessionUtils.getSessionId()) != 0);
+	}
+
+	private boolean isLikedByOwner(String ownerId) {
+		TKBCard tmp = repository.findById(cardId).get();
+		return tmp.cardLikesByOwnerId(SessionUtils.getSessionId()) != 0;
 	}
 
 	public void changeText(int likes) {
 		if (!btnLike.getText().equals(String.valueOf(likes))) {
 			btnLike.setText(String.valueOf(likes));
 		}
+		
+		btnDislike.setText(String.valueOf(getCurrentLikesByOwner()));
 	}
 
-	private void changeLikeButtonIconToLiked(boolean liked) {
+	private void changeButtonIconToLiked(boolean liked) {
 		if (liked) {
 			btnLike.setIcon(VaadinIcon.THUMBS_UP.create());
 		} else {
@@ -140,4 +172,5 @@ public class LikeComponent extends HorizontalLayout {
 		}
 	}
 
+	
 }

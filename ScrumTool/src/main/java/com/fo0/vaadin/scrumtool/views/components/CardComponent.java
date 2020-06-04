@@ -88,7 +88,7 @@ public class CardComponent extends HorizontalLayout {
 			});
 			btnLayout.add(btnDelete);
 		}
-		
+
 		setFlexGrow(1, label);
 		setWidthFull();
 		getStyle().set("border-radius", "10px");
@@ -124,7 +124,7 @@ public class CardComponent extends HorizontalLayout {
 		if (!label.getText().equals(text)) {
 			label.setText(card.getText());
 		}
-		
+
 		if (Config.DEBUG) {
 			label.setText(card.getText() + " (" + card.getDataOrder() + ")");
 		}
@@ -134,7 +134,7 @@ public class CardComponent extends HorizontalLayout {
 		card = cardRepository.findById(getId().get()).get();
 
 		changeText(card.getText());
-		
+
 		likeComponent.reload();
 	}
 

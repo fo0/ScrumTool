@@ -8,6 +8,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 
 public class CreateColumnDialog extends Dialog {
@@ -15,7 +16,7 @@ public class CreateColumnDialog extends Dialog {
 	private static final long serialVersionUID = 3959841920378174696L;
 
 	public CreateColumnDialog(KanbanView view) {
-		setWidth("340px");
+		setWidth("330");
 		TextField t = new TextField("Name");
 		t.focus();
 		Button b = new Button("Create");
@@ -25,11 +26,14 @@ public class CreateColumnDialog extends Dialog {
 			BroadcasterBoard.broadcast(view.getId().get(), "update");
 			close();
 		});
-
+		
 		HorizontalLayout l = new HorizontalLayout(t, b);
-		l.setFlexGrow(1);
-		l.setMargin(true);
-		add(l);
+		VerticalLayout layout = new VerticalLayout(l);
+		layout.getStyle().set("overflow", "hidden");
+		layout.setFlexGrow(1);
+		layout.setMargin(false);
+		layout.setWidthFull();
+		add(layout);
 	}
 
 }
