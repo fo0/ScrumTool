@@ -44,6 +44,9 @@ public class TKBCard implements Serializable, IDataOrder {
 	@Builder.Default
 	private Set<TKBCardLikes> likes = Sets.newHashSet();
 
+	public void removeLikeByOwnerId(String ownerId) {
+		likes.stream().filter(e -> e.getOwnerId().equals(ownerId)).findFirst().ifPresent(likes::remove);
+	}
 
 	public int cardLikesByOwnerId(String ownerId) {
 		return likes.stream().filter(e -> e.getOwnerId().equals(ownerId)).mapToInt(TKBCardLikes::getLikeValue).sum();
