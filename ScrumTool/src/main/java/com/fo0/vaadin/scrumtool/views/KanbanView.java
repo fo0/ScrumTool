@@ -19,6 +19,7 @@ import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
 import com.fo0.vaadin.scrumtool.views.components.MySimpleTimer;
+import com.fo0.vaadin.scrumtool.views.components.MySimpleTimer2;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.dialogs.CreateColumnDialog;
@@ -39,6 +40,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.FlexLayout.FlexDirection;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
@@ -80,6 +82,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private Registration broadcasterTimerRegistration;
 
 	private MySimpleTimer timer;
+	private MySimpleTimer2 timer2;
 
 	private void init() {
 		log.info("init");
@@ -143,12 +146,19 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				String[] cmd = event.split("\\.");
 				switch (cmd[0]) {
 				case "start":
-					timer.setStartTime(Long.valueOf(cmd[1]));
-					timer.start();
+					if (!timer2.isRunning()) {
+						timer2.setStartTime(Long.valueOf(cmd[1]));
+						timer2.start();
+						timer.setStartTime(Long.valueOf(cmd[1]));
+						timer.start();
+					}
 					break;
 
 				case "stop":
-					timer.reset();
+					if (!timer2.isRunning()) {
+						timer2.reset();
+						timer.reset();
+					}
 					break;
 
 				default:
@@ -316,10 +326,31 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		HorizontalLayout timer = createTimer();
 		layout.add(timer);
+		
+		HorizontalLayout timer2 = createTimer2();
+		layout.add(timer2);
 
 		layout.setAlignSelf(FlexComponent.Alignment.END, timer);
+		layout.setAlignSelf(FlexComponent.Alignment.END, timer2);
 		
 		return layout;
+	}
+	
+	private HorizontalLayout createTimer2() {
+		timer2 = new MySimpleTimer2();
+		timer2.setStartTime(180);
+		timer2.addButtonStartListener(e -> {
+			BroadcasterBoardTimer.broadcast(getId().get(), String.format("start.%s", timer2.getTime()));
+		});
+		timer2.addButtonStopListener(e -> {
+			BroadcasterBoardTimer.broadcast(getId().get(), String.format("stop.%s", timer2.getTime()));
+		});
+
+		timer2.addTimerEndEvent(e -> {
+			Notification.show("Timer ends", 5000, Position.MIDDLE);
+		});
+		
+		return timer2;
 	}
 
 	private HorizontalLayout createTimer() {
