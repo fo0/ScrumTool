@@ -13,6 +13,8 @@ import lombok.NonNull;
 
 public class KanbanTimer extends HorizontalLayout {
 
+	private static final long serialVersionUID = 3177233081265413859L;
+
 	@Getter
 	private MySimpleTimer timer;
 

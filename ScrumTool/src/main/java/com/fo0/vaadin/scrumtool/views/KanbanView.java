@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.claspina.confirmdialog.ButtonOption;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
@@ -19,6 +20,7 @@ import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
 import com.fo0.vaadin.scrumtool.views.components.KBClipboardHelper;
+import com.fo0.vaadin.scrumtool.views.components.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.views.components.KanbanTimer;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.components.ToolTip;
@@ -78,7 +80,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private Button btnDelete;
 	private KBClipboardHelper btnBoardIdClipboard;
 	private KBClipboardHelper btnBoardUrlClipboard;
-	
+
 	@Getter
 	private TKBOptions options;
 	private String ownerId;
@@ -88,7 +90,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private KanbanTimer timer;
 
 	private Button btnBoardShare;
-
 
 	private void init() {
 		log.info("init");
@@ -263,7 +264,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		Button b = new Button("Column", VaadinIcon.PLUS.create());
 		ToolTip.add(b, "Create new column");
-		
+
 		b.addClickListener(e -> {
 			if (options.getMaxColumns() > 0) {
 				if (columns.getComponentCount() >= options.getMaxColumns()) {
@@ -279,7 +280,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		btnBoardShare = new Button("URL", VaadinIcon.SHARE.create());
 		btnBoardUrlClipboard = new KBClipboardHelper("", btnBoardShare);
 		ToolTip.add(btnBoardUrlClipboard, "Copy Url to clipboard");
-		
+
 		btnBoardId = new Button("Board-ID", VaadinIcon.SHARE.create());
 		btnBoardId.getStyle().set("vertical-align", "0");
 		btnBoardIdClipboard = new KBClipboardHelper("", btnBoardId);
@@ -289,12 +290,12 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		Button btnSync = new Button("Refresh", VaadinIcon.REFRESH.create(), e -> sync());
 		ToolTip.add(btnSync, "Refresh the board");
-		
+
 		layout.add(btnSync);
 
 		Button btnExportToMarkDown = new Button("Export", VaadinIcon.SHARE.create());
 		ToolTip.add(btnExportToMarkDown, "Export with many options");
-		
+
 		btnExportToMarkDown.addClickListener(e -> {
 			new MarkDownDialog(repository.findById(getId().get()).get()).open();
 		});
@@ -303,10 +304,20 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		if (KBViewUtils.isAllowed(options, ownerId)) {
 			btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
 			ToolTip.add(btnDelete, "Delete the board");
-			
+
 			btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
 			btnDelete.addClickListener(e -> {
-				new DeleteBoardDialog(this).open();
+				//@formatter:off
+				KBConfirmDialog.createQuestion()
+					.withCaption("Delete Board")
+					.withMessage(String.format("This will delete '%s' columns", columns.getComponentCount()))
+					.withOkButton(() -> {
+						repository.deleteById(getId().get());
+						UI.getCurrent().navigate(MainView.class);
+					})
+					.withCancelButton()
+					.open();	
+				//@formatter:on
 			});
 			layout.add(btnDelete);
 		}
@@ -333,23 +344,30 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		ToolTip.add(btnResetLikes, "Reset all given likes");
 		btnResetLikes.getStyle().set("color", STYLES.COLOR_RED_500);
 		btnResetLikes.addClickListener(e -> {
-			TKBData data = repository.findById(getId().get()).get();
-			data.resetLikes();
-			repository.save(data);
-			BroadcasterBoard.broadcast(getId().get(), "update");
+			//@formatter:off
+			KBConfirmDialog.createQuestion()
+				.withCaption("Reset all given Likes")
+				.withOkButton(() -> {
+					TKBData data = repository.findById(getId().get()).get();
+					data.resetLikes();
+					repository.save(data);
+					BroadcasterBoard.broadcast(getId().get(), "update");
+				})
+				.withCancelButton()
+				.open();	
+			//@formatter:on
 		});
 		layout.add(btnResetLikes);
 
 		timer = new KanbanTimer(getId().get(), 60d);
 		layout.add(timer);
 		layout.setAlignSelf(FlexComponent.Alignment.END, timer);
-
 		return layout;
 	}
 
 	public void setSessionIdAtButton(String id) {
 		btnBoardIdClipboard.setContent(id);
-		
+
 		try {
 			VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
 			StringBuffer uriString = req.getRequestURL();
@@ -358,6 +376,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		} catch (Exception e) {
 			log.error(e);
 		}
-		
+
 	}
 }

@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.claspina.confirmdialog.ButtonOption;
+
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterColumns;
 import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
-import com.fo0.vaadin.scrumtool.data.repository.KBCardLikesRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
@@ -51,10 +52,8 @@ public class ColumnComponent extends VerticalLayout {
 	private KBDataRepository dataRepository = SpringContext.getBean(KBDataRepository.class);
 	private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
 	private KBColumnRepository repository = SpringContext.getBean(KBColumnRepository.class);
-	private KBCardLikesRepository likeRepository = SpringContext.getBean(KBCardLikesRepository.class);
 
 	@Getter
-	private TKBColumn data;
 	private KanbanView view;
 	private TextArea area;
 	private H3 h3;
@@ -63,7 +62,6 @@ public class ColumnComponent extends VerticalLayout {
 
 	public ColumnComponent(KanbanView view, TKBColumn column) {
 		this.view = view;
-		this.data = column;
 		setId(column.getId());
 
 		setWidth("400px");
@@ -73,14 +71,14 @@ public class ColumnComponent extends VerticalLayout {
 
 		h3 = new H3();
 		h3.getStyle().set("margin", "unset");
-		changeTitle(column.getName());
+		changeTitle(column.getName(), column.getDataOrder());
 		h3.setWidthFull();
 
 		HorizontalLayout captionLayout = new HorizontalLayout(h3);
 		captionLayout.setMargin(false);
 		captionLayout.setSpacing(false);
 
-		if (KBViewUtils.isAllowed(view.getOptions(), data.getOwnerId())) {
+		if (KBViewUtils.isAllowed(view.getOptions(), column.getOwnerId())) {
 			Button btnShuffle = new Button(VaadinIcon.RANDOM.create());
 			btnShuffle.addClickListener(e -> {
 				//@formatter:off
@@ -108,12 +106,21 @@ public class ColumnComponent extends VerticalLayout {
 
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			btnDelete.addClickListener(e -> {
-				log.info("delete column: " + getId().get());
-				Notification.show("Deleting Column: " + column.getName(), Config.NOTIFICATION_DURATION, Position.MIDDLE);
-				TKBData c = dataRepository.findById(view.getId().get()).get();
-				c.removeColumnById(getId().get());
-				dataRepository.save(c);
-				BroadcasterBoard.broadcast(view.getId().get(), "update");
+				//@formatter:off
+				KBConfirmDialog.createQuestion()
+					.withCaption("Deleting Column: " + column.getName())
+					.withMessage(String.format("This will remove %s cards", cards.getComponentCount()))
+					.withOkButton(() -> {
+						log.info("delete column: " + getId().get());
+						Notification.show("Deleting Column: " + column.getName(), Config.NOTIFICATION_DURATION, Position.MIDDLE);
+						TKBData c = dataRepository.findById(view.getId().get()).get();
+						c.removeColumnById(getId().get());
+						dataRepository.save(c);
+						BroadcasterBoard.broadcast(view.getId().get(), "update");
+					})
+					.withCancelButton()
+					.open();	
+				//@formatter:on
 			});
 			captionLayout.add(btnDelete);
 			captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btnDelete);
@@ -234,13 +241,13 @@ public class ColumnComponent extends VerticalLayout {
 		}
 	}
 
-	public void changeTitle(String string) {
+	public void changeTitle(String string, int order) {
 		if (!h3.getText().equals(string)) {
 			h3.setText(string);
 		}
 
 		if (Config.DEBUG)
-			h3.setText(string + " (" + data.getDataOrder() + ")");
+			h3.setText(string + " (" + order + ")");
 	}
 
 	private TKBColumn addCard(String randomId, String sessionId, String value) {
@@ -270,8 +277,8 @@ public class ColumnComponent extends VerticalLayout {
 	}
 
 	public void reload() {
-		data = repository.findById(getId().get()).get();
-		changeTitle(data.getName());
+		TKBColumn data = repository.findById(getId().get()).get();
+		changeTitle(data.getName(), data.getDataOrder());
 
 		// update layout with new missing data
 		data.getCards().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).forEachOrdered(pdc -> {
