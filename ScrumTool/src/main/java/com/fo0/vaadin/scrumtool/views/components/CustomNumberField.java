@@ -94,12 +94,14 @@ public class CustomNumberField extends NumberField {
 			} else {
 				setValue(defaultValue);
 			}
-			
+
 			addValueChangeListener(e -> {
 				if (isZeroIsInfinite() && e.getValue() != null && e.getValue() == getInfiniteValue()) {
 					e.getSource().setValue(null);
 				}
 			});
+		} else {
+			setValue(defaultValue);
 		}
 		
 		if (!(defaultValue >= min && defaultValue <= max && min <= max)) {

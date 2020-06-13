@@ -1,11 +1,11 @@
 package com.fo0.vaadin.scrumtool.views;
 
+import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.olli.ClipboardHelper;
 
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoardTimer;
@@ -18,8 +18,10 @@ import com.fo0.vaadin.scrumtool.data.table.TKBOptions;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
-import com.fo0.vaadin.scrumtool.views.components.MySimpleTimer;
+import com.fo0.vaadin.scrumtool.views.components.KBClipboardHelper;
+import com.fo0.vaadin.scrumtool.views.components.KanbanTimer;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
+import com.fo0.vaadin.scrumtool.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.dialogs.CreateColumnDialog;
 import com.fo0.vaadin.scrumtool.views.dialogs.DeleteBoardDialog;
@@ -44,6 +46,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.shared.Registration;
 
 import lombok.Getter;
@@ -72,14 +76,19 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	public HorizontalLayout columns;
 	private Button btnBoardId;
 	private Button btnDelete;
-	private ClipboardHelper btnBoardIdClipboard;
+	private KBClipboardHelper btnBoardIdClipboard;
+	private KBClipboardHelper btnBoardUrlClipboard;
+	
 	@Getter
 	private TKBOptions options;
 	private String ownerId;
 	private Registration broadcasterRegistration;
 	private Registration broadcasterTimerRegistration;
 
-	private MySimpleTimer timer;
+	private KanbanTimer timer;
+
+	private Button btnBoardShare;
+
 
 	private void init() {
 		log.info("init");
@@ -143,12 +152,17 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				String[] cmd = event.split("\\.");
 				switch (cmd[0]) {
 				case "start":
-					timer.setStartTime(Long.valueOf(cmd[1]));
-					timer.start();
+					timer.getTimer().setStartTime(Long.valueOf(cmd[1]));
+					timer.getTimer().start();
 					break;
 
 				case "stop":
-					timer.reset();
+					timer.getTimer().reset();
+					break;
+
+				case "time":
+					timer.getTimer().setStartTime(Long.valueOf(cmd[1]));
+					timer.getTimer().reset();
 					break;
 
 				default:
@@ -248,6 +262,8 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		layout.setWidthFull();
 
 		Button b = new Button("Column", VaadinIcon.PLUS.create());
+		ToolTip.add(b, "Create new column");
+		
 		b.addClickListener(e -> {
 			if (options.getMaxColumns() > 0) {
 				if (columns.getComponentCount() >= options.getMaxColumns()) {
@@ -260,18 +276,25 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 		layout.add(b);
 
-		btnBoardId = new Button("Board-ID: Unknown", VaadinIcon.GROUP.create());
+		btnBoardShare = new Button("URL", VaadinIcon.SHARE.create());
+		btnBoardUrlClipboard = new KBClipboardHelper("", btnBoardShare);
+		ToolTip.add(btnBoardUrlClipboard, "Copy Url to clipboard");
+		
+		btnBoardId = new Button("Board-ID", VaadinIcon.SHARE.create());
 		btnBoardId.getStyle().set("vertical-align", "0");
-		btnBoardIdClipboard = new ClipboardHelper("", btnBoardId);
-		layout.add(btnBoardIdClipboard);
+		btnBoardIdClipboard = new KBClipboardHelper("", btnBoardId);
+		ToolTip.add(btnBoardIdClipboard, "Copy ID to clipboard");
 
-		Button btnSync = new Button("Refresh", VaadinIcon.REFRESH.create());
-		btnSync.addClickListener(e -> {
-			sync();
-		});
+		layout.add(btnBoardIdClipboard, btnBoardUrlClipboard);
+
+		Button btnSync = new Button("Refresh", VaadinIcon.REFRESH.create(), e -> sync());
+		ToolTip.add(btnSync, "Refresh the board");
+		
 		layout.add(btnSync);
 
 		Button btnExportToMarkDown = new Button("Export", VaadinIcon.SHARE.create());
+		ToolTip.add(btnExportToMarkDown, "Export with many options");
+		
 		btnExportToMarkDown.addClickListener(e -> {
 			new MarkDownDialog(repository.findById(getId().get()).get()).open();
 		});
@@ -279,6 +302,8 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		if (KBViewUtils.isAllowed(options, ownerId)) {
 			btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
+			ToolTip.add(btnDelete, "Delete the board");
+			
 			btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
 			btnDelete.addClickListener(e -> {
 				new DeleteBoardDialog(this).open();
@@ -305,6 +330,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		}
 
 		Button btnResetLikes = new Button("Likes", VaadinIcon.REFRESH.create());
+		ToolTip.add(btnResetLikes, "Reset all given likes");
 		btnResetLikes.getStyle().set("color", STYLES.COLOR_RED_500);
 		btnResetLikes.addClickListener(e -> {
 			TKBData data = repository.findById(getId().get()).get();
@@ -314,46 +340,24 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 		layout.add(btnResetLikes);
 
-		HorizontalLayout timer = createTimer();
+		timer = new KanbanTimer(getId().get(), 60d);
 		layout.add(timer);
-
 		layout.setAlignSelf(FlexComponent.Alignment.END, timer);
-		
-		return layout;
-	}
 
-	private HorizontalLayout createTimer() {
-		timer = new MySimpleTimer();
-		timer.setStartTime(180);
-
-		timer.addStartListener(e -> {
-		});
-
-		timer.addStopListener(e -> {
-		});
-
-		timer.addTimerEndEvent(e -> {
-			Notification.show("Timer ends", 5000, Position.MIDDLE);
-		});
-
-		Button btnStart = new Button(VaadinIcon.PLAY.create());
-		btnStart.addClickListener(e -> {
-			BroadcasterBoardTimer.broadcast(getId().get(), String.format("start.%s", timer.getTime()));
-		});
-
-		Button btnStop = new Button(VaadinIcon.STOP.create());
-		btnStop.addClickListener(e -> {
-			BroadcasterBoardTimer.broadcast(getId().get(), String.format("stop.%s", timer.getTime()));
-		});
-
-		HorizontalLayout layout = new HorizontalLayout(btnStart, timer, btnStop);
-		layout.setSpacing(false);
-		layout.getStyle().set("border", "2px solid black");
 		return layout;
 	}
 
 	public void setSessionIdAtButton(String id) {
-		btnBoardId.setText("Board: " + id);
 		btnBoardIdClipboard.setContent(id);
+		
+		try {
+			VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
+			StringBuffer uriString = req.getRequestURL();
+			URI uri = new URI(uriString.toString());
+			btnBoardUrlClipboard.setContent(uri.toString());
+		} catch (Exception e) {
+			log.error(e);
+		}
+		
 	}
 }
