@@ -27,5 +27,8 @@ public class TKBOptions implements Serializable {
 	@Builder.Default
 	private int maxLikesPerUserPerCard = 1;
 	
+	// DESC = latest ON TOP | ASC = oldest on top
+	public boolean cardSortDirectionDesc = true;
+	
 }
 

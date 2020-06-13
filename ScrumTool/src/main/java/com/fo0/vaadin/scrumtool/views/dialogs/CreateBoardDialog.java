@@ -32,10 +32,11 @@ public class CreateBoardDialog extends Dialog {
 	private NumberField nmbCardTextLengthMax;
 	private NumberField nmbMaxPerOwner;
 	private NumberField nmbCardLikesMaxPerOwner;
+	private Checkbox chkOptLatestCardOnTop;
 
 	public CreateBoardDialog() {
 		setWidth("450px");
-		setHeight("650px");
+		setHeight("700px");
 
 		VerticalLayout layout = new VerticalLayout();
 		layout.setWidthFull();
@@ -63,13 +64,18 @@ public class CreateBoardDialog extends Dialog {
 
 		nmbColumnsMax = createNumberField(layout, "Max-Columns", 0, 0, Integer.MAX_VALUE);
 		nmbCardsMax = createNumberField(layout, "Max-Cards", 0, 0, Integer.MAX_VALUE);
-		nmbCardTextLengthMax = createNumberField(layout, "Max Card Text Length", 0, 0, Integer.MAX_VALUE);
+		nmbCardTextLengthMax = createNumberField(layout, "Max Card Text Length", 0, 0, 999);
 		nmbMaxPerOwner = createNumberField(layout, "Max-Likes per User", 0, 0, Integer.MAX_VALUE);
 		nmbCardLikesMaxPerOwner = createNumberField(layout, "Max Card Likes per User", 0, 0, Integer.MAX_VALUE);
 		
 		chkOptPermissionSystem = new Checkbox("Permissionsystem");
 		chkOptPermissionSystem.setWidthFull();
 		layout.add(chkOptPermissionSystem);
+		
+		chkOptLatestCardOnTop = new Checkbox("Latest Card on top");
+		chkOptLatestCardOnTop.setValue(true);
+		chkOptLatestCardOnTop.setWidthFull();
+		layout.add(chkOptLatestCardOnTop);
 
 		return layout;
 	}
@@ -114,6 +120,7 @@ public class CreateBoardDialog extends Dialog {
 							.maxCardTextLength(nmbCardTextLengthMax.getValue().intValue())
 							.maxLikesPerUser(nmbMaxPerOwner.getValue().intValue())
 							.maxLikesPerUserPerCard(nmbCardLikesMaxPerOwner.getValue().intValue())
+							.cardSortDirectionDesc(chkOptLatestCardOnTop.getValue())
 							.build())
 					.build());
 			UI.getCurrent().navigate(KanbanView.class, p.getId());

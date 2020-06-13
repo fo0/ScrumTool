@@ -51,7 +51,7 @@ public class KBViewUtils {
 		if (CollectionUtils.isEmpty(items)) {
 			return 0;
 		}
-
+		
 		return items.stream().map(IDataOrder::getDataOrder).max(Integer::compare).get() + 1;
 	}
 

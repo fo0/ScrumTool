@@ -1,4 +1,4 @@
 # Contributors
 
 - fo0
-- Kaesdingeling
+- KaesDingeling

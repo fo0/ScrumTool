@@ -91,13 +91,17 @@ public class CustomNumberField extends NumberField {
 			
 			if (defaultValue == getInfiniteValue()) {
 				setValue(null);
+			} else {
+				setValue(defaultValue);
 			}
-			
+
 			addValueChangeListener(e -> {
 				if (isZeroIsInfinite() && e.getValue() != null && e.getValue() == getInfiniteValue()) {
 					e.getSource().setValue(null);
 				}
 			});
+		} else {
+			setValue(defaultValue);
 		}
 		
 		if (!(defaultValue >= min && defaultValue <= max && min <= max)) {
