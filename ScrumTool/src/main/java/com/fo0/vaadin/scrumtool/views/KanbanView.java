@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
+import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoardComponent;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoardTimer;
 import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
@@ -15,6 +16,7 @@ import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.data.table.TKBOptions;
+import com.fo0.vaadin.scrumtool.data.utils.ComponentSyncData;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
@@ -22,6 +24,7 @@ import com.fo0.vaadin.scrumtool.views.components.KBClipboardHelper;
 import com.fo0.vaadin.scrumtool.views.components.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.views.components.KanbanTimer;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
+import com.fo0.vaadin.scrumtool.views.components.TimerComponent;
 import com.fo0.vaadin.scrumtool.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.dialogs.CreateColumnDialog;
@@ -40,7 +43,7 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
@@ -84,8 +87,10 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private String ownerId;
 	private Registration broadcasterRegistration;
 	private Registration broadcasterTimerRegistration;
+	private Registration broadcasterTimer2Registration;
 
 	private KanbanTimer timer;
+	private TimerComponent timer2;
 
 	private Button btnBoardShare;
 
@@ -141,6 +146,28 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				reload();
 			});
 		});
+		
+		broadcasterTimer2Registration = BroadcasterBoardComponent.register(getId().get(), timer2, syncEvent -> {
+			ui.access(() -> {
+				switch (syncEvent.getAction()) {
+					case "start":
+						timer2.setTime(((TimerComponent) syncEvent.getComponent()).getTime());
+						timer2.startSilent();
+						break;
+					case "play":
+						timer2.playSilent();
+						break;
+					case "pause":
+						timer2.pauseSilent();
+						break;
+					case "stop":
+						timer2.stopSilent();
+						break;
+					default:
+						break;
+				}
+			});
+		});
 
 		broadcasterTimerRegistration = BroadcasterBoardTimer.register(getId().get(), event -> {
 			ui.access(() -> {
@@ -173,13 +200,28 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Override
 	protected void onDetach(DetachEvent detachEvent) {
-//		super.onDetach(detachEvent);
 		if (broadcasterRegistration != null) {
 			broadcasterRegistration.remove();
 			broadcasterRegistration = null;
 		} else {
 			log.info("cannot remove broadcast, because it is null");
 		}
+		
+		if (broadcasterTimerRegistration != null) {
+			broadcasterTimerRegistration.remove();
+			broadcasterTimerRegistration = null;
+		} else {
+			log.info("cannot remove broadcast timer, because it is null");
+		}
+		
+		if (broadcasterTimer2Registration != null) {
+			broadcasterTimer2Registration.remove();
+			broadcasterTimer2Registration = null;
+		} else {
+			log.info("cannot remove broadcast timer2, because it is null");
+		}
+		
+		super.onDetach(detachEvent);
 	}
 
 	public void sync() {
@@ -258,6 +300,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	public HorizontalLayout createHeaderLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
 		layout.getStyle().set("border", "0.5px solid black");
+		layout.setAlignItems(Alignment.CENTER);
 		layout.setWidthFull();
 
 		Button b = new Button("Column", VaadinIcon.PLUS.create());
@@ -276,6 +319,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		layout.add(b);
 
 		btnBoardShare = new Button("URL", VaadinIcon.SHARE.create());
+		btnBoardShare.getStyle().set("vertical-align", "0");
 		btnBoardUrlClipboard = new KBClipboardHelper("", btnBoardShare);
 		ToolTip.add(btnBoardUrlClipboard, "Copy Url to clipboard");
 
@@ -359,9 +403,35 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		layout.add(btnResetLikes);
 
 		timer = new KanbanTimer(getId().get(), 60d);
-		layout.add(timer);
-		layout.setAlignSelf(FlexComponent.Alignment.END, timer);
+		layout.add(timer, createTimer2());
 		return layout;
+	}
+	
+	private TimerComponent createTimer2() {
+		timer2 = new TimerComponent();
+		timer2.setTime(180000);
+		timer2.addStartListener(e -> BroadcasterBoardComponent.broadcast(getId().get(), ComponentSyncData.builder()
+				.action("start")
+				.component(timer2)
+				.build()));
+		timer2.addPauseListener(e -> BroadcasterBoardComponent.broadcast(getId().get(), ComponentSyncData.builder()
+				.action("pause")
+				.component(timer2)
+				.build()));
+		timer2.addPlayListener(e -> BroadcasterBoardComponent.broadcast(getId().get(), ComponentSyncData.builder()
+				.action("play")
+				.component(timer2)
+				.build()));
+		timer2.addStopListener(e -> BroadcasterBoardComponent.broadcast(getId().get(), ComponentSyncData.builder()
+				.action("stop")
+				.component(timer2)
+				.build()));
+
+		timer2.addTimerEndEvent(e -> {
+			Notification.show("Timer ends", 5000, Position.MIDDLE);
+		});
+		
+		return timer2;
 	}
 
 	public void setSessionIdAtButton(String id) {
