@@ -345,6 +345,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			//@formatter:off
 			KBConfirmDialog.createQuestion()
 				.withCaption("Reset all given Likes")
+				.withMessage("This will delete every like on any card")
 				.withOkButton(() -> {
 					TKBData data = repository.findById(getId().get()).get();
 					data.resetLikes();
