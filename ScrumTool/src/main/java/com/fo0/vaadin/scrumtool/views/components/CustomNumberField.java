@@ -91,6 +91,8 @@ public class CustomNumberField extends NumberField {
 			
 			if (defaultValue == getInfiniteValue()) {
 				setValue(null);
+			} else {
+				setValue(defaultValue);
 			}
 			
 			addValueChangeListener(e -> {
