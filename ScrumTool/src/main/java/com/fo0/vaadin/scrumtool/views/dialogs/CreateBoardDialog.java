@@ -64,7 +64,7 @@ public class CreateBoardDialog extends Dialog {
 
 		nmbColumnsMax = createNumberField(layout, "Max-Columns", 0, 0, Integer.MAX_VALUE);
 		nmbCardsMax = createNumberField(layout, "Max-Cards", 0, 0, Integer.MAX_VALUE);
-		nmbCardTextLengthMax = createNumberField(layout, "Max Card Text Length", 0, 999, Integer.MAX_VALUE);
+		nmbCardTextLengthMax = createNumberField(layout, "Max Card Text Length", 0, 0, 999);
 		nmbMaxPerOwner = createNumberField(layout, "Max-Likes per User", 0, 0, Integer.MAX_VALUE);
 		nmbCardLikesMaxPerOwner = createNumberField(layout, "Max Card Likes per User", 0, 0, Integer.MAX_VALUE);
 		
