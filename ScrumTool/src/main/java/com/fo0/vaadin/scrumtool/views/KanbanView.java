@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.claspina.confirmdialog.ButtonOption;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
@@ -26,7 +25,6 @@ import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.dialogs.CreateColumnDialog;
-import com.fo0.vaadin.scrumtool.views.dialogs.DeleteBoardDialog;
 import com.fo0.vaadin.scrumtool.views.dialogs.MarkDownDialog;
 import com.fo0.vaadin.scrumtool.views.layouts.MainLayout;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;

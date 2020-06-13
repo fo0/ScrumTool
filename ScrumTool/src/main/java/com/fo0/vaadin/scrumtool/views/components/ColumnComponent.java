@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.claspina.confirmdialog.ButtonOption;
-
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterColumns;
 import com.fo0.vaadin.scrumtool.config.Config;
@@ -260,9 +258,13 @@ public class ColumnComponent extends VerticalLayout {
 		return tmp;
 	}
 
-	private CardComponent addCardLayout(TKBCard card) {
+	private CardComponent addCardLayout(TKBCard card, boolean sortOrderDesc) {
 		CardComponent cc = new CardComponent(view, this, getId().get(), card);
-		cards.add(cc);
+		if (sortOrderDesc) {
+			cards.addComponentAsFirst(cc);
+		} else {
+			cards.add(cc);
+		}
 		return cc;
 	}
 
@@ -270,7 +272,7 @@ public class ColumnComponent extends VerticalLayout {
 		TKBCard pdc = cardRepository.findById(cardId).get();
 		CardComponent card = getCardById(pdc.getId());
 		if (card == null) {
-			card = addCardLayout(pdc);
+			card = addCardLayout(pdc, view.getOptions().isCardSortDirectionDesc());
 		}
 
 		card.reload();
@@ -285,7 +287,7 @@ public class ColumnComponent extends VerticalLayout {
 			CardComponent card = getCardById(pdc.getId());
 			if (card == null) {
 				// add card as new card
-				card = addCardLayout(pdc);
+				card = addCardLayout(pdc, view.getOptions().isCardSortDirectionDesc());
 			}
 
 			card.reload();
