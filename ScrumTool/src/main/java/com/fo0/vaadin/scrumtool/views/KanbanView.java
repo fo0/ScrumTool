@@ -370,7 +370,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
 			StringBuffer uriString = req.getRequestURL();
 			URI uri = new URI(uriString.toString());
-			btnBoardUrlClipboard.setContent(uri.toString());
+			btnBoardUrlClipboard.setContent(uri.toString() + "/kanbanboard/" + getId().get());
 		} catch (Exception e) {
 			log.error(e);
 		}
