@@ -23,6 +23,9 @@ jobs:
     - name: Check output
       env:
         RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
+      run: |
+        echo $RELEASE_VERSION
+        echo ${{ steps.vars.outputs.tag }}
     - name: Build
       run: echo 'test' #mvn -B package --file ScrumTool/pom.xml -Pproduction
     - name: Upload binaries to release
