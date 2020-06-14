@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
-import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoardComponent;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoardTimer;
 import com.fo0.vaadin.scrumtool.config.Config;
 import com.fo0.vaadin.scrumtool.data.interfaces.IDataOrder;
@@ -16,13 +15,11 @@ import com.fo0.vaadin.scrumtool.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.data.table.TKBOptions;
-import com.fo0.vaadin.scrumtool.data.utils.ComponentSyncData;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.views.components.ColumnComponent;
 import com.fo0.vaadin.scrumtool.views.components.KBClipboardHelper;
 import com.fo0.vaadin.scrumtool.views.components.KBConfirmDialog;
-import com.fo0.vaadin.scrumtool.views.components.KanbanTimer;
 import com.fo0.vaadin.scrumtool.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.views.components.TimerComponent;
 import com.fo0.vaadin.scrumtool.views.components.ToolTip;
@@ -87,10 +84,8 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private String ownerId;
 	private Registration broadcasterRegistration;
 	private Registration broadcasterTimerRegistration;
-	private Registration broadcasterTimer2Registration;
 
-	private KanbanTimer timer;
-	private TimerComponent timer2;
+	private TimerComponent timer;
 
 	private Button btnBoardShare;
 
@@ -146,51 +141,28 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				reload();
 			});
 		});
-		
-		broadcasterTimer2Registration = BroadcasterBoardComponent.register(getId().get(), timer2, syncEvent -> {
-			ui.access(() -> {
-				switch (syncEvent.getAction()) {
-					case "start":
-						timer2.setTime(((TimerComponent) syncEvent.getComponent()).getTime());
-						timer2.startSilent();
-						break;
-					case "play":
-						timer2.playSilent();
-						break;
-					case "pause":
-						timer2.pauseSilent();
-						break;
-					case "stop":
-						timer2.stopSilent();
-						break;
-					default:
-						break;
-				}
-			});
-		});
 
 		broadcasterTimerRegistration = BroadcasterBoardTimer.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for timer", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
 				}
-
+				
 				String[] cmd = event.split("\\.");
 				switch (cmd[0]) {
 				case "start":
-					timer.getTimer().setStartTime(Long.valueOf(cmd[1]));
-					timer.getTimer().start();
+					timer.setTime(Long.valueOf(cmd[1]));
+					timer.startSilent();
 					break;
-
+				case "play":
+					timer.playSilent();
+					break;
+				case "pause":
+					timer.pauseSilent();
+					break;
 				case "stop":
-					timer.getTimer().reset();
+					timer.stopSilent();
 					break;
-
-				case "time":
-					timer.getTimer().setStartTime(Long.valueOf(cmd[1]));
-					timer.getTimer().reset();
-					break;
-
 				default:
 					break;
 				}
@@ -206,21 +178,14 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		} else {
 			log.info("cannot remove broadcast, because it is null");
 		}
-		
+
 		if (broadcasterTimerRegistration != null) {
 			broadcasterTimerRegistration.remove();
 			broadcasterTimerRegistration = null;
 		} else {
 			log.info("cannot remove broadcast timer, because it is null");
 		}
-		
-		if (broadcasterTimer2Registration != null) {
-			broadcasterTimer2Registration.remove();
-			broadcasterTimer2Registration = null;
-		} else {
-			log.info("cannot remove broadcast timer2, because it is null");
-		}
-		
+
 		super.onDetach(detachEvent);
 	}
 
@@ -402,36 +367,23 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 		layout.add(btnResetLikes);
 
-		timer = new KanbanTimer(getId().get(), 60d);
-		layout.add(timer, createTimer2());
+		layout.add(createTimer2());
 		return layout;
 	}
-	
-	private TimerComponent createTimer2() {
-		timer2 = new TimerComponent();
-		timer2.setTime(180000);
-		timer2.addStartListener(e -> BroadcasterBoardComponent.broadcast(getId().get(), ComponentSyncData.builder()
-				.action("start")
-				.component(timer2)
-				.build()));
-		timer2.addPauseListener(e -> BroadcasterBoardComponent.broadcast(getId().get(), ComponentSyncData.builder()
-				.action("pause")
-				.component(timer2)
-				.build()));
-		timer2.addPlayListener(e -> BroadcasterBoardComponent.broadcast(getId().get(), ComponentSyncData.builder()
-				.action("play")
-				.component(timer2)
-				.build()));
-		timer2.addStopListener(e -> BroadcasterBoardComponent.broadcast(getId().get(), ComponentSyncData.builder()
-				.action("stop")
-				.component(timer2)
-				.build()));
 
-		timer2.addTimerEndEvent(e -> {
+	private TimerComponent createTimer2() {
+		timer = new TimerComponent();
+		timer.setTime(180000);
+		timer.addStartListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "start." + timer.getTime()));
+		timer.addPauseListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "pause"));
+		timer.addPlayListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "play"));
+		timer.addStopListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "stop"));
+
+		timer.addTimerEndEvent(e -> {
 			Notification.show("Timer ends", 5000, Position.MIDDLE);
 		});
-		
-		return timer2;
+
+		return timer;
 	}
 
 	public void setSessionIdAtButton(String id) {

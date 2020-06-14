@@ -84,18 +84,18 @@ public class TimerComponent extends HorizontalLayout {
 		buttonStartStop.addClassName("only-icon");
 		buttonStartStop.addClickListener(e -> {
 			if (isRunning() || isPaused()) {
-				stop();
+				fireStopEvent();
 			} else {
-				start();
+				fireStartEvent();
 			}
 		});
 
 		buttonPause.addClassName("only-icon");
 		buttonPause.addClickListener(e -> {
 			if (isPaused()) {
-				play();
+				firePlayEvent();
 			} else {
-				pause();
+				firePauseEvent();
 			}
 		});
 		buttonPause.setVisible(false);
@@ -369,6 +369,16 @@ public class TimerComponent extends HorizontalLayout {
 	/**
 	 * 
 	 * 
+	 * @Created 07.06.2020 - 02:29:38
+	 * @author KaesDingeling
+	 */
+	public void fireStartEvent() {
+		startListeners.fireEvent(new ComponentEvent<TimerComponent>(this, false));
+	}
+	
+	/**
+	 * 
+	 * 
 	 * @Created 13.06.2020 - 22:10:26
 	 * @author KaesDingeling
 	 */
@@ -403,6 +413,10 @@ public class TimerComponent extends HorizontalLayout {
 		pauseSilent();
 	}
 	
+	public void firePauseEvent() {
+		pauseListeners.fireEvent(new ComponentEvent<TimerComponent>(this, false));
+	}
+	
 	/**
 	 * 
 	 * 
@@ -428,6 +442,10 @@ public class TimerComponent extends HorizontalLayout {
 	public void play() {
 		playListeners.fireEvent(new ComponentEvent<TimerComponent>(this, false));
 		playSilent();
+	}
+
+	public void firePlayEvent() {
+		playListeners.fireEvent(new ComponentEvent<TimerComponent>(this, false));
 	}
 	
 	/**
@@ -455,6 +473,16 @@ public class TimerComponent extends HorizontalLayout {
 	public void stop() {
 		stopListeners.fireEvent(new ComponentEvent<TimerComponent>(this, false));
 		stopSilent();
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @Created 07.06.2020 - 02:29:33
+	 * @author KaesDingeling
+	 */
+	public void fireStopEvent() {
+		stopListeners.fireEvent(new ComponentEvent<TimerComponent>(this, false));
 	}
 	
 	/**
