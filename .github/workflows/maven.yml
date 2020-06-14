@@ -3,7 +3,9 @@
 
 name: Build-Publish
 
-on: [push]
+on:
+  push:
+    tags: 'v*'
   
 jobs:
   build:
@@ -23,5 +25,5 @@ jobs:
         repo_token: ${{ secrets.GH_TOKEN }}
         file: ScrumTool/target/ScrumTool-1.0-SNAPSHOT.jar
         asset_name: ScrumTool.jar
-        tag: v1.0
+        tag: ${GITHUB_REF_NAME}
         overwrite: true
