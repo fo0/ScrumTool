@@ -11,14 +11,6 @@ jobs:
   build:
     name: Publish binaries
     runs-on: ubuntu-latest
-    run: |
-      echo $SOURCE_NAME
-      echo $SOURCE_BRANCH
-      echo $SOURCE_TAG
-    env:
-      SOURCE_NAME: ${{ steps.branch_name.outputs.SOURCE_NAME }}
-      SOURCE_BRANCH: ${{ steps.branch_name.outputs.SOURCE_BRANCH }}
-      SOURCE_TAG: ${{ steps.branch_name.outputs.SOURCE_TAG }}
 
     steps:
     - uses: hecrj/setup-rust-action@v1
@@ -30,8 +22,10 @@ jobs:
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v1-release
       with:
+        script: |
+          return context.payload.ref.replace(/\/refs\/tags\//, '');
         repo_token: ${{ secrets.GH_TOKEN }}
         file: ScrumTool/target/ScrumTool-1.0-SNAPSHOT.jar
         asset_name: ScrumTool.jar
-        tag: ${{ SOURCE_TAG }}
+        tag: ${{ steps.tag.outputs.result }}
         overwrite: true
