@@ -37,7 +37,7 @@ public class LikeComponent extends VerticalLayout {
 	private String cardId;
 
 	private Button btnLike;
-	private Button btnDislike;
+	private Button btnRemoveLike;
 
 	private Registration broadcasterRegistration;
 
@@ -48,6 +48,7 @@ public class LikeComponent extends VerticalLayout {
 		setId(cardId);
 
 		btnLike = new Button(VaadinIcon.THUMBS_UP_O.create());
+		ToolTip.add(btnLike, "Like the card");
 		btnLike.setText(String.valueOf(likes));
 		btnLike.setWidthFull();
 		btnLike.addClickListener(e -> {
@@ -66,10 +67,11 @@ public class LikeComponent extends VerticalLayout {
 		});
 		add(btnLike);
 
-		btnDislike = new Button(VaadinIcon.THUMBS_DOWN_O.create());
-		btnDislike.setText(String.valueOf(getCurrentLikesByOwner()));
-		btnDislike.setWidthFull();
-		btnDislike.addClickListener(e -> {
+		btnRemoveLike = new Button(VaadinIcon.THUMBS_DOWN_O.create());
+		ToolTip.add(btnRemoveLike, "Remove your like");
+		btnRemoveLike.setText(String.valueOf(getCurrentLikesByOwner()));
+		btnRemoveLike.setWidthFull();
+		btnRemoveLike.addClickListener(e -> {
 			if (!isLikedByOwner(SessionUtils.getSessionId())) {
 				Notification.show("You must like the card, bevor remove", Config.NOTIFICATION_DURATION, Position.MIDDLE);
 				return;
@@ -78,7 +80,7 @@ public class LikeComponent extends VerticalLayout {
 			removeLike(SessionUtils.getSessionId());
 			BroadcasterCardLikes.broadcast(cardId, "update");
 		});
-		add(btnDislike);
+		add(btnRemoveLike);
 		setMargin(false);
 		setPadding(false);
 		setSpacing(false);
@@ -161,7 +163,7 @@ public class LikeComponent extends VerticalLayout {
 			btnLike.setText(String.valueOf(likes));
 		}
 		
-		btnDislike.setText(String.valueOf(getCurrentLikesByOwner()));
+		btnRemoveLike.setText(String.valueOf(getCurrentLikesByOwner()));
 	}
 
 	private void changeButtonIconToLiked(boolean liked) {

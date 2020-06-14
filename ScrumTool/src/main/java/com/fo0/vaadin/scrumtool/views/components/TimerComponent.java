@@ -75,13 +75,21 @@ public class TimerComponent extends HorizontalLayout {
 		buttonStopListeners = new ComponentEventBus(this);
 		
 		inputMinutesField = new NumberField();
+		ToolTip.add(inputMinutesField, "Edit the Timer");
+		
 		inputSecondsField = new NumberField();
+		ToolTip.add(inputSecondsField, "Edit the Timer");
+		
 		inputSeperator = new Label(":");
 		timer = new SimpleTimer();
 		buttonStartStop = new Button();
 		buttonPause = new Button();
+		ToolTip.add(buttonPause, "Pause the timer");
 		
 		buttonStartStop.addClassName("only-icon");
+		ToolTip.add(buttonStartStop, "Start/Stop the Timer");
+		
+		
 		buttonStartStop.addClickListener(e -> {
 			if (isRunning() || isPaused()) {
 				fireStopEvent();

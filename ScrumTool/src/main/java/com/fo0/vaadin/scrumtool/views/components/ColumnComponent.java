@@ -78,6 +78,7 @@ public class ColumnComponent extends VerticalLayout {
 
 		if (KBViewUtils.isAllowed(view.getOptions(), column.getOwnerId())) {
 			Button btnShuffle = new Button(VaadinIcon.RANDOM.create());
+			ToolTip.add(btnShuffle, "Shuffle the cards");
 			btnShuffle.addClickListener(e -> {
 				//@formatter:off
 				TKBColumn tmp = repository.findById(getId().get()).get();
@@ -103,6 +104,7 @@ public class ColumnComponent extends VerticalLayout {
 			captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btnShuffle);
 
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
+			ToolTip.add(btnDelete, "Delete the column");
 			btnDelete.addClickListener(e -> {
 				//@formatter:off
 				KBConfirmDialog.createQuestion()
@@ -161,7 +163,8 @@ public class ColumnComponent extends VerticalLayout {
 
 		layoutHeader.add(txtLayout);
 
-		Button btnAdd = new Button("Note", VaadinIcon.PLUS.create());
+		Button btnAdd = new Button("Card", VaadinIcon.PLUS.create());
+		ToolTip.add(btnAdd, "Add a Card");
 		btnAdd.setWidthFull();
 		btnAdd.addClickListener(e -> {
 			if (view.getOptions().getMaxCards() > 0) {
@@ -178,6 +181,7 @@ public class ColumnComponent extends VerticalLayout {
 		});
 
 		Button btnCancel = new Button("Clear", VaadinIcon.TRASH.create());
+		ToolTip.add(btnCancel, "Clear the Input");
 		btnCancel.setWidthFull();
 		btnCancel.addClickListener(e -> {
 			area.clear();

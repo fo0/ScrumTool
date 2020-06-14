@@ -67,6 +67,7 @@ public class CardComponent extends HorizontalLayout {
 
 		if (KBViewUtils.isAllowed(view.getOptions(), card.getOwnerId())) {
 			Button btnEdit = new Button(VaadinIcon.EDIT.create());
+			ToolTip.add(btnEdit, "Edit the card");
 			btnEdit.addClickListener(e -> {
 				new ChangeTextDialog("Edit Text", label.getText(), savedText -> {
 					log.info("edit card: " + getId().get());
@@ -79,6 +80,7 @@ public class CardComponent extends HorizontalLayout {
 			btnLayout.add(btnEdit);
 
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
+			ToolTip.add(btnDelete, "Delete the card");
 			btnDelete.addClickListener(e -> {
 				log.info("delete card: " + getId().get());
 				TKBColumn c = columnRepository.findById(columnId).get();
