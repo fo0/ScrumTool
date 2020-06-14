@@ -17,15 +17,19 @@ jobs:
       with:
         rust-version: stable
     - uses: actions/checkout@v1
+    - name: Set output
+      id: var
+      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+    - name: Check output
+      env:
+        RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
     - name: Build
       run: echo 'test' #mvn -B package --file ScrumTool/pom.xml -Pproduction
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v1-release
       with:
-        script: |
-          return context.payload.ref.replace(/\/refs\/tags\//, '');
         repo_token: ${{ secrets.GH_TOKEN }}
         file: ScrumTool/target/ScrumTool-1.0-SNAPSHOT.jar
         asset_name: ScrumTool.jar
-        tag: ${{ steps.tag.outputs.result }}
+        tag: ${{ steps.vars.outputs.tag }}
         overwrite: true
