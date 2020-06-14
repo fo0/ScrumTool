@@ -1,0 +1,21 @@
+:host([theme~="timer-component"]) [part="input-field"]:after,
+:host([theme~="timer-component"]) [part="input-field"]:before {
+	display: none;
+}
+
+:host([theme~="timer-component"]) [part="value"] {
+	padding: 0 5px 0;
+}
+
+:host([theme~="timer-component-minutes"]) [part="value"] {
+	text-align: right;
+}
+
+:host([theme~="timer-component-seconds"]) [part="value"] {
+	text-align: left;
+}
+
+:host([theme~="timer-component"]) {
+	padding: 0;
+	margin: 0;
+}
