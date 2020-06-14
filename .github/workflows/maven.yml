@@ -23,5 +23,5 @@ jobs:
         repo_token: ${{ secrets.GH_TOKEN }}
         file: ScrumTool/target/ScrumTool-1.0-SNAPSHOT.jar
         asset_name: ScrumTool.jar
-        tag: v0.2
+        tag: v1.0
         overwrite: true
