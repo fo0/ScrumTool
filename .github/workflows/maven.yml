@@ -22,7 +22,7 @@ jobs:
         rust-version: stable
     - uses: actions/checkout@v1
     - name: Build
-      run: mvn -B package --file ScrumTool/pom.xml -Pproduction
+      run: echo 'test' #mvn -B package --file ScrumTool/pom.xml -Pproduction
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v1-release
       with:
