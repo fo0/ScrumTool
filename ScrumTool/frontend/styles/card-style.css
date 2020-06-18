@@ -1,3 +1,28 @@
-:host(.gamecard-hover:hover) {
-		box-shadow: 0 19px 38px rgba(0,0,127,0.30), 0 15px 12px rgba(0,0,127,0.22);
+:host(.card-hover) {
+	transition-duration: 1s;
+	transition-property: border-radius;
+}
+
+:host(.card-hover:hover) {
+	border-radius: 1.5em !important;
+	border-color: rgb(0, 95, 141) !important;
+}
+
+:host(.card-hove) {
+  position: relative;
+}
+
+:host(.card-hove) > ::slotted(iron-icon) {
+  position: absolute;
+  bottom: -1px;
+  left: -1px;
+  margin: 0;
+  height: 18px;
+  border: 1px solid red;
+  padding: 7px 4px 6px 5px;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-top-right-radius: 5px;
+  opacity: 0;
+  transition: opacity .175s;
 }
