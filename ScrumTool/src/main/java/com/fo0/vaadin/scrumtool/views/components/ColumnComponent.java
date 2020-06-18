@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterColumns;
 import com.fo0.vaadin.scrumtool.config.Config;
@@ -174,6 +176,11 @@ public class ColumnComponent extends VerticalLayout {
 				}
 			}
 
+			if(StringUtils.isBlank(area.getValue())) {
+				Notification.show("Please enter a text", Config.NOTIFICATION_DURATION, Position.MIDDLE);
+				return;
+			}
+			
 			TKBColumn col = addCard(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
 			BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.ADD_COLUMN + col.getId());
 			area.clear();
