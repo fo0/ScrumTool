@@ -15,6 +15,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -27,6 +28,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
+@CssImport(value = "./styles/card-style.css", themeFor = "vaadin-horizontal-layout")
 public class CardComponent extends HorizontalLayout {
 
 	private static final long serialVersionUID = -1213748155629932731L;
@@ -66,18 +68,12 @@ public class CardComponent extends HorizontalLayout {
 		btnLayout.add(likeComponent);
 
 		if (KBViewUtils.isAllowed(view.getOptions(), card.getOwnerId())) {
-			Button btnEdit = new Button(VaadinIcon.EDIT.create());
-			ToolTip.add(btnEdit, "Edit the card");
-			btnEdit.addClickListener(e -> {
-				new ChangeTextDialog("Edit Text", label.getText(), savedText -> {
-					log.info("edit card: " + getId().get());
-					TKBCard c = cardRepository.findById(getId().get()).get();
-					c.setText(savedText);
-					cardRepository.save(c);
-					BroadcasterCards.broadcast(getId().get(), "update");
-				}).open();
+			Button btnComment = new Button(VaadinIcon.COMMENT.create());
+			ToolTip.add(btnComment, "Comment the Card");
+			btnComment.addClickListener(e -> {
+
 			});
-			btnLayout.add(btnEdit);
+			btnLayout.add(btnComment);
 
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			ToolTip.add(btnDelete, "Delete the card");
@@ -95,6 +91,17 @@ public class CardComponent extends HorizontalLayout {
 		setWidthFull();
 		getStyle().set("border-radius", "10px");
 		getStyle().set("border", "1px solid var(--material-disabled-text-color)");
+		addClassName("gamecard-hover");
+		
+		addClickListener(e -> {
+			new ChangeTextDialog("Edit Text", label.getText(), savedText -> {
+				log.info("edit card: " + getId().get());
+				TKBCard c = cardRepository.findById(getId().get()).get();
+				c.setText(savedText);
+				cardRepository.save(c);
+				BroadcasterCards.broadcast(getId().get(), "update");
+			}).open();
+		});
 	}
 
 	@Override

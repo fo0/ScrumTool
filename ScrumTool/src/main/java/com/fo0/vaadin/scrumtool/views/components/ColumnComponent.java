@@ -170,7 +170,7 @@ public class ColumnComponent extends VerticalLayout {
 		btnAdd.setWidthFull();
 		btnAdd.addClickListener(e -> {
 			if (view.getOptions().getMaxCards() > 0) {
-				if (cards.getComponentCount() > view.getOptions().getMaxCards()) {
+				if (cards.getComponentCount() >= view.getOptions().getMaxCards()) {
 					Notification.show("Card limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
 					return;
 				}
