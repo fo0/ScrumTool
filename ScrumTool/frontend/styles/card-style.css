@@ -8,21 +8,24 @@
 	border-color: rgb(0, 95, 141) !important;
 }
 
-:host(.card-hove) {
+:host(.card-hover) {
   position: relative;
 }
 
-:host(.card-hove) > ::slotted(iron-icon) {
+:host(.card-hover) > ::slotted(iron-icon) {
   position: absolute;
-  bottom: -1px;
-  left: -1px;
+  bottom: 1px;
+  left: 1px;
   margin: 0;
   height: 18px;
-  border: 1px solid red;
   padding: 7px 4px 6px 5px;
   border-bottom-color: transparent;
   border-left-color: transparent;
   border-top-right-radius: 5px;
   opacity: 0;
   transition: opacity .175s;
+}
+
+:host(.card-hover:hover) > ::slotted(iron-icon) {
+  opacity: 1;
 }
