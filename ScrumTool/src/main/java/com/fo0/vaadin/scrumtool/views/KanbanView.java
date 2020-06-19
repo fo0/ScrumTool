@@ -147,7 +147,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for timer", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
 				}
-				
+
 				String[] cmd = event.split("\\.");
 				switch (cmd[0]) {
 				case "start":
@@ -393,7 +393,13 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
 			StringBuffer uriString = req.getRequestURL();
 			URI uri = new URI(uriString.toString());
-			btnBoardUrlClipboard.setContent(uri.toString() + "/kanbanboard/" + getId().get());
+
+			String url = uri.toString();
+			if (!url.endsWith(getId().get())) {
+				url = uri.toString() + NAME + "/" + getId().get();
+			}
+
+			btnBoardUrlClipboard.setContent(url);
 		} catch (Exception e) {
 			log.error(e);
 		}
