@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.broadcast.BroadcasterColumns;
 import com.fo0.vaadin.scrumtool.config.Config;
@@ -78,6 +80,7 @@ public class ColumnComponent extends VerticalLayout {
 
 		if (KBViewUtils.isAllowed(view.getOptions(), column.getOwnerId())) {
 			Button btnShuffle = new Button(VaadinIcon.RANDOM.create());
+			ToolTip.add(btnShuffle, "Shuffle the cards");
 			btnShuffle.addClickListener(e -> {
 				//@formatter:off
 				TKBColumn tmp = repository.findById(getId().get()).get();
@@ -103,6 +106,7 @@ public class ColumnComponent extends VerticalLayout {
 			captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btnShuffle);
 
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
+			ToolTip.add(btnDelete, "Delete the column");
 			btnDelete.addClickListener(e -> {
 				//@formatter:off
 				KBConfirmDialog.createQuestion()
@@ -161,16 +165,22 @@ public class ColumnComponent extends VerticalLayout {
 
 		layoutHeader.add(txtLayout);
 
-		Button btnAdd = new Button("Note", VaadinIcon.PLUS.create());
+		Button btnAdd = new Button("Card", VaadinIcon.PLUS.create());
+		ToolTip.add(btnAdd, "Add a Card");
 		btnAdd.setWidthFull();
 		btnAdd.addClickListener(e -> {
 			if (view.getOptions().getMaxCards() > 0) {
-				if (cards.getComponentCount() > view.getOptions().getMaxCards()) {
+				if (cards.getComponentCount() >= view.getOptions().getMaxCards()) {
 					Notification.show("Card limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
 					return;
 				}
 			}
 
+			if(StringUtils.isBlank(area.getValue())) {
+				Notification.show("Please enter a text", Config.NOTIFICATION_DURATION, Position.MIDDLE);
+				return;
+			}
+			
 			TKBColumn col = addCard(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
 			BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.ADD_COLUMN + col.getId());
 			area.clear();
@@ -178,6 +188,7 @@ public class ColumnComponent extends VerticalLayout {
 		});
 
 		Button btnCancel = new Button("Clear", VaadinIcon.TRASH.create());
+		ToolTip.add(btnCancel, "Clear the Input");
 		btnCancel.setWidthFull();
 		btnCancel.addClickListener(e -> {
 			area.clear();

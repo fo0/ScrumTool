@@ -62,16 +62,16 @@ public class CreateBoardDialog extends Dialog {
 		layout.setFlexGrow(1);
 		add(layout);
 
-		nmbColumnsMax = createNumberField(layout, "Max-Columns", 0, 0, Integer.MAX_VALUE);
-		nmbCardsMax = createNumberField(layout, "Max-Cards", 0, 0, Integer.MAX_VALUE);
+		nmbColumnsMax = createNumberField(layout, "Max-Columns", 0, 0, 50);
+		nmbCardsMax = createNumberField(layout, "Max-Cards", 0, 0, 99);
 		nmbCardTextLengthMax = createNumberField(layout, "Max Card Text Length", 0, 0, 999);
 		nmbMaxPerOwner = createNumberField(layout, "Max-Likes per User", 0, 0, Integer.MAX_VALUE);
 		nmbCardLikesMaxPerOwner = createNumberField(layout, "Max Card Likes per User", 0, 0, Integer.MAX_VALUE);
-		
+
 		chkOptPermissionSystem = new Checkbox("Permissionsystem");
 		chkOptPermissionSystem.setWidthFull();
 		layout.add(chkOptPermissionSystem);
-		
+
 		chkOptLatestCardOnTop = new Checkbox("Latest Card on top");
 		chkOptLatestCardOnTop.setValue(true);
 		chkOptLatestCardOnTop.setWidthFull();
@@ -96,7 +96,7 @@ public class CreateBoardDialog extends Dialog {
 		numberField.setWidthFull();
 
 		layout.add(numberField);
-		
+
 		return numberField;
 	}
 
@@ -115,11 +115,11 @@ public class CreateBoardDialog extends Dialog {
 					.ownerId(SessionUtils.getSessionId())
 					.options(TKBOptions.builder()
 							.optionPermissionSystem(chkOptPermissionSystem.getValue())
-							.maxColumns(nmbColumnsMax.getValue().intValue())
-							.maxCards(nmbCardsMax.getValue().intValue())
-							.maxCardTextLength(nmbCardTextLengthMax.getValue().intValue())
-							.maxLikesPerUser(nmbMaxPerOwner.getValue().intValue())
-							.maxLikesPerUserPerCard(nmbCardLikesMaxPerOwner.getValue().intValue())
+							.maxColumns(getCurrentOrDefaultValue(nmbColumnsMax))
+							.maxCards(getCurrentOrDefaultValue(nmbCardsMax))
+							.maxCardTextLength(getCurrentOrDefaultValue(nmbCardTextLengthMax))
+							.maxLikesPerUser(getCurrentOrDefaultValue(nmbMaxPerOwner))
+							.maxLikesPerUserPerCard(getCurrentOrDefaultValue(nmbCardLikesMaxPerOwner))
 							.cardSortDirectionDesc(chkOptLatestCardOnTop.getValue())
 							.build())
 					.build());
@@ -131,6 +131,10 @@ public class CreateBoardDialog extends Dialog {
 		HorizontalLayout l = new HorizontalLayout(btnClose, btnOk);
 		l.setWidthFull();
 		return l;
+	}
+
+	private int getCurrentOrDefaultValue(NumberField field) {
+		return field.getValue().intValue() == 0 ? (int) field.getMax() : field.getValue().intValue();
 	}
 
 }

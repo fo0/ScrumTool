@@ -69,7 +69,7 @@ public class MarkDownDialog extends Dialog {
 	}
 	
 	private Button createBtnJiraMarkdown() {
-		Button btnCommonMarkdown= new Button("Jira-Markdown");
+		Button btnCommonMarkdown= new Button("Jira-Markup");
 		btnCommonMarkdown.addClickListener(e -> {
 			area.setValue(JiraMarkDown.create(data).stream().collect(Collectors.joining("\n")));
 		});
