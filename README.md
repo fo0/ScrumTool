@@ -4,6 +4,7 @@
 
 ### Getting Started
 Just download the latest app (via releases) and start it via
+Current Stable Version is v0.4: https://github.com/fo0/ScrumTool/releases/download/v0.4/ScrumTool.jar
 ```
 java -jar ScrumTool-VERSION.jar
 ``` 
