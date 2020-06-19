@@ -1,6 +1,5 @@
 :host(.card-hover) {
-	transition-duration: 1s;
-	transition-property: border-radius;
+  	transition: border-radius 1s, border-color .175s;
 }
 
 :host(.card-hover:hover) {
