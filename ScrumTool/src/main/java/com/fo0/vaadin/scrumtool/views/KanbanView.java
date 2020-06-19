@@ -317,7 +317,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				//@formatter:off
 				KBConfirmDialog.createQuestion()
 					.withCaption("Delete Board")
-					.withMessage(String.format("This will delete '%s' columns", columns.getComponentCount()))
+					.withMessage(String.format("This will delete the board and '%s' columns", columns.getComponentCount()))
 					.withOkButton(() -> {
 						repository.deleteById(getId().get());
 						UI.getCurrent().navigate(MainView.class);
