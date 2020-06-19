@@ -111,7 +111,7 @@ public class ColumnComponent extends VerticalLayout {
 				//@formatter:off
 				KBConfirmDialog.createQuestion()
 					.withCaption("Deleting Column: " + column.getName())
-					.withMessage(String.format("This will remove %s cards", cards.getComponentCount()))
+					.withMessage(String.format("This will remove '%s' cards", cards.getComponentCount()))
 					.withOkButton(() -> {
 						log.info("delete column: " + getId().get());
 						Notification.show("Deleting Column: " + column.getName(), Config.NOTIFICATION_DURATION, Position.MIDDLE);
