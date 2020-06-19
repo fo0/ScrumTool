@@ -12,7 +12,6 @@ import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.fo0.vaadin.scrumtool.views.dialogs.ChangeTextDialog;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -24,7 +23,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.shared.Registration;
 
 import lombok.Getter;
@@ -89,21 +87,15 @@ public class CardComponent extends HorizontalLayout {
 			});
 			btnLayout.add(btnDelete);
 		}
-
+		
 		setFlexGrow(1, label);
 		setWidthFull();
 		getStyle().set("box-shadow", "0.5px solid black");
 		getStyle().set("border-radius", "1em");
 		getStyle().set("border", "1px solid var(--material-disabled-text-color)");
 		addClassName("card-hover");
-
-		addClickListener(e -> {
-			boolean layout = e.getSource() instanceof HorizontalLayout;
-			boolean labelx = (e.getSource() instanceof Component) && ((Component) e.getSource() instanceof Label);
-
-			System.out.println("layout: " + layout);
-			System.out.println("label: " + labelx);
-
+		
+		label.getElement().addEventListener("click", e -> {
 			new ChangeTextDialog("Edit Text", label.getText(), savedText -> {
 				log.info("edit card: " + getId().get());
 				TKBCard c = cardRepository.findById(columnId).get();
@@ -112,7 +104,7 @@ public class CardComponent extends HorizontalLayout {
 				BroadcasterCards.broadcast(getId().get(), "update");
 			}).open();
 		});
-
+		
 		Icon editIcon = VaadinIcon.EDIT.create();
 		add(editIcon);
 	}
