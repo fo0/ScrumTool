@@ -40,6 +40,7 @@ public class CardComponent extends HorizontalLayout {
 	private TKBCard card;
 	private LikeComponent likeComponent;
 	private String columnId;
+	private String cardId;
 	private Label label;
 	private Registration broadcasterRegistration;
 
@@ -48,6 +49,7 @@ public class CardComponent extends HorizontalLayout {
 		this.columnId = columnId;
 
 		setId(card.getId());
+		cardId = getId().get();
 		setSpacing(true);
 		setPadding(true);
 		setMargin(false);
@@ -98,10 +100,10 @@ public class CardComponent extends HorizontalLayout {
 		label.getElement().addEventListener("click", e -> {
 			new ChangeTextDialog("Edit Text", label.getText(), savedText -> {
 				log.info("edit card: " + getId().get());
-				TKBCard c = cardRepository.findById(columnId).get();
+				TKBCard c = cardRepository.findById(cardId).get();
 				c.setText(savedText);
 				cardRepository.save(c);
-				BroadcasterCards.broadcast(getId().get(), "update");
+				BroadcasterCards.broadcast(cardId, "update");
 			}).open();
 		});
 		
