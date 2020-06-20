@@ -181,7 +181,7 @@ public class ColumnComponent extends VerticalLayout {
 				return;
 			}
 
-			addCardAndSave(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
+			addCardAndSaveAndBroadcast(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
 			area.clear();
 			area.focus();
 		});
@@ -209,8 +209,8 @@ public class ColumnComponent extends VerticalLayout {
 		dropTarget.addDropListener(e -> {
 			e.getDragSourceComponent().ifPresent(card -> {
 				CardComponent droppedCard = (CardComponent) card;
-				log.info("card: " + droppedCard.getId().get());
-				TKBColumn col = addCard(Utils.randomId(), droppedCard.getCard().getOwnerId(), droppedCard.getCard().getText());
+				log.debug("receive dropped card: " + droppedCard.getId().get());
+				TKBColumn col = addCardAndSave(Utils.randomId(), droppedCard.getCard().getOwnerId(), droppedCard.getCard().getText());
 				BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.ADD_COLUMN + col.getId());
 			});
 		});
@@ -219,8 +219,8 @@ public class ColumnComponent extends VerticalLayout {
 
 	}
 
-	private void addCardAndSave(String id, String owner, String message) {
-		TKBColumn col = addCard(id, owner, message);
+	private void addCardAndSaveAndBroadcast(String id, String owner, String message) {
+		TKBColumn col = addCardAndSave(id, owner, message);
 		BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.ADD_COLUMN + col.getId());
 	}
 
@@ -251,7 +251,7 @@ public class ColumnComponent extends VerticalLayout {
 					break;
 
 				case BroadcasterColumns.ADD_COLUMN:
-					ColumnComponent.this.reloadAddCard(cmd[1]);
+					ColumnComponent.this.addCardAndReload(cmd[1]);
 					break;
 
 				default:
@@ -283,7 +283,7 @@ public class ColumnComponent extends VerticalLayout {
 			h3.setText(string + " (" + order + ")");
 	}
 
-	private TKBColumn addCard(String randomId, String sessionId, String value) {
+	private TKBColumn addCardAndSave(String randomId, String sessionId, String value) {
 		TKBColumn tmp = repository.findById(getId().get()).get();
 		TKBCard card = TKBCard.builder().id(randomId).ownerId(sessionId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getCards()))
 				.text(value).build();
@@ -300,10 +300,15 @@ public class ColumnComponent extends VerticalLayout {
 		DragSource<CardComponent> dragConfig = DragSource.create(cc);
 		dragConfig.setEffectAllowed(EffectAllowed.MOVE);
 		dragConfig.addDragStartListener(e -> {
-			Notification.show("Start D'n'D: " + cc.getCard().getText());
+			if (Config.DEBUG) {
+				Notification.show("Start Drag Card: " + e.getComponent().getCard().getText());
+			}
 		});
 
 		dragConfig.addDragEndListener(e -> {
+			if (Config.DEBUG) {
+				Notification.show("Stop Drag Card: " + e.getComponent().getCard().getText());
+			}
 			e.getComponent().deleteCard();
 		});
 
@@ -315,7 +320,7 @@ public class ColumnComponent extends VerticalLayout {
 		return cc;
 	}
 
-	public void reloadAddCard(String cardId) {
+	public void addCardAndReload(String cardId) {
 		TKBCard pdc = cardRepository.findById(cardId).get();
 		CardComponent card = getCardById(pdc.getId());
 		if (card == null) {
