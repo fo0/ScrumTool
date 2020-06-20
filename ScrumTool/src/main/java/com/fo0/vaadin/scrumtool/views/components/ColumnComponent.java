@@ -309,6 +309,7 @@ public class ColumnComponent extends VerticalLayout {
 			if (Config.DEBUG) {
 				Notification.show("Stop Drag Card: " + e.getComponent().getCard().getText());
 			}
+			
 			e.getComponent().deleteCard();
 		});
 
