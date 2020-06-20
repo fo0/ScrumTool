@@ -12,6 +12,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 public class KBViewUtils {
 
 	public static boolean isAllowed(TKBOptions options, String ownerId) {
@@ -51,7 +54,7 @@ public class KBViewUtils {
 		if (CollectionUtils.isEmpty(items)) {
 			return 0;
 		}
-		
+
 		return items.stream().map(IDataOrder::getDataOrder).max(Integer::compare).get() + 1;
 	}
 

@@ -30,6 +30,9 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dnd.DragSource;
+import com.vaadin.flow.component.dnd.DropTarget;
+import com.vaadin.flow.component.dnd.EffectAllowed;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -59,10 +62,12 @@ public class ColumnComponent extends VerticalLayout {
 	private H3 h3;
 	private Registration broadcasterRegistration;
 	private VerticalLayout cards;
+	private String id;
 
 	public ColumnComponent(KanbanView view, TKBColumn column) {
 		this.view = view;
 		setId(column.getId());
+		this.id = getId().get();
 
 		setWidth("400px");
 		getStyle().set("box-shadow", "var(--material-shadow-elevation-4dp)");
@@ -113,12 +118,7 @@ public class ColumnComponent extends VerticalLayout {
 					.withCaption("Deleting Column: " + column.getName())
 					.withMessage(String.format("This will remove '%s' cards", cards.getComponentCount()))
 					.withOkButton(() -> {
-						log.info("delete column: " + getId().get());
-						Notification.show("Deleting Column: " + column.getName(), Config.NOTIFICATION_DURATION, Position.MIDDLE);
-						TKBData c = dataRepository.findById(view.getId().get()).get();
-						c.removeColumnById(getId().get());
-						dataRepository.save(c);
-						BroadcasterBoard.broadcast(view.getId().get(), "update");
+						deleteColumn();
 					})
 					.withCancelButton()
 					.open();	
@@ -176,13 +176,12 @@ public class ColumnComponent extends VerticalLayout {
 				}
 			}
 
-			if(StringUtils.isBlank(area.getValue())) {
+			if (StringUtils.isBlank(area.getValue())) {
 				Notification.show("Please enter a text", Config.NOTIFICATION_DURATION, Position.MIDDLE);
 				return;
 			}
-			
-			TKBColumn col = addCard(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
-			BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.ADD_COLUMN + col.getId());
+
+			addCardAndSave(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
 			area.clear();
 			area.focus();
 		});
@@ -204,13 +203,38 @@ public class ColumnComponent extends VerticalLayout {
 		cards.setMargin(false);
 		cards.setPadding(false);
 		cards.setSpacing(true);
+		cards.setHeightFull();
+
+		DropTarget<VerticalLayout> dropTarget = DropTarget.create(cards);
+		dropTarget.addDropListener(e -> {
+			e.getDragSourceComponent().ifPresent(card -> {
+				CardComponent droppedCard = (CardComponent) card;
+				log.info("card: " + droppedCard.getId().get());
+				TKBColumn col = addCard(Utils.randomId(), droppedCard.getCard().getOwnerId(), droppedCard.getCard().getText());
+				BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.ADD_COLUMN + col.getId());
+			});
+		});
+
 		add(cards);
 
 	}
 
+	private void addCardAndSave(String id, String owner, String message) {
+		TKBColumn col = addCard(id, owner, message);
+		BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.ADD_COLUMN + col.getId());
+	}
+
+	private void deleteColumn() {
+		log.info("delete column: " + getId().get());
+		Notification.show("Deleting Column: " + h3.getTitle().get(), Config.NOTIFICATION_DURATION, Position.MIDDLE);
+		TKBData c = dataRepository.findById(view.getId().get()).get();
+		c.removeColumnById(getId().get());
+		dataRepository.save(c);
+		BroadcasterBoard.broadcast(view.getId().get(), "update");
+	}
+
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
-//		super.onAttach(attachEvent);
 		UI ui = UI.getCurrent();
 		broadcasterRegistration = BroadcasterColumns.register(getId().get(), event -> {
 			ui.access(() -> {
@@ -271,6 +295,18 @@ public class ColumnComponent extends VerticalLayout {
 
 	private CardComponent addCardLayout(TKBCard card, boolean sortOrderDesc) {
 		CardComponent cc = new CardComponent(view, this, getId().get(), card);
+
+		// for dnd support
+		DragSource<CardComponent> dragConfig = DragSource.create(cc);
+		dragConfig.setEffectAllowed(EffectAllowed.MOVE);
+		dragConfig.addDragStartListener(e -> {
+			Notification.show("Start D'n'D: " + cc.getCard().getText());
+		});
+
+		dragConfig.addDragEndListener(e -> {
+			e.getComponent().deleteCard();
+		});
+
 		if (sortOrderDesc) {
 			cards.addComponentAsFirst(cc);
 		} else {

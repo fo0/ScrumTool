@@ -38,6 +38,7 @@ public class CardComponent extends HorizontalLayout {
 	private KBColumnRepository columnRepository = SpringContext.getBean(KBColumnRepository.class);
 	@Getter
 	private TKBCard card;
+	private ColumnComponent column;
 	private LikeComponent likeComponent;
 	private String columnId;
 	private String cardId;
@@ -47,6 +48,7 @@ public class CardComponent extends HorizontalLayout {
 	public CardComponent(KanbanView view, ColumnComponent column, String columnId, TKBCard card) {
 		this.card = card;
 		this.columnId = columnId;
+		this.column = column;
 
 		setId(card.getId());
 		cardId = getId().get();
@@ -80,23 +82,17 @@ public class CardComponent extends HorizontalLayout {
 
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			ToolTip.add(btnDelete, "Delete the card");
-			btnDelete.addClickListener(e -> {
-				log.info("delete card: " + getId().get());
-				TKBColumn c = columnRepository.findById(columnId).get();
-				c.removeCardById(getId().get());
-				columnRepository.save(c);
-				BroadcasterColumns.broadcast(column.getId().get(), "update");
-			});
+			btnDelete.addClickListener(e -> deleteCard());
 			btnLayout.add(btnDelete);
 		}
-		
+
 		setFlexGrow(1, label);
 		setWidthFull();
 		getStyle().set("box-shadow", "0.5px solid black");
 		getStyle().set("border-radius", "1em");
 		getStyle().set("border", "1px solid var(--material-disabled-text-color)");
 		addClassName("card-hover");
-		
+
 		label.getElement().addEventListener("click", e -> {
 			new ChangeTextDialog("Edit Text", label.getText(), savedText -> {
 				log.info("edit card: " + getId().get());
@@ -106,9 +102,17 @@ public class CardComponent extends HorizontalLayout {
 				BroadcasterCards.broadcast(cardId, "update");
 			}).open();
 		});
-		
+
 		Icon editIcon = VaadinIcon.EDIT.create();
 		add(editIcon);
+	}
+
+	public void deleteCard() {
+		log.info("delete card: " + getId().get());
+		TKBColumn c = columnRepository.findById(column.getId().get()).get();
+		c.removeCardById(getId().get());
+		columnRepository.save(c);
+		BroadcasterColumns.broadcast(column.getId().get(), "update");
 	}
 
 	@Override
