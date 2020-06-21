@@ -21,6 +21,7 @@ import com.fo0.vaadin.scrumtool.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.styles.STYLES;
 import com.fo0.vaadin.scrumtool.utils.SpringContext;
+import com.fo0.vaadin.scrumtool.utils.StreamUtils;
 import com.fo0.vaadin.scrumtool.utils.Utils;
 import com.fo0.vaadin.scrumtool.views.KanbanView;
 import com.fo0.vaadin.scrumtool.views.utils.KBViewUtils;
@@ -210,7 +211,7 @@ public class ColumnComponent extends VerticalLayout {
 			e.getDragSourceComponent().ifPresent(card -> {
 				CardComponent droppedCard = (CardComponent) card;
 				log.debug("receive dropped card: " + droppedCard.getId().get());
-				TKBColumn col = addCardAndSave(Utils.randomId(), droppedCard.getCard().getOwnerId(), droppedCard.getCard().getText());
+				TKBColumn col = addCardAndSave(Utils.randomId(), droppedCard.getCard());
 				BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.ADD_COLUMN + col.getId());
 			});
 		});
@@ -293,6 +294,18 @@ public class ColumnComponent extends VerticalLayout {
 		return tmp;
 	}
 
+	private TKBColumn addCardAndSave(String randomId, TKBCard card) {
+		TKBColumn tmp = repository.findById(getId().get()).get();
+		card.setId(randomId);
+		StreamUtils.stream(card.getLikes()).forEach(e -> {
+			e.setId(Utils.randomId());
+		});
+		tmp.addCard(card);
+		repository.save(tmp);
+		log.info("add card: {}", randomId);
+		return tmp;
+	}
+
 	private CardComponent addCardLayout(TKBCard card, boolean sortOrderDesc) {
 		CardComponent cc = new CardComponent(view, this, getId().get(), card);
 
@@ -306,10 +319,17 @@ public class ColumnComponent extends VerticalLayout {
 		});
 
 		dragConfig.addDragEndListener(e -> {
+			if (!e.isSuccessful()) {
+				if (Config.DEBUG) {
+					Notification.show("unsuccessful drop from card: " + e.getComponent().getCard().getText());
+				}
+				return;
+			}
+
 			if (Config.DEBUG) {
 				Notification.show("Stop Drag Card: " + e.getComponent().getCard().getText());
 			}
-			
+
 			e.getComponent().deleteCard();
 		});
 
