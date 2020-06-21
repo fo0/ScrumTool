@@ -73,6 +73,7 @@ public class CardComponent extends HorizontalLayout {
 
 		if (KBViewUtils.isAllowed(view.getOptions(), card.getOwnerId())) {
 			Button btnComment = new Button(VaadinIcon.COMMENT_O.create());
+			ToolTip.add(btnComment, "Comment a card feature, comming soon");
 			btnComment.setEnabled(false);
 			ToolTip.add(btnComment, "Comment the Card");
 			btnComment.addClickListener(e -> {

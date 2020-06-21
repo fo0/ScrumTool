@@ -320,16 +320,15 @@ public class ColumnComponent extends VerticalLayout {
 
 		dragConfig.addDragEndListener(e -> {
 			if (!e.isSuccessful()) {
-				if (Config.DEBUG) {
-					Notification.show("unsuccessful drop from card: " + e.getComponent().getCard().getText());
-				}
+					Notification.show("Please move the card to a column", 3000, Position.MIDDLE);
 				return;
 			}
 
 			if (Config.DEBUG) {
-				Notification.show("Stop Drag Card: " + e.getComponent().getCard().getText());
+				Notification.show("Stop drag Card: " + e.getComponent().getCard().getText());
 			}
 
+			Notification.show("Card moved", 3000, Position.BOTTOM_END);
 			e.getComponent().deleteCard();
 		});
 
