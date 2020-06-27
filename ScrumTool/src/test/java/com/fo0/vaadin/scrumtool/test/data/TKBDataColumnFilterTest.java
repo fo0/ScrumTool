@@ -30,8 +30,9 @@ public class TKBDataColumnFilterTest {
 		TKBData result = dataRepository.filterByColumn("column1");
 
 		if (result != null)
-			result.getColumns().forEach(System.out::println);
+			result.getColumns().forEach(e -> System.out.println("id: " + e.getId() + ", name:" + e.getName()));
 
+		
 		assertNotNull(result);
 		assertEquals(1, CollectionUtils.size(result.getColumns()));
 	}

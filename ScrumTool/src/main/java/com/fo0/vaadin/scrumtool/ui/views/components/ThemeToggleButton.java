@@ -6,6 +6,7 @@ import com.fo0.vaadin.scrumtool.ui.utils.UIUtils;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.material.Material;
 
@@ -46,8 +47,8 @@ public class ThemeToggleButton extends HorizontalLayout {
 		setSpacing(false);
 		setAlignItems(Alignment.CENTER);
 		
-		offBtn = new Button("Light", e -> setThemeLight());
-		onBtn = new Button("Dark", e -> setThemeDark());
+		offBtn = new Button(VaadinIcon.SUN_O.create(),  e -> setThemeLight());
+		onBtn = new Button(VaadinIcon.MOON_O.create(), e -> setThemeDark());
 		
 		if (withCustomTheme) {
 			addClassName(THEME_BASE);

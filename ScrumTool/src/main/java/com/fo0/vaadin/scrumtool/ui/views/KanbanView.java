@@ -16,9 +16,7 @@ import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBOptions;
 import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
-import com.fo0.vaadin.scrumtool.ui.styles.STYLES;
 import com.fo0.vaadin.scrumtool.ui.views.components.ColumnComponent;
-import com.fo0.vaadin.scrumtool.ui.views.components.KBClipboardHelper;
 import com.fo0.vaadin.scrumtool.ui.views.components.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.ui.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.ui.views.components.TimerComponent;
@@ -26,6 +24,7 @@ import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CreateColumnDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.MarkDownDialog;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.ShareLayout;
 import com.fo0.vaadin.scrumtool.ui.views.layouts.MainLayout;
 import com.fo0.vaadin.scrumtool.ui.views.utils.KBViewUtils;
 import com.google.common.collect.Lists;
@@ -34,18 +33,22 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.shared.Registration;
@@ -74,10 +77,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private ThemeToggleButton themeToggleButton;
 	@Getter
 	public HorizontalLayout columns;
-	private Button btnBoardId;
-	private Button btnDelete;
-	private KBClipboardHelper btnBoardIdClipboard;
-	private KBClipboardHelper btnBoardUrlClipboard;
 
 	@Getter
 	private TKBOptions options;
@@ -86,8 +85,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private Registration broadcasterTimerRegistration;
 
 	private TimerComponent timer;
-
-	private Button btnBoardShare;
 
 	private void init() {
 		log.info("init");
@@ -126,7 +123,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		init();
 		sync();
-		setSessionIdAtButton(getId().get());
 	}
 
 	@Override
@@ -264,6 +260,21 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	public HorizontalLayout createHeaderLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
+		layout.setSpacing(false);
+		layout.setMargin(false);
+		HorizontalLayout left = new HorizontalLayout();
+		left.setSpacing(false);
+		left.setMargin(false);
+		left.setWidthFull();
+		left.setAlignItems(Alignment.CENTER);
+		HorizontalLayout right = new HorizontalLayout();
+		right.setSpacing(false);
+		right.setMargin(false);
+		right.setWidthFull();
+		right.setJustifyContentMode(JustifyContentMode.END);
+		right.setAlignItems(Alignment.CENTER);
+		layout.add(left, right);
+
 		layout.getStyle().set("border", "0.5px solid black");
 		layout.setAlignItems(Alignment.CENTER);
 		layout.setWidthFull();
@@ -281,56 +292,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 			new CreateColumnDialog(this).open();
 		});
-		layout.add(b);
-
-		btnBoardShare = new Button("URL", VaadinIcon.SHARE.create());
-		btnBoardShare.getStyle().set("vertical-align", "0");
-		btnBoardUrlClipboard = new KBClipboardHelper("", btnBoardShare);
-		ToolTip.add(btnBoardUrlClipboard, "Copy Url to clipboard");
-
-		btnBoardId = new Button("Board-ID", VaadinIcon.SHARE.create());
-		btnBoardId.getStyle().set("vertical-align", "0");
-		btnBoardIdClipboard = new KBClipboardHelper("", btnBoardId);
-		ToolTip.add(btnBoardIdClipboard, "Copy ID to clipboard");
-
-		layout.add(btnBoardIdClipboard, btnBoardUrlClipboard);
-
-		Button btnSync = new Button("Refresh", VaadinIcon.REFRESH.create(), e -> sync());
-		ToolTip.add(btnSync, "Refresh the board");
-
-		layout.add(btnSync);
-
-		Button btnExportToMarkDown = new Button("Export", VaadinIcon.SHARE.create());
-		ToolTip.add(btnExportToMarkDown, "Export with many options");
-
-		btnExportToMarkDown.addClickListener(e -> {
-			new MarkDownDialog(repository.findById(getId().get()).get()).open();
-		});
-		layout.add(btnExportToMarkDown);
-
-		if (KBViewUtils.isAllowed(options, ownerId)) {
-			btnDelete = new Button("Delete", VaadinIcon.TRASH.create());
-			ToolTip.add(btnDelete, "Delete the board");
-
-			btnDelete.getStyle().set("color", STYLES.COLOR_RED_500);
-			btnDelete.addClickListener(e -> {
-				//@formatter:off
-				KBConfirmDialog.createQuestion()
-					.withCaption("Delete Board")
-					.withMessage(String.format("This will delete the board and '%s' columns", columns.getComponentCount()))
-					.withOkButton(() -> {
-						repository.deleteById(getId().get());
-						UI.getCurrent().navigate(MainView.class);
-					})
-					.withCancelButton()
-					.open();	
-				//@formatter:on
-			});
-			layout.add(btnDelete);
-		}
-
-		themeToggleButton = new ThemeToggleButton(false);
-		layout.add(themeToggleButton);
+		left.add(b);
 
 		if (Config.DEBUG) {
 			Button btnDebug = new Button("Debug", VaadinIcon.INFO.create());
@@ -344,30 +306,51 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				d.add(t);
 				d.open();
 			});
-			layout.add(btnDebug);
+			left.add(btnDebug);
 		}
 
-		Button btnResetLikes = new Button("Likes", VaadinIcon.REFRESH.create());
-		ToolTip.add(btnResetLikes, "Reset all given likes");
-		btnResetLikes.getStyle().set("color", STYLES.COLOR_RED_500);
-		btnResetLikes.addClickListener(e -> {
-			//@formatter:off
-			KBConfirmDialog.createQuestion()
-				.withCaption("Reset all given Likes")
-				.withMessage("This will delete every like on any card")
-				.withOkButton(() -> {
-					TKBData data = repository.findById(getId().get()).get();
-					data.resetLikes();
-					repository.save(data);
-					BroadcasterBoard.broadcast(getId().get(), "update");
-				})
-				.withCancelButton()
-				.open();	
-			//@formatter:on
-		});
-		layout.add(btnResetLikes);
+		right.add(createTimer2());
 
-		layout.add(createTimer2());
+		themeToggleButton = new ThemeToggleButton(false);
+
+		MenuBar menuBar = new MenuBar();
+		right.add(menuBar);
+
+		MenuItem menuItem = menuBar.addItem(VaadinIcon.COG.create());
+
+		if (KBViewUtils.isAllowed(options, ownerId)) {
+			menuItem.getSubMenu().addItem("Delete Board", e -> {
+				KBConfirmDialog.createQuestion().withCaption("Delete Board")
+						.withMessage(String.format("This will delete the board and '%s' columns", columns.getComponentCount()))
+						.withOkButton(() -> {
+							repository.deleteById(getId().get());
+							UI.getCurrent().navigate(MainView.class);
+						}).withCancelButton().open();
+			});
+		}
+
+		menuItem.getSubMenu().addItem("Reset all given Likes", e -> {
+			KBConfirmDialog.createQuestion().withCaption("Reset all given Likes").withMessage("This will delete every like on any card")
+					.withOkButton(() -> {
+						TKBData data = repository.findById(getId().get()).get();
+						data.resetLikes();
+						repository.save(data);
+						BroadcasterBoard.broadcast(getId().get(), "update");
+					}).withCancelButton().open();
+		});
+
+		menuItem.getSubMenu().addItem("Refresh", e -> sync());
+
+		menuItem.getSubMenu().addItem("Export", e -> {
+			new MarkDownDialog(repository.findById(getId().get()).get()).open();
+		});
+
+		MenuItem shareMenu = menuItem.getSubMenu().addItem("Share with others", e -> {
+			new ShareLayout("Share Layout", () -> getId().get(), () -> createCurrentUrl(VaadinService.getCurrentRequest())).open();
+		});
+
+		menuItem.getSubMenu().addItem(themeToggleButton);
+
 		return layout;
 	}
 
@@ -386,11 +369,9 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		return timer;
 	}
 
-	public void setSessionIdAtButton(String id) {
-		btnBoardIdClipboard.setContent(id);
-
+	private String createCurrentUrl(VaadinRequest request) {
 		try {
-			VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
+			VaadinServletRequest req = (VaadinServletRequest) request; // VaadinService.getCurrentRequest();
 			StringBuffer uriString = req.getRequestURL();
 			URI uri = new URI(uriString.toString());
 
@@ -399,10 +380,11 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				url = uri.toString() + NAME + "/" + getId().get();
 			}
 
-			btnBoardUrlClipboard.setContent(url);
+			return url;
 		} catch (Exception e) {
-			log.error(e);
+			log.error("failed to create url share resource", e);
 		}
 
+		return "Error creating URL Resource";
 	}
 }
