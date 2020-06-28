@@ -34,6 +34,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -61,6 +62,8 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Route(value = KanbanView.NAME, layout = MainLayout.class)
+@CssImport(value = "./styles/custom-menu-bar.css", themeFor = "vaadin-menu-bar")
+@CssImport(value = "./styles/custom-menu-bar-button.css", themeFor = "vaadin-menu-bar-button")
 public class KanbanView extends Div implements HasUrlParameter<String>, IThemeToggleButton {
 
 	public static final String NAME = "kanbanboard";
@@ -259,25 +262,26 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	}
 
 	public HorizontalLayout createHeaderLayout() {
-		HorizontalLayout layout = new HorizontalLayout();
-		layout.setSpacing(false);
-		layout.setMargin(false);
 		HorizontalLayout left = new HorizontalLayout();
+		left.setAlignItems(Alignment.CENTER);
 		left.setSpacing(false);
 		left.setMargin(false);
 		left.setWidthFull();
-		left.setAlignItems(Alignment.CENTER);
+		
 		HorizontalLayout right = new HorizontalLayout();
+		right.setJustifyContentMode(JustifyContentMode.END);
+		right.setAlignItems(Alignment.CENTER);
 		right.setSpacing(false);
 		right.setMargin(false);
 		right.setWidthFull();
-		right.setJustifyContentMode(JustifyContentMode.END);
-		right.setAlignItems(Alignment.CENTER);
-		layout.add(left, right);
-
+		
+		HorizontalLayout layout = new HorizontalLayout();
 		layout.getStyle().set("border", "0.5px solid black");
 		layout.setAlignItems(Alignment.CENTER);
+		layout.setSpacing(false);
+		layout.setMargin(false);
 		layout.setWidthFull();
+		layout.add(left, right);
 
 		Button b = new Button("Column", VaadinIcon.PLUS.create());
 		ToolTip.add(b, "Create new column");
@@ -314,10 +318,14 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		themeToggleButton = new ThemeToggleButton(false);
 
 		MenuBar menuBar = new MenuBar();
+		menuBar.getStyle().set("margin-right", "5px");
+		menuBar.getStyle().set("margin-left", "1px");
+		menuBar.addThemeName("no-overflow-button");
+		
 		right.add(menuBar);
 
 		MenuItem menuItem = menuBar.addItem(VaadinIcon.COG.create());
-
+		
 		if (KBViewUtils.isAllowed(options, ownerId)) {
 			menuItem.getSubMenu().addItem("Delete Board", e -> {
 				KBConfirmDialog.createQuestion().withCaption("Delete Board")

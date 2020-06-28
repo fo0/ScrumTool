@@ -1,0 +1,8 @@
+:host([part="overflow-button"][theme~="no-overflow-button"]) {
+	display: none !important;
+}
+
+:host(:first-of-type) {
+	border-bottom-left-radius: 0.25em;
+	border-top-left-radius: 0.25em;
+}

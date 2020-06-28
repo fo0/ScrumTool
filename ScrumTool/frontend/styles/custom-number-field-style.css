@@ -9,10 +9,12 @@
 
 :host([theme~="timer-component-minutes"]) [part="value"] {
 	text-align: right;
+	padding-top: 1px;
 }
 
 :host([theme~="timer-component-seconds"]) [part="value"] {
 	text-align: left;
+	padding-top: 1px;
 }
 
 :host([theme~="timer-component"]) {
