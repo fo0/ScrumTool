@@ -120,7 +120,6 @@ public class TimerComponent extends HorizontalLayout {
 		inputMinutesField.addThemeName("timer-component-minutes");
 		inputMinutesField.addThemeName("timer-component");
 		inputMinutesField.setPlaceholder("0");
-		inputMinutesField.setHeight("26px");
 		inputMinutesField.setWidth("65px");
 		inputMinutesField.setMax(60);
 		inputMinutesField.setMin(0);
@@ -129,7 +128,6 @@ public class TimerComponent extends HorizontalLayout {
 		inputSecondsField.addThemeName("timer-component-seconds");
 		inputSecondsField.addThemeName("timer-component");
 		inputSecondsField.setPlaceholder("00");
-		inputSecondsField.setHeight("26px");
 		inputSecondsField.setWidth("40px");
 		inputSecondsField.setMax(60);
 		inputSecondsField.setMin(0);
