@@ -31,7 +31,6 @@ java -cp h2*.jar org.h2.tools.Shell -url jdbc:h2:file:./database -user sa -passw
 ```sql
 java -cp h2*.jar org.h2.tools.Shell -url jdbc:h2:file:./database -user sa -password sa -sql \
 "SET REFERENTIAL_INTEGRITY FALSE;\
-truncate table tkbdata_tkbcolumn;\
 truncate table tkbdata;\
 truncate table tkbcolumn_tkbcard;\
 truncate table tkbcolumn;\
