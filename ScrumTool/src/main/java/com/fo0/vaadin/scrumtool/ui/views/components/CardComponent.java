@@ -10,6 +10,7 @@ import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.ChangeTextDialog;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.CommentDialog;
 import com.fo0.vaadin.scrumtool.ui.views.utils.KBViewUtils;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -71,16 +72,16 @@ public class CardComponent extends HorizontalLayout {
 		likeComponent = new LikeComponent(view, view.getId().get(), card.getId(), card.countAllLikes());
 		btnLayout.add(likeComponent);
 
+		Button btnComment = new Button(VaadinIcon.COMMENT_O.create());
+		ToolTip.add(btnComment, "Comment a card feature, comming soon");
+		btnComment.setEnabled(true);
+		ToolTip.add(btnComment, "Comment the Card");
+		btnComment.addClickListener(e -> {
+			new CommentDialog(cardId, label.getText()).open();
+		});
+		btnLayout.add(btnComment);
+		
 		if (KBViewUtils.isAllowed(view.getOptions(), card.getOwnerId())) {
-			Button btnComment = new Button(VaadinIcon.COMMENT_O.create());
-			ToolTip.add(btnComment, "Comment a card feature, comming soon");
-			btnComment.setEnabled(false);
-			ToolTip.add(btnComment, "Comment the Card");
-			btnComment.addClickListener(e -> {
-				
-			});
-			btnLayout.add(btnComment);
-
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			ToolTip.add(btnDelete, "Delete the card");
 			btnDelete.addClickListener(e -> deleteCard());

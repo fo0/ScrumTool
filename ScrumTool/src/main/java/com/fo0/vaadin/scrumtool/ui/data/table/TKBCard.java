@@ -39,10 +39,14 @@ public class TKBCard implements Serializable, IDataOrder {
 	private int dataOrder = -1;
 
 	private String text;
-
+	
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private Set<TKBCardLikes> likes = Sets.newHashSet();
+	
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private Set<TKBCardComment> comments = Sets.newHashSet();
 
 	public void removeLikeByOwnerId(String ownerId) {
 		likes.stream().filter(e -> e.getOwnerId().equals(ownerId)).findFirst().ifPresent(likes::remove);

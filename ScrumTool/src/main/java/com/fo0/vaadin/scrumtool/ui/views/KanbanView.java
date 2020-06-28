@@ -11,6 +11,7 @@ import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterBoardTimer;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
@@ -69,6 +70,10 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Autowired
 	private KBDataRepository repository;
+	
+	@Autowired
+	private KBColumnRepository columnRepository;
+	
 	@Getter
 	private VerticalLayout root;
 	@Getter
@@ -231,8 +236,14 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	public void addColumn(String id, String ownerId, String name) {
 		log.info("add column: {} ({})", name, id);
 		TKBData tmp = repository.findById(getId().get()).get();
-		tmp.addColumn(TKBColumn.builder().id(id).ownerId(ownerId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns())).name(name)
+		
+		tmp.addColumn(TKBColumn.builder()
+				.id(id)
+				.ownerId(ownerId)
+				.dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns()))
+				.name(name)
 				.build());
+		
 		repository.save(tmp);
 	}
 

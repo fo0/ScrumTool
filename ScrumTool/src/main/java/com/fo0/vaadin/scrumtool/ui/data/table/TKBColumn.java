@@ -8,7 +8,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -42,9 +41,6 @@ public class TKBColumn implements Serializable, IDataOrder {
 
 	@Builder.Default
 	private int dataOrder = -1;
-
-//	@ManyToOne(fetch = FetchType.LAZY)
-//	private TKBData data;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
