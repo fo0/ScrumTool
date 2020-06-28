@@ -1,0 +1,95 @@
+package com.fo0.vaadin.scrumtool.ui.views.components;
+
+import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumns;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardCommentRepository;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
+import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
+import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardComment;
+import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
+import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
+@CssImport(value = "./styles/card-style.css", themeFor = "vaadin-horizontal-layout")
+public class CardCommentComponent extends HorizontalLayout {
+
+	private static final long serialVersionUID = -1213748155629932731L;
+
+	private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
+	private KBCardCommentRepository cardCommentRepository = SpringContext.getBean(KBCardCommentRepository.class);
+
+	private String cardId;
+	private TKBCardComment comment;
+	private Label label;
+
+	public CardCommentComponent(String cardId, TKBCardComment comment) {
+		this.comment = comment;
+		this.cardId = cardId;
+
+		setId(comment.getId());
+		setSpacing(true);
+		setPadding(true);
+		setMargin(false);
+		label = new Label(comment.getText());
+		label.getStyle().set("word-break", "break-word");
+		label.setWidthFull();
+		add(label);
+
+		VerticalLayout btnLayout = new VerticalLayout();
+		btnLayout.setWidth("unset");
+		btnLayout.setSpacing(false);
+		btnLayout.setMargin(false);
+		btnLayout.setPadding(false);
+		add(btnLayout);
+
+		setFlexGrow(1, label);
+		setWidthFull();
+		getStyle().set("box-shadow", "0.5px solid black");
+		getStyle().set("border-radius", "1em");
+		getStyle().set("border", "1px solid var(--material-disabled-text-color)");
+		addClassName("card-hover");
+
+		Button btnDelete = new Button(VaadinIcon.TRASH.create());
+		ToolTip.add(btnDelete, "Delete the comment");
+		btnDelete.addClickListener(e -> delete());
+		btnLayout.add(btnDelete);
+
+		label.getElement().addEventListener("click", e -> {
+			new TextDialog("Edit Text", label.getText(), savedText -> {
+				log.info("edit comment: " + getId().get());
+				TKBCardComment c = cardCommentRepository.findById(comment.getId()).get();
+				c.setText(savedText);
+				cardCommentRepository.save(c);
+			}).open();
+		});
+
+		Icon editIcon = VaadinIcon.EDIT.create();
+		add(editIcon);
+	}
+
+	public void delete() {
+	}
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+	}
+
+	@Override
+	protected void onDetach(DetachEvent detachEvent) {
+	}
+
+	public void reload() {
+	}
+
+}

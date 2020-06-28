@@ -23,8 +23,11 @@ public class TKBCardComment {
 	@Builder.Default
 	private String id = Utils.randomId();
 
+	@Builder.Default
+	private int dataOrder = -1;
+	
 	private String ownerId;
 
-	private String value;
+	private String text;
 
 }

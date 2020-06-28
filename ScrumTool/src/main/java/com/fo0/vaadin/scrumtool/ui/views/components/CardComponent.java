@@ -9,7 +9,7 @@ import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
-import com.fo0.vaadin.scrumtool.ui.views.dialogs.ChangeTextDialog;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CommentDialog;
 import com.fo0.vaadin.scrumtool.ui.views.utils.KBViewUtils;
 import com.vaadin.flow.component.AttachEvent;
@@ -96,7 +96,7 @@ public class CardComponent extends HorizontalLayout {
 		addClassName("card-hover");
 
 		label.getElement().addEventListener("click", e -> {
-			new ChangeTextDialog("Edit Text", label.getText(), savedText -> {
+			new TextDialog("Edit Text", label.getText(), savedText -> {
 				log.info("edit card: " + getId().get());
 				TKBCard c = cardRepository.findById(cardId).get();
 				c.setText(savedText);
