@@ -72,8 +72,8 @@ public class CreateBoardDialog extends Dialog {
 		chkOptPermissionSystem.setWidthFull();
 		layout.add(chkOptPermissionSystem);
 
-		chkOptLatestCardOnTop = new Checkbox("Latest Card on top");
-		chkOptLatestCardOnTop.setValue(true);
+		chkOptLatestCardOnTop = new Checkbox("Oldest Card in Column on top");
+		chkOptLatestCardOnTop.setValue(false);
 		chkOptLatestCardOnTop.setWidthFull();
 		layout.add(chkOptLatestCardOnTop);
 
@@ -120,7 +120,7 @@ public class CreateBoardDialog extends Dialog {
 							.maxCardTextLength(getCurrentOrDefaultValue(nmbCardTextLengthMax))
 							.maxLikesPerUser(getCurrentOrDefaultValue(nmbMaxPerOwner))
 							.maxLikesPerUserPerCard(getCurrentOrDefaultValue(nmbCardLikesMaxPerOwner))
-							.cardSortDirectionDesc(chkOptLatestCardOnTop.getValue())
+							.cardSortDirectionDesc(!chkOptLatestCardOnTop.getValue())
 							.build())
 					.build());
 			UI.getCurrent().navigate(KanbanView.class, p.getId());

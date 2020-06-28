@@ -51,6 +51,34 @@ public class TKBUtils {
 				.build();
 		//@formatter:on
 	}
+	
+	public static TKBData randomTkbData3() {
+		//@formatter:off
+		TKBData data =  TKBData.builder().build();
+		data.setOptions(TKBOptions.builder().build());
+		data.setColumns(Sets.newHashSet(TKBColumn.builder()
+						.name("column1")
+//						.data(data)
+						.cards(Sets.newHashSet(TKBCard.builder()
+								.likes(Sets.newHashSet(
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
+										))
+								.build()))
+						.build(),
+						TKBColumn.builder()
+						.name("column2")
+//						.data(data)
+						.cards(Sets.newHashSet(TKBCard.builder()
+								.likes(Sets.newHashSet(
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
+										))
+								.build()))
+						.build()));
+		return data;
+		//@formatter:on
+	}
 
 
 }

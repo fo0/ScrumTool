@@ -9,6 +9,7 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -43,6 +44,7 @@ public class TKBData implements IDataId, Serializable {
 	private TKBOptions options;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true) // currently not working: mappedBy="data"
+	@JoinColumn(name = "data_id")
 	@Builder.Default
 	private Set<TKBColumn> columns = Sets.newHashSet();
 

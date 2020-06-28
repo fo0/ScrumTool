@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardLikesRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
@@ -15,9 +16,9 @@ import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
 
-
 @SpringBootTest(classes = PersistenceConfig.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@ActiveProfiles("test-db")
 public class TKBDataDeleteTest {
 
 	@Autowired
