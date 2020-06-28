@@ -2,7 +2,7 @@
 	background-color: var(--material-background-color);
 	border-bottom-left-radius: 0;
 	border-top-left-radius: 0;
-	min-width: 55px !important;
+	min-width: 45px !important;
 	padding: 2px !important;
 }
 
@@ -10,7 +10,7 @@
 	background-color: var(--material-background-color);
 	border-bottom-right-radius: 0;
 	border-top-right-radius: 0;
-	min-width: 55px !important;
+	min-width: 45px !important;
 	padding: 2px !important;
 }
 

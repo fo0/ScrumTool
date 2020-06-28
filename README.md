@@ -1,13 +1,13 @@
 ![Build-Publish](https://github.com/fo0/ScrumTool/workflows/Build-Publish/badge.svg?event=push)
 
 # ScrumTool
+![Demo-GUI](docs/chrome_2020-06-28_16-18-16.png)
 
 ### Getting Started
 Just download the latest app (via releases) and start it via <br>
-Current Stable Version is v0.4: [Download v0.4](https://github.com/fo0/ScrumTool/releases/download/v0.4/ScrumTool.jar)
 ```
 java -jar ScrumTool-VERSION.jar
-``` 
+```
 
 ## info for devs
 add property `app.debug=true` to your i.e. eclipse run-configuration via `Override Properties` to see more informations
@@ -31,7 +31,6 @@ java -cp h2*.jar org.h2.tools.Shell -url jdbc:h2:file:./database -user sa -passw
 ```sql
 java -cp h2*.jar org.h2.tools.Shell -url jdbc:h2:file:./database -user sa -password sa -sql \
 "SET REFERENTIAL_INTEGRITY FALSE;\
-truncate table tkbdata_tkbcolumn;\
 truncate table tkbdata;\
 truncate table tkbcolumn_tkbcard;\
 truncate table tkbcolumn;\
