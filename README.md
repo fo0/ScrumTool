@@ -2,11 +2,14 @@
 
 # ScrumTool
 
+# Demo View
+![Demo-GUI](docs/chrome_2020-06-28_16-18-16.png)
+
 ### Getting Started
 Just download the latest app (via releases) and start it via <br>
 ```
 java -jar ScrumTool-VERSION.jar
-``` 
+```
 
 ## info for devs
 add property `app.debug=true` to your i.e. eclipse run-configuration via `Override Properties` to see more informations
