@@ -134,7 +134,7 @@ public class TimerComponent extends HorizontalLayout {
 		timer.getStyle().set("margin-right", "10px");
 		timer.getStyle().set("text-align", "center");
 		timer.getStyle().set("overflow", "hidden");
-		timer.getStyle().set("font-size", "25px");
+//		timer.getStyle().set("font-size", "25px");
 		timer.getStyle().set("width", "0");
 		timer.setFractions(false);
 		timer.setMinutes(true);
