@@ -88,6 +88,8 @@ public class CommentDialog extends Dialog {
 
 		commentsLayout = new VerticalLayout();
 		commentsLayout.setWidthFull();
+		commentsLayout.setMargin(false);
+		commentsLayout.setPadding(false);
 		root.add(commentsLayout);
 
 		initCards();
