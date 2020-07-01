@@ -78,7 +78,6 @@ public class TimerComponent extends HorizontalLayout {
 		ToolTip.add(inputMinutesField, "Edit the Timer");
 		
 		inputSecondsField = new NumberField();
-		ToolTip.add(inputSecondsField, "Edit the Timer");
 		
 		inputSeperator = new Label(":");
 		timer = new SimpleTimer();
