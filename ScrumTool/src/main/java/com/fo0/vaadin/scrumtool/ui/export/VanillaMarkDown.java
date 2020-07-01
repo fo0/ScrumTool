@@ -4,8 +4,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardComment;

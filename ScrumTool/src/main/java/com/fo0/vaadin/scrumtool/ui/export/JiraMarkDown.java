@@ -36,7 +36,7 @@ public class JiraMarkDown {
 		column.getCards().stream().sorted(Comparator.comparing(TKBCard::getDataOrder)).forEachOrdered(card -> {
 			list.add(String.format("| %d | %d | %s | %s |", card.getDataOrder(), card.countAllLikes(), card.getText(),
 					card.getComments().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).map(TKBCardComment::getText)
-							.collect(Collectors.joining(" \\ "))));
+							.collect(Collectors.joining(" \\\\ "))));
 		});
 
 		return list;

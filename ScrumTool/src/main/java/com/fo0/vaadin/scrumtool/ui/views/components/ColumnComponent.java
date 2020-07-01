@@ -9,7 +9,6 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterBoard;
-import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumn;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;

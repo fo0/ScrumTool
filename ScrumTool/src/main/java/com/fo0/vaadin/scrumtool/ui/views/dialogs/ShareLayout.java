@@ -4,8 +4,8 @@ import java.util.function.Supplier;
 
 import com.fo0.vaadin.scrumtool.ui.views.components.ShareComponent;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class ShareLayout extends Dialog {
 

@@ -13,6 +13,7 @@ import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBOptionRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBOptions;
@@ -76,6 +77,9 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Autowired
 	private KBColumnRepository columnRepository;
+	
+	@Autowired
+	private KBOptionRepository optionRepository;
 
 	@Getter
 	private VerticalLayout root;
@@ -89,6 +93,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	@Getter
 	private TKBOptions options;
 	private String ownerId;
+	
 	private Registration broadcasterRegistration;
 	private Registration broadcasterTimerRegistration;
 
@@ -156,6 +161,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				switch (cmd[0]) {
 				case "start":
 					timer.setTime(Long.valueOf(cmd[1]));
+					persistTimer(Long.valueOf(cmd[1]));
 					timer.startSilent();
 					break;
 				case "play":
@@ -373,7 +379,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	private TimerComponent createTimer2() {
 		timer = new TimerComponent();
-		timer.setTime(180000);
+		timer.setTime(options.getTimerInMillis());
 		timer.addStartListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "start." + timer.getTime()));
 		timer.addPauseListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "pause"));
 		timer.addPlayListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "play"));
@@ -403,5 +409,11 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		}
 
 		return "Error creating URL Resource";
+	}
+	
+	public void persistTimer(long time) {
+		options = optionRepository.findById(options.getId()).get();
+		options.setTimerInMillis(time);
+		options = optionRepository.save(options);
 	}
 }

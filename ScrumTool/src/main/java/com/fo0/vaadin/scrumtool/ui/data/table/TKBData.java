@@ -5,12 +5,12 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -40,7 +40,7 @@ public class TKBData implements IDataId, Serializable {
 
 	private String ownerId;
 
-	@Embedded
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private TKBOptions options;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
