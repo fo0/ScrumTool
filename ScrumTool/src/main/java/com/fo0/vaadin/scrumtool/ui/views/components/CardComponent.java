@@ -144,11 +144,11 @@ public class CardComponent extends HorizontalLayout {
 
 	private void changeText(String text) {
 		if (!label.getText().equals(text)) {
-			label.setText(card.getText());
+			label.setText(text);
 		}
 
 		if (Config.DEBUG) {
-			label.setText(card.getText() + " (" + card.getDataOrder() + ")");
+			label.setText(text + " (" + card.getDataOrder() + ")");
 		}
 	}
 

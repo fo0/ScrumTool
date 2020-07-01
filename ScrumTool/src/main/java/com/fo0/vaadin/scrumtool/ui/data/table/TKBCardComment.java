@@ -3,6 +3,7 @@ package com.fo0.vaadin.scrumtool.ui.data.table;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.ui.utils.Utils;
 
 import lombok.AllArgsConstructor;
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class TKBCardComment {
+public class TKBCardComment implements IDataOrder{
 
 	@Id
 	@Builder.Default

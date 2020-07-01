@@ -1,15 +1,12 @@
 package com.fo0.vaadin.scrumtool.ui.views.components;
 
-import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumns;
+import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardComment;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardCommentRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardComment;
-import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Label;
@@ -17,6 +14,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.shared.Registration;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -71,6 +69,7 @@ public class CardCommentComponent extends HorizontalLayout {
 				TKBCardComment c = cardCommentRepository.findById(comment.getId()).get();
 				c.setText(savedText);
 				cardCommentRepository.save(c);
+				BroadcasterCardComment.broadcast(cardId, "update");
 			}).open();
 		});
 
@@ -79,17 +78,25 @@ public class CardCommentComponent extends HorizontalLayout {
 	}
 
 	public void delete() {
-	}
-
-	@Override
-	protected void onAttach(AttachEvent attachEvent) {
-	}
-
-	@Override
-	protected void onDetach(DetachEvent detachEvent) {
+		log.info("delete card comment: {}", getId().get());
+		TKBCardComment cc = cardCommentRepository.findById(getId().get()).get();
+		TKBCard c = cardRepository.findById(cardId).get();
+		c.getComments().remove(cc);
+		cardRepository.save(c);
+		BroadcasterCardComment.broadcast(cardId, "update");
 	}
 
 	public void reload() {
-	}
+		TKBCardComment tmp = cardCommentRepository.findById(getId().get()).get();
 
+		// update layout with new missing data
+		changeText(tmp.getText());
+	}
+	
+	private void changeText(String text) {
+		if (!label.getText().equals(text)) {
+			label.setText(text);
+		}
+	}
+	
 }
