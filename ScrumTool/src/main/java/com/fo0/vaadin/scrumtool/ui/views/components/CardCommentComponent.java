@@ -1,5 +1,6 @@
 package com.fo0.vaadin.scrumtool.ui.views.components;
 
+import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardComment;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardCommentRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
@@ -83,6 +84,7 @@ public class CardCommentComponent extends HorizontalLayout {
 		c.getComments().remove(cc);
 		cardRepository.save(c);
 		BroadcasterCardComment.broadcast(cardId, "update");
+		BroadcasterCard.broadcast(cardId, "update");
 	}
 
 	public void reload() {

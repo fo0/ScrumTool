@@ -4,6 +4,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 
+import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardComment;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardCommentRepository;
@@ -132,6 +133,8 @@ public class CommentDialog extends Dialog {
 		TKBCard card = cardRepository.findById(cardId).get();
 		card.getComments().add(cardComment);
 		cardRepository.save(card);
+		BroadcasterCardComment.broadcast(cardId, "update");
+		BroadcasterCard.broadcast(cardId, "update");
 	}
 
 	public void reload() {

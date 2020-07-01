@@ -1,5 +1,7 @@
 package com.fo0.vaadin.scrumtool.ui.views.components;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumn;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
@@ -46,6 +48,8 @@ public class CardComponent extends HorizontalLayout {
 	private Label label;
 	private Registration broadcasterRegistration;
 
+	private Button btnComment;
+
 	public CardComponent(KanbanView view, ColumnComponent column, String columnId, TKBCard card) {
 		this.card = card;
 		this.columnId = columnId;
@@ -72,15 +76,14 @@ public class CardComponent extends HorizontalLayout {
 		likeComponent = new LikeComponent(view, view.getId().get(), card.getId(), card.countAllLikes());
 		btnLayout.add(likeComponent);
 
-		Button btnComment = new Button(VaadinIcon.COMMENT_O.create());
-		ToolTip.add(btnComment, "Comment a card feature, comming soon");
-		btnComment.setEnabled(true);
+		btnComment = new Button(VaadinIcon.COMMENT_O.create());
 		ToolTip.add(btnComment, "Comment the Card");
+		changeButtonCommentsCaption(CollectionUtils.size(card.getComments()));
 		btnComment.addClickListener(e -> {
 			new CommentDialog(cardId, label.getText()).open();
 		});
 		btnLayout.add(btnComment);
-		
+
 		if (KBViewUtils.isAllowed(view.getOptions(), card.getOwnerId())) {
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			ToolTip.add(btnDelete, "Delete the card");
@@ -158,6 +161,17 @@ public class CardComponent extends HorizontalLayout {
 		changeText(card.getText());
 
 		likeComponent.reload();
+		
+		changeButtonCommentsCaption(CollectionUtils.size(card.getComments()));
+	}
+
+	public void changeButtonCommentsCaption(int count) {
+		if (count > 0) {
+			btnComment.setText(String.valueOf(count));
+			btnComment.setIcon(VaadinIcon.COMMENT.create());
+		} else {
+			btnComment.setIcon(VaadinIcon.COMMENT_O.create());
+		}
 	}
 
 }
