@@ -1,7 +1,7 @@
 package com.fo0.vaadin.scrumtool.ui.views.components;
 
-import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCards;
-import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumns;
+import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
+import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumn;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
@@ -101,7 +101,7 @@ public class CardComponent extends HorizontalLayout {
 				TKBCard c = cardRepository.findById(cardId).get();
 				c.setText(savedText);
 				cardRepository.save(c);
-				BroadcasterCards.broadcast(cardId, "update");
+				BroadcasterCard.broadcast(cardId, "update");
 			}).open();
 		});
 
@@ -114,14 +114,14 @@ public class CardComponent extends HorizontalLayout {
 		TKBColumn c = columnRepository.findById(column.getId().get()).get();
 		c.removeCardById(getId().get());
 		columnRepository.save(c);
-		BroadcasterColumns.broadcast(column.getId().get(), "update");
+		BroadcasterColumn.broadcast(column.getId().get(), "update");
 	}
 
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
 //		super.onAttach(attachEvent);
 		UI ui = UI.getCurrent();
-		broadcasterRegistration = BroadcasterCards.register(getId().get(), event -> {
+		broadcasterRegistration = BroadcasterCard.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);

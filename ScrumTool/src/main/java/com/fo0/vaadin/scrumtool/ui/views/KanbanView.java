@@ -73,10 +73,10 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Autowired
 	private KBDataRepository repository;
-	
+
 	@Autowired
 	private KBColumnRepository columnRepository;
-	
+
 	@Getter
 	private VerticalLayout root;
 	@Getter
@@ -239,14 +239,10 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	public void addColumn(String id, String ownerId, String name) {
 		log.info("add column: {} ({})", name, id);
 		TKBData tmp = repository.findById(getId().get()).get();
-		
-		tmp.addColumn(TKBColumn.builder()
-				.id(id)
-				.ownerId(ownerId)
-				.dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns()))
-				.name(name)
+
+		tmp.addColumn(TKBColumn.builder().id(id).ownerId(ownerId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns())).name(name)
 				.build());
-		
+
 		repository.save(tmp);
 	}
 
@@ -278,14 +274,14 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		left.setSpacing(false);
 		left.setMargin(false);
 		left.setWidthFull();
-		
+
 		HorizontalLayout right = new HorizontalLayout();
 		right.setJustifyContentMode(JustifyContentMode.END);
 		right.setAlignItems(Alignment.CENTER);
 		right.setSpacing(false);
 		right.setMargin(false);
 		right.setWidthFull();
-		
+
 		HorizontalLayout layout = new HorizontalLayout();
 		layout.getStyle().set("border", "0.5px solid black");
 		layout.setAlignItems(Alignment.CENTER);
@@ -329,14 +325,16 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		themeToggleButton = new ThemeToggleButton(false);
 
 		MenuBar menuBar = new MenuBar();
+		ToolTip.add(menuBar, "Settings");
+
 		menuBar.getStyle().set("margin-right", "5px");
 		menuBar.getStyle().set("margin-left", "1px");
 		menuBar.addThemeName("no-overflow-button");
-		
+
 		right.add(menuBar);
 
 		MenuItem menuItem = menuBar.addItem(VaadinIcon.COG.create());
-		
+
 		if (KBViewUtils.isAllowed(options, ownerId)) {
 			menuItem.getSubMenu().addItem("Delete Board", e -> {
 				KBConfirmDialog.createQuestion().withCaption("Delete Board")

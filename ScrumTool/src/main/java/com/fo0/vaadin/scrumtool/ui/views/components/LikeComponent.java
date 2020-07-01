@@ -1,6 +1,6 @@
 package com.fo0.vaadin.scrumtool.ui.views.components;
 
-import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardLikes;
+import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardLike;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
@@ -63,7 +63,7 @@ public class LikeComponent extends VerticalLayout {
 			}
 
 			addLike(Utils.randomId(), SessionUtils.getSessionId());
-			BroadcasterCardLikes.broadcast(cardId, "update");
+			BroadcasterCardLike.broadcast(cardId, "update");
 		});
 		add(btnLike);
 
@@ -78,7 +78,7 @@ public class LikeComponent extends VerticalLayout {
 			}
 
 			removeLike(SessionUtils.getSessionId());
-			BroadcasterCardLikes.broadcast(cardId, "update");
+			BroadcasterCardLike.broadcast(cardId, "update");
 		});
 		add(btnRemoveLike);
 		setMargin(false);
@@ -89,7 +89,7 @@ public class LikeComponent extends VerticalLayout {
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
 		UI ui = UI.getCurrent();
-		broadcasterRegistration = BroadcasterCardLikes.register(getId().get(), event -> {
+		broadcasterRegistration = BroadcasterCardLike.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);

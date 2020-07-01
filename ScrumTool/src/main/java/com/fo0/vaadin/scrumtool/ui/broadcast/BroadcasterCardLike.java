@@ -15,7 +15,7 @@ import com.vaadin.flow.shared.Registration;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class BroadcasterCardLikes {
+public class BroadcasterCardLike {
 
 	private static final Executor EXECUTOR = Executors.newCachedThreadPool();
 	private static final Map<String, List<Consumer<String>>> LISTENERS = Maps.newLinkedHashMap();
@@ -29,7 +29,7 @@ public class BroadcasterCardLikes {
 		LISTENERS.get(id).add(listener);
 
 		return () -> {
-			synchronized (BroadcasterCardLikes.class) {
+			synchronized (BroadcasterCardLike.class) {
 				LISTENERS.remove(id);
 			}
 		};
