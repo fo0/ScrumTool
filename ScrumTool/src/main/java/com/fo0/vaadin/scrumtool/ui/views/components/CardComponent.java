@@ -1,7 +1,9 @@
 package com.fo0.vaadin.scrumtool.ui.views.components;
 
-import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCards;
-import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumns;
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
+import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumn;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
@@ -9,7 +11,8 @@ import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
-import com.fo0.vaadin.scrumtool.ui.views.dialogs.ChangeTextDialog;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.CommentDialog;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
 import com.fo0.vaadin.scrumtool.ui.views.utils.KBViewUtils;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -45,6 +48,8 @@ public class CardComponent extends HorizontalLayout {
 	private Label label;
 	private Registration broadcasterRegistration;
 
+	private Button btnComment;
+
 	public CardComponent(KanbanView view, ColumnComponent column, String columnId, TKBCard card) {
 		this.card = card;
 		this.columnId = columnId;
@@ -71,16 +76,15 @@ public class CardComponent extends HorizontalLayout {
 		likeComponent = new LikeComponent(view, view.getId().get(), card.getId(), card.countAllLikes());
 		btnLayout.add(likeComponent);
 
-		if (KBViewUtils.isAllowed(view.getOptions(), card.getOwnerId())) {
-			Button btnComment = new Button(VaadinIcon.COMMENT_O.create());
-			ToolTip.add(btnComment, "Comment a card feature, comming soon");
-			btnComment.setEnabled(false);
-			ToolTip.add(btnComment, "Comment the Card");
-			btnComment.addClickListener(e -> {
-				
-			});
-			btnLayout.add(btnComment);
+		btnComment = new Button(VaadinIcon.COMMENT_O.create());
+		ToolTip.add(btnComment, "Comment the Card");
+		changeButtonCommentsCaption(CollectionUtils.size(card.getComments()));
+		btnComment.addClickListener(e -> {
+			new CommentDialog(cardId, label.getText()).open();
+		});
+		btnLayout.add(btnComment);
 
+		if (KBViewUtils.isAllowed(view.getOptions(), card.getOwnerId())) {
 			Button btnDelete = new Button(VaadinIcon.TRASH.create());
 			ToolTip.add(btnDelete, "Delete the card");
 			btnDelete.addClickListener(e -> deleteCard());
@@ -95,12 +99,12 @@ public class CardComponent extends HorizontalLayout {
 		addClassName("card-hover");
 
 		label.getElement().addEventListener("click", e -> {
-			new ChangeTextDialog("Edit Text", label.getText(), savedText -> {
+			new TextDialog("Edit Text", label.getText(), savedText -> {
 				log.info("edit card: " + getId().get());
 				TKBCard c = cardRepository.findById(cardId).get();
 				c.setText(savedText);
 				cardRepository.save(c);
-				BroadcasterCards.broadcast(cardId, "update");
+				BroadcasterCard.broadcast(cardId, "update");
 			}).open();
 		});
 
@@ -113,14 +117,14 @@ public class CardComponent extends HorizontalLayout {
 		TKBColumn c = columnRepository.findById(column.getId().get()).get();
 		c.removeCardById(getId().get());
 		columnRepository.save(c);
-		BroadcasterColumns.broadcast(column.getId().get(), "update");
+		BroadcasterColumn.broadcast(column.getId().get(), "update");
 	}
 
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
 //		super.onAttach(attachEvent);
 		UI ui = UI.getCurrent();
-		broadcasterRegistration = BroadcasterCards.register(getId().get(), event -> {
+		broadcasterRegistration = BroadcasterCard.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
@@ -143,11 +147,11 @@ public class CardComponent extends HorizontalLayout {
 
 	private void changeText(String text) {
 		if (!label.getText().equals(text)) {
-			label.setText(card.getText());
+			label.setText(text);
 		}
 
 		if (Config.DEBUG) {
-			label.setText(card.getText() + " (" + card.getDataOrder() + ")");
+			label.setText(text + " (" + card.getDataOrder() + ")");
 		}
 	}
 
@@ -157,6 +161,17 @@ public class CardComponent extends HorizontalLayout {
 		changeText(card.getText());
 
 		likeComponent.reload();
+		
+		changeButtonCommentsCaption(CollectionUtils.size(card.getComments()));
+	}
+
+	public void changeButtonCommentsCaption(int count) {
+		if (count > 0) {
+			btnComment.setText(String.valueOf(count));
+			btnComment.setIcon(VaadinIcon.COMMENT.create());
+		} else {
+			btnComment.setIcon(VaadinIcon.COMMENT_O.create());
+		}
 	}
 
 }

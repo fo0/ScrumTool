@@ -11,13 +11,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 
-public class ChangeTextDialog extends Dialog {
+public class TextDialog extends Dialog {
 
 	private static final long serialVersionUID = -5714183761044782095L;
 
 	private VerticalLayout layout;
 
-	public ChangeTextDialog(String caption, String initValue, Consumer<String> text) {
+	public TextDialog(String caption, String initValue, Consumer<String> text) {
 		layout = new VerticalLayout();
 		add(layout);
 		setWidth("400px");

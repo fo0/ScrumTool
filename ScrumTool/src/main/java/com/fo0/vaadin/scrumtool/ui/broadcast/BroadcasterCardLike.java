@@ -15,24 +15,21 @@ import com.vaadin.flow.shared.Registration;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class BroadcasterColumns {
-
-	public static final String MESSAGE_SHUFFLE = "shuffle";
-	public static final String ADD_COLUMN = "addcolumn.";
+public class BroadcasterCardLike {
 
 	private static final Executor EXECUTOR = Executors.newCachedThreadPool();
 	private static final Map<String, List<Consumer<String>>> LISTENERS = Maps.newLinkedHashMap();
 
 	public static synchronized Registration register(String id, Consumer<String> listener) {
 		if (Config.DEBUG) {
-			log.info("registering column consumer for: " + id);
+			log.info("registering cardlikes consumer for: " + id);
 		}
 
 		LISTENERS.putIfAbsent(id, Lists.newLinkedList());
 		LISTENERS.get(id).add(listener);
 
 		return () -> {
-			synchronized (BroadcasterColumns.class) {
+			synchronized (BroadcasterCardLike.class) {
 				LISTENERS.remove(id);
 			}
 		};
@@ -43,7 +40,7 @@ public class BroadcasterColumns {
 			if (Config.DEBUG) {
 				log.info("broadcast message '{}' to id '{}'", message, id);
 			}
-
+			
 			EXECUTOR.execute(() -> e.accept(message));
 		});
 	}

@@ -75,7 +75,6 @@ public class TimerComponent extends HorizontalLayout {
 		buttonStopListeners = new ComponentEventBus(this);
 		
 		inputMinutesField = new NumberField();
-		ToolTip.add(inputMinutesField, "Edit the Timer");
 		
 		inputSecondsField = new NumberField();
 		ToolTip.add(inputSecondsField, "Edit the Timer");
@@ -135,7 +134,7 @@ public class TimerComponent extends HorizontalLayout {
 		timer.getStyle().set("margin-right", "10px");
 		timer.getStyle().set("text-align", "center");
 		timer.getStyle().set("overflow", "hidden");
-		timer.getStyle().set("font-size", "25px");
+//		timer.getStyle().set("font-size", "25px");
 		timer.getStyle().set("width", "0");
 		timer.setFractions(false);
 		timer.setMinutes(true);

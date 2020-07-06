@@ -11,7 +11,9 @@ import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterBoardTimer;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBOptionRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBOptions;
@@ -34,6 +36,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -61,6 +64,8 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Route(value = KanbanView.NAME, layout = MainLayout.class)
+@CssImport(value = "./styles/custom-menu-bar.css", themeFor = "vaadin-menu-bar")
+@CssImport(value = "./styles/custom-menu-bar-button.css", themeFor = "vaadin-menu-bar-button")
 public class KanbanView extends Div implements HasUrlParameter<String>, IThemeToggleButton {
 
 	public static final String NAME = "kanbanboard";
@@ -69,6 +74,13 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Autowired
 	private KBDataRepository repository;
+
+	@Autowired
+	private KBColumnRepository columnRepository;
+	
+	@Autowired
+	private KBOptionRepository optionRepository;
+
 	@Getter
 	private VerticalLayout root;
 	@Getter
@@ -81,6 +93,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	@Getter
 	private TKBOptions options;
 	private String ownerId;
+	
 	private Registration broadcasterRegistration;
 	private Registration broadcasterTimerRegistration;
 
@@ -148,6 +161,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				switch (cmd[0]) {
 				case "start":
 					timer.setTime(Long.valueOf(cmd[1]));
+					persistTimer(Long.valueOf(cmd[1]));
 					timer.startSilent();
 					break;
 				case "play":
@@ -231,8 +245,10 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	public void addColumn(String id, String ownerId, String name) {
 		log.info("add column: {} ({})", name, id);
 		TKBData tmp = repository.findById(getId().get()).get();
+
 		tmp.addColumn(TKBColumn.builder().id(id).ownerId(ownerId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns())).name(name)
 				.build());
+
 		repository.save(tmp);
 	}
 
@@ -259,25 +275,26 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	}
 
 	public HorizontalLayout createHeaderLayout() {
-		HorizontalLayout layout = new HorizontalLayout();
-		layout.setSpacing(false);
-		layout.setMargin(false);
 		HorizontalLayout left = new HorizontalLayout();
+		left.setAlignItems(Alignment.CENTER);
 		left.setSpacing(false);
 		left.setMargin(false);
 		left.setWidthFull();
-		left.setAlignItems(Alignment.CENTER);
+
 		HorizontalLayout right = new HorizontalLayout();
+		right.setJustifyContentMode(JustifyContentMode.END);
+		right.setAlignItems(Alignment.CENTER);
 		right.setSpacing(false);
 		right.setMargin(false);
 		right.setWidthFull();
-		right.setJustifyContentMode(JustifyContentMode.END);
-		right.setAlignItems(Alignment.CENTER);
-		layout.add(left, right);
 
+		HorizontalLayout layout = new HorizontalLayout();
 		layout.getStyle().set("border", "0.5px solid black");
 		layout.setAlignItems(Alignment.CENTER);
+		layout.setSpacing(false);
+		layout.setMargin(false);
 		layout.setWidthFull();
+		layout.add(left, right);
 
 		Button b = new Button("Column", VaadinIcon.PLUS.create());
 		ToolTip.add(b, "Create new column");
@@ -314,6 +331,12 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		themeToggleButton = new ThemeToggleButton(false);
 
 		MenuBar menuBar = new MenuBar();
+		ToolTip.add(menuBar, "Settings");
+
+		menuBar.getStyle().set("margin-right", "5px");
+		menuBar.getStyle().set("margin-left", "1px");
+		menuBar.addThemeName("no-overflow-button");
+
 		right.add(menuBar);
 
 		MenuItem menuItem = menuBar.addItem(VaadinIcon.COG.create());
@@ -356,7 +379,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	private TimerComponent createTimer2() {
 		timer = new TimerComponent();
-		timer.setTime(180000);
+		timer.setTime(options.getTimerInMillis());
 		timer.addStartListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "start." + timer.getTime()));
 		timer.addPauseListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "pause"));
 		timer.addPlayListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "play"));
@@ -386,5 +409,11 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		}
 
 		return "Error creating URL Resource";
+	}
+	
+	public void persistTimer(long time) {
+		options = optionRepository.findById(options.getId()).get();
+		options.setTimerInMillis(time);
+		options = optionRepository.save(options);
 	}
 }

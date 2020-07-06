@@ -15,21 +15,21 @@ import com.vaadin.flow.shared.Registration;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class BroadcasterCardLikes {
+public class BroadcasterCardComment {
 
 	private static final Executor EXECUTOR = Executors.newCachedThreadPool();
 	private static final Map<String, List<Consumer<String>>> LISTENERS = Maps.newLinkedHashMap();
 
 	public static synchronized Registration register(String id, Consumer<String> listener) {
 		if (Config.DEBUG) {
-			log.info("registering cardlikes consumer for: " + id);
+			log.info("registering card comment consumer for: " + id);
 		}
 
 		LISTENERS.putIfAbsent(id, Lists.newLinkedList());
 		LISTENERS.get(id).add(listener);
 
 		return () -> {
-			synchronized (BroadcasterCardLikes.class) {
+			synchronized (BroadcasterCardComment.class) {
 				LISTENERS.remove(id);
 			}
 		};
@@ -38,7 +38,7 @@ public class BroadcasterCardLikes {
 	public static synchronized void broadcast(String id, String message) {
 		StreamUtils.parallelStream(LISTENERS.get(id)).forEach(e -> {
 			if (Config.DEBUG) {
-				log.info("broadcast message '{}' to id '{}'", message, id);
+				log.info("broadcast card comment message '{}' to id '{}'", message, id);
 			}
 			
 			EXECUTOR.execute(() -> e.accept(message));

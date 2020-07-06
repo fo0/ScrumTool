@@ -9,7 +9,7 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterBoard;
-import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumns;
+import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumn;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
@@ -24,6 +24,7 @@ import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.utils.StreamUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.Utils;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
 import com.fo0.vaadin.scrumtool.ui.views.utils.KBViewUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -85,6 +86,22 @@ public class ColumnComponent extends VerticalLayout {
 		captionLayout.setSpacing(false);
 
 		if (KBViewUtils.isAllowed(view.getOptions(), column.getOwnerId())) {
+			Button btnEdit = new Button(VaadinIcon.EDIT.create());
+			ToolTip.add(btnEdit, "Edit the column");
+			btnEdit.addClickListener(e -> {
+				//@formatter:off
+				new TextDialog("Change Caption", h3.getText(), savedText -> {
+					log.info("Edit column: " + getId().get());
+					TKBColumn c = repository.findById(id).get();
+					c.setName(savedText);
+					repository.save(c);
+					BroadcasterColumn.broadcast(id, "update");
+				}).open();
+				//@formatter:on
+			});
+			captionLayout.add(btnEdit);
+			captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btnEdit);
+			
 			Button btnShuffle = new Button(VaadinIcon.RANDOM.create());
 			ToolTip.add(btnShuffle, "Shuffle the cards");
 			btnShuffle.addClickListener(e -> {
@@ -105,7 +122,7 @@ public class ColumnComponent extends VerticalLayout {
 				
 				tmp.setCards(Sets.newHashSet(toShuffle));
 				tmp = repository.save(tmp);
-				BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.MESSAGE_SHUFFLE);
+				BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.MESSAGE_SHUFFLE);
 				//@formatter:on
 			});
 			captionLayout.add(btnShuffle);
@@ -212,7 +229,7 @@ public class ColumnComponent extends VerticalLayout {
 				CardComponent droppedCard = (CardComponent) card;
 				log.debug("receive dropped card: " + droppedCard.getId().get());
 				TKBColumn col = addCardAndSave(Utils.randomId(), droppedCard.getCard());
-				BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.ADD_COLUMN + col.getId());
+				BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.ADD_COLUMN + col.getId());
 			});
 		});
 
@@ -222,7 +239,7 @@ public class ColumnComponent extends VerticalLayout {
 
 	private void addCardAndSaveAndBroadcast(String id, String owner, String message) {
 		TKBColumn col = addCardAndSave(id, owner, message);
-		BroadcasterColumns.broadcast(getId().get(), BroadcasterColumns.ADD_COLUMN + col.getId());
+		BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.ADD_COLUMN + col.getId());
 	}
 
 	private void deleteColumn() {
@@ -237,7 +254,7 @@ public class ColumnComponent extends VerticalLayout {
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
 		UI ui = UI.getCurrent();
-		broadcasterRegistration = BroadcasterColumns.register(getId().get(), event -> {
+		broadcasterRegistration = BroadcasterColumn.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
@@ -246,12 +263,12 @@ public class ColumnComponent extends VerticalLayout {
 				String[] cmd = event.split("\\.");
 
 				switch (cmd[0]) {
-				case BroadcasterColumns.MESSAGE_SHUFFLE:
+				case BroadcasterColumn.MESSAGE_SHUFFLE:
 					ColumnComponent.this.cards.removeAll();
 					ColumnComponent.this.reload();
 					break;
 
-				case BroadcasterColumns.ADD_COLUMN:
+				case BroadcasterColumn.ADD_COLUMN:
 					ColumnComponent.this.addCardAndReload(cmd[1]);
 					break;
 

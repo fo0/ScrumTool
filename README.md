@@ -32,11 +32,10 @@ java -cp h2*.jar org.h2.tools.Shell -url jdbc:h2:file:./database -user sa -passw
 java -cp h2*.jar org.h2.tools.Shell -url jdbc:h2:file:./database -user sa -password sa -sql \
 "SET REFERENTIAL_INTEGRITY FALSE;\
 truncate table tkbdata;\
-truncate table tkbcolumn_tkbcard;\
+truncate table tkboption;\
 truncate table tkbcolumn;\
-truncate table tkbcard_tkbcardlikes;\
 truncate table tkbcardlikes;\
-truncate table tkbcard"
+truncate table tkbcardcomment;
 ```
 
 ### truncate all data at midnight

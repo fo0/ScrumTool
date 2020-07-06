@@ -8,6 +8,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
@@ -39,10 +40,16 @@ public class TKBCard implements Serializable, IDataOrder {
 	private int dataOrder = -1;
 
 	private String text;
-
+	
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "cardId")
 	@Builder.Default
 	private Set<TKBCardLikes> likes = Sets.newHashSet();
+	
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "cardId")
+	@Builder.Default
+	private Set<TKBCardComment> comments = Sets.newHashSet();
 
 	public void removeLikeByOwnerId(String ownerId) {
 		likes.stream().filter(e -> e.getOwnerId().equals(ownerId)).findFirst().ifPresent(likes::remove);
