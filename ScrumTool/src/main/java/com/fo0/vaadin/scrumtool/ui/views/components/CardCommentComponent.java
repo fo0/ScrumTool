@@ -70,6 +70,7 @@ public class CardCommentComponent extends HorizontalLayout {
 				c.setText(savedText);
 				cardCommentRepository.save(c);
 				BroadcasterCardComment.broadcast(cardId, "update");
+				BroadcasterCard.broadcast(cardId, "update");
 			}).open();
 		});
 
