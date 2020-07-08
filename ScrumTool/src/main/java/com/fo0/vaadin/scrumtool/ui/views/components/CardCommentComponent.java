@@ -2,6 +2,7 @@ package com.fo0.vaadin.scrumtool.ui.views.components;
 
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardComment;
+import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardCommentRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
@@ -39,9 +40,10 @@ public class CardCommentComponent extends HorizontalLayout {
 		setSpacing(true);
 		setPadding(true);
 		setMargin(false);
-		label = new Label(comment.getText());
+		label = new Label();
 		label.getStyle().set("word-break", "break-word");
 		label.setWidthFull();
+		changeText(comment.getText());
 		add(label);
 
 		VerticalLayout btnLayout = new VerticalLayout();
@@ -77,7 +79,7 @@ public class CardCommentComponent extends HorizontalLayout {
 		Icon editIcon = VaadinIcon.EDIT.create();
 		add(editIcon);
 	}
-
+	
 	public void delete() {
 		log.info("delete card comment: {}", getId().get());
 		TKBCardComment cc = cardCommentRepository.findById(getId().get()).get();
@@ -98,6 +100,10 @@ public class CardCommentComponent extends HorizontalLayout {
 	private void changeText(String text) {
 		if (!label.getText().equals(text)) {
 			label.setText(text);
+		}
+		
+		if (Config.DEBUG) {
+			label.setText(text + " (" + comment.getDataOrder() + ")");
 		}
 	}
 	
