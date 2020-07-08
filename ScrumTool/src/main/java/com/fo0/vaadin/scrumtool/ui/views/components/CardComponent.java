@@ -1,5 +1,8 @@
 package com.fo0.vaadin.scrumtool.ui.views.components;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
@@ -8,6 +11,7 @@ import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
+import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardComment;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
@@ -78,7 +82,7 @@ public class CardComponent extends HorizontalLayout {
 
 		btnComment = new Button(VaadinIcon.COMMENT_O.create());
 		ToolTip.add(btnComment, "Comment the Card");
-		changeButtonCommentsCaption(CollectionUtils.size(card.getComments()));
+		changeButtonCommentsCaption(card.getComments());
 		btnComment.addClickListener(e -> {
 			new CommentDialog(cardId, label.getText()).open();
 		});
@@ -162,13 +166,14 @@ public class CardComponent extends HorizontalLayout {
 
 		likeComponent.reload();
 		
-		changeButtonCommentsCaption(CollectionUtils.size(card.getComments()));
+		changeButtonCommentsCaption(card.getComments());
 	}
 
-	public void changeButtonCommentsCaption(int count) {
-		if (count > 0) {
-			btnComment.setText(String.valueOf(count));
+	public void changeButtonCommentsCaption(Set<TKBCardComment> set) {
+		if (CollectionUtils.size(set) > 0) {
+			btnComment.setText(String.valueOf(set.size()));
 			btnComment.setIcon(VaadinIcon.COMMENT.create());
+			ToolTip.addLines(btnComment, set.stream().map(TKBCardComment::getText).collect(Collectors.toList()));
 		} else {
 			btnComment.setIcon(VaadinIcon.COMMENT_O.create());
 		}
