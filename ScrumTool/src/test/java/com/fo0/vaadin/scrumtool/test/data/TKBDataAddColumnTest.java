@@ -8,38 +8,30 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fo0.vaadin.scrumtool.ui.config.Profiles;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardLikesRepository;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
+import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
 
 @SpringBootTest(classes = PersistenceConfig.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles(Profiles.H2_DRIVER)
-public class TKBDataFetchTest {
+public class TKBDataAddColumnTest {
 
 	@Autowired
 	private KBDataRepository dataRepository;
 
-	@Autowired
-	private KBColumnRepository columnRepository;
-
-	@Autowired
-	private KBCardRepository cardRepository;
-
-	@Autowired
-	private KBCardLikesRepository cardLikerepository;
-
+	@Transactional
 	@Test
 	public void findAllColumnsByRepo() {
-		// persist data with 2 columns
-		TKBData data = TKBUtils.randomTkbData4();
+		TKBData data = TKBData.builder().build();
 		dataRepository.save(data);
 
-		assertEquals(3, dataRepository.findByIdFetched(data.getId()).getColumns().size());
+		data = dataRepository.insertColumnById(data.getId(), TKBColumn.builder().name("Lazy").build());
+
+		assertEquals(1, dataRepository.findByIdFetched(data.getId()).getColumns().size());
 	}
 
 }

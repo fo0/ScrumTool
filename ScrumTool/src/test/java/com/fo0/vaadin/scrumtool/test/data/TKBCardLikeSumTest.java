@@ -11,35 +11,32 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.fo0.vaadin.scrumtool.ui.config.Profiles;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardLikesRepository;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
 
 @SpringBootTest(classes = PersistenceConfig.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles(Profiles.H2_DRIVER)
-public class TKBDataFetchTest {
+public class TKBCardLikeSumTest {
 
 	@Autowired
 	private KBDataRepository dataRepository;
 
 	@Autowired
-	private KBColumnRepository columnRepository;
-
-	@Autowired
-	private KBCardRepository cardRepository;
-
-	@Autowired
-	private KBCardLikesRepository cardLikerepository;
+	private KBCardLikesRepository repository;
 
 	@Test
-	public void findAllColumnsByRepo() {
-		// persist data with 2 columns
-		TKBData data = TKBUtils.randomTkbData4();
-		dataRepository.save(data);
+	public void cardLikesInDataByOwnerTest() {
+		TKBData data = dataRepository.save(TKBUtils.randomTkbData4());
 
-		assertEquals(3, dataRepository.findByIdFetched(data.getId()).getColumns().size());
+		assertEquals(6, repository.countLikesInDataByOwner(data.getId(), "owner1"));
+	}
+	
+	@Test
+	public void cardLikesInDataByOwnerNullTest() {
+		TKBData data = dataRepository.save(TKBData.builder().build());
+
+		assertEquals(0, repository.countLikesInDataByOwner(data.getId(), "owner1"));
 	}
 
 }

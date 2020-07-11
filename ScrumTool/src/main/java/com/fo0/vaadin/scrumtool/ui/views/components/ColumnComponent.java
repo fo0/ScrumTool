@@ -246,7 +246,7 @@ public class ColumnComponent extends VerticalLayout {
 	private void deleteColumn() {
 		log.info("delete column: " + getId().get());
 		Notification.show("Deleting Column: " + h3.getText(), Config.NOTIFICATION_DURATION, Position.MIDDLE);
-		TKBData c = dataRepository.findById(view.getId().get()).get();
+		TKBData c = dataRepository.findByIdFetched(view.getId().get());
 		c.removeColumnById(id);
 		dataRepository.save(c);
 		BroadcasterBoard.broadcast(view.getId().get(), "update");

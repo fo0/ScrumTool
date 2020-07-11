@@ -124,7 +124,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			add(b);
 			return;
 		}
-
+		
 		TKBData tmp = repository.findById(getId().get()).get();
 		if (options == null) {
 			options = tmp.getOptions();
@@ -205,7 +205,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	}
 
 	public void reload() {
-		TKBData tmp = repository.findById(getId().get()).get();
+		TKBData tmp = repository.findByIdFetched(getId().get());
 
 		// update layout with new missing data
 		tmp.getColumns().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).forEachOrdered(pdc -> {
@@ -244,11 +244,17 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	public void addColumn(String id, String ownerId, String name) {
 		log.info("add column: {} ({})", name, id);
-		TKBData tmp = repository.findById(getId().get()).get();
+		TKBData tmp = repository.findByIdFetched(getId().get());
 
-		tmp.addColumn(TKBColumn.builder().id(id).ownerId(ownerId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns())).name(name)
+		//@formatter:off
+		tmp.addColumn(TKBColumn.builder()
+				.id(id)
+				.name(name)
+				.ownerId(ownerId)
+				.dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns()))
 				.build());
-
+		//@formatter:on
+		
 		repository.save(tmp);
 	}
 
@@ -355,7 +361,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		menuItem.getSubMenu().addItem("Reset all given Likes", e -> {
 			KBConfirmDialog.createQuestion().withCaption("Reset all given Likes").withMessage("This will delete every like on any card")
 					.withOkButton(() -> {
-						TKBData data = repository.findById(getId().get()).get();
+						TKBData data = repository.findByIdFetched(getId().get());
 						data.resetLikes();
 						repository.save(data);
 						BroadcasterBoard.broadcast(getId().get(), "update");
@@ -365,7 +371,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		menuItem.getSubMenu().addItem("Refresh", e -> sync());
 
 		menuItem.getSubMenu().addItem("Export", e -> {
-			new MarkDownDialog(repository.findById(getId().get()).get()).open();
+			new MarkDownDialog(repository.findByIdFetched(getId().get())).open();
 		});
 
 		MenuItem shareMenu = menuItem.getSubMenu().addItem("Share with others", e -> {

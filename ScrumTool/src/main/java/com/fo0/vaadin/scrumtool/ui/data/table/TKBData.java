@@ -43,7 +43,7 @@ public class TKBData implements IDataId, Serializable {
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private TKBOptions options;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "dataId")
 	@Builder.Default
 	private Set<TKBColumn> columns = Sets.newHashSet();

@@ -7,7 +7,6 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import com.fo0.vaadin.scrumtool.ui.config.Config;
-import com.fo0.vaadin.scrumtool.ui.utils.StreamUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vaadin.flow.shared.Registration;
@@ -36,12 +35,7 @@ public class BroadcasterBoard {
 	}
 
 	public static synchronized void broadcast(String id, String message) {
-		StreamUtils.parallelStream(BroadcasterBoard.LISTENERS.get(id)).forEach(e -> {
-			if (Config.DEBUG) {
-				log.info("broadcast message '{}' to id '{}'", message, id);
-			}
-			EXECUTOR.execute(() -> e.accept(message));
-		});
+		BroadcasterUtils.runParallel(EXECUTOR, LISTENERS, id, message);
 	}
 
 }

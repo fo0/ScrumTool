@@ -13,109 +13,83 @@ import lombok.Builder;
 public class TKBUtils {
 
 	public static TKBData randomTkbData() {
-		//@formatter:off
-		return TKBData.builder()
-				.options(TKBOptions.builder().build())
-				.columns(Sets.newHashSet(TKBColumn.builder()
-						.name("column1")
+		// @formatter:off
+		return TKBData.builder().options(TKBOptions.builder().build())
+				.columns(Sets.newHashSet(TKBColumn.builder().name("column1")
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()))
 								.build()))
 						.build()))
 				.build();
-		//@formatter:on
+		// @formatter:on
 	}
-	
+
 	public static TKBData randomTkbData2() {
-		//@formatter:off
-		return TKBData.builder()
-				.options(TKBOptions.builder().build())
-				.columns(Sets.newHashSet(TKBColumn.builder()
-						.name("column1")
+		// @formatter:off
+		return TKBData.builder().options(TKBOptions.builder().build()).columns(Sets.newHashSet(
+				TKBColumn.builder().name("column1")
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()))
 								.build()))
 						.build(),
-						TKBColumn.builder()
-						.name("column2")
+				TKBColumn.builder().name("column2")
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()))
 								.build()))
 						.build()))
 				.build();
-		//@formatter:on
+		// @formatter:on
 	}
-	
+
 	public static TKBData randomTkbData3() {
-		//@formatter:off
-		TKBData data =  TKBData.builder().build();
+		// @formatter:off
+		TKBData data = TKBData.builder().build();
 		data.setOptions(TKBOptions.builder().build());
-		data.setColumns(Sets.newHashSet(TKBColumn.builder()
-						.name("column1")
+		data.setColumns(Sets.newHashSet(
+				TKBColumn.builder().name("column1")
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()))
 								.build()))
 						.build(),
-						TKBColumn.builder()
-						.name("column2")
+				TKBColumn.builder().name("column2")
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()))
 								.build()))
 						.build()));
 		return data;
-		//@formatter:on
+		// @formatter:on
 	}
-	
 
 	public static TKBData randomTkbData4() {
-		//@formatter:off
-		TKBData data =  TKBData.builder().build();
+		// @formatter:off
+		TKBData data = TKBData.builder().build();
 		data.setOptions(TKBOptions.builder().build());
-		data.setColumns(Sets.newHashSet(TKBColumn.builder()
-						.name("column1")
+		data.setColumns(Sets.newHashSet(
+				TKBColumn.builder().name("column1")
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()))
 								.build()))
 						.build(),
-						TKBColumn.builder()
-						.name("column2")
+				TKBColumn.builder().name("column2")
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()))
 								.build()))
 						.build(),
-						TKBColumn.builder()
-						.name("column3")
+				TKBColumn.builder().name("column3")
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()))
 								.build()))
 						.build()));
 		return data;
-		//@formatter:on
+		// @formatter:on
 	}
-
 
 }
