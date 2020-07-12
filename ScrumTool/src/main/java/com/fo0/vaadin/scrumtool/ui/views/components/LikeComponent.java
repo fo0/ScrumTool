@@ -1,7 +1,5 @@
 package com.fo0.vaadin.scrumtool.ui.views.components;
 
-import org.springframework.expression.spel.ast.OpAnd;
-
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardLike;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardLikesRepository;
@@ -10,7 +8,6 @@ import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBOptionRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardLikes;
-import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBOptions;
 import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;

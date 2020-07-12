@@ -39,7 +39,7 @@ public class MainLayout extends VerticalLayout implements RouterLayout, IThemeTo
 		setSizeFull();
 		setPadding(false);
 		
-		SessionUtils.createSessionIdIfExists();
+		SessionUtils.createSessionIdIfNotExistsExists();
 		
 		checkOSTheme();
 	}

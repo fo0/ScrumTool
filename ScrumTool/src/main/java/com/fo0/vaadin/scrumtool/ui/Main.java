@@ -9,7 +9,7 @@ import com.fo0.vaadin.scrumtool.ui.config.Profiles;
 /**
  * The entry point of the Spring Boot application.
  */
-@SpringBootApplication()
+@SpringBootApplication
 public class Main extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {

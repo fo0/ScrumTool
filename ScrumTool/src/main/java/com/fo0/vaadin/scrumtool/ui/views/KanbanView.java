@@ -9,14 +9,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterBoardTimer;
+import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterUsers;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBOptionRepository;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBUserRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBOptions;
+import com.fo0.vaadin.scrumtool.ui.data.table.TKBUser;
+import com.fo0.vaadin.scrumtool.ui.model.User;
 import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.views.components.ColumnComponent;
 import com.fo0.vaadin.scrumtool.ui.views.components.KBConfirmDialog;
@@ -77,9 +81,12 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Autowired
 	private KBColumnRepository columnRepository;
-	
+
 	@Autowired
 	private KBOptionRepository optionRepository;
+
+	@Autowired
+	private KBUserRepository userRepository;
 
 	@Getter
 	private VerticalLayout root;
@@ -93,11 +100,16 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	@Getter
 	private TKBOptions options;
 	private String ownerId;
-	
+
+	@Getter
+	private String dataUserId;
+
 	private Registration broadcasterRegistration;
 	private Registration broadcasterTimerRegistration;
+	private Registration broadcasterUsers;
 
 	private TimerComponent timer;
+	private Button btnUsers;
 
 	private void init() {
 		log.info("init");
@@ -115,7 +127,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Override
 	public void setParameter(BeforeEvent event, String parameter) {
-		SessionUtils.createSessionIdIfExists();
 		setId(parameter);
 
 		if (!repository.findById(getId().get()).isPresent()) {
@@ -124,15 +135,23 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			add(b);
 			return;
 		}
-		
+
 		TKBData tmp = repository.findById(getId().get()).get();
 		if (options == null) {
 			options = tmp.getOptions();
 			if (options == null) {
-				options = new TKBOptions();
+				options = TKBOptions.builder().build();
 			}
+
+			TKBUser u = userRepository.findByDataIdFetched(getId().get());
+			if (u == null) {
+				u = TKBUser.builder().build();
+			}
+			dataUserId = u.getId();
 			ownerId = tmp.getOwnerId();
 		}
+
+		userRepository.insertUserById(dataUserId, User.builder().id(SessionUtils.getSessionId()).active(true).build());
 
 		init();
 		sync();
@@ -142,19 +161,33 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	protected void onAttach(AttachEvent attachEvent) {
 //		super.onAttach(attachEvent);
 		UI ui = UI.getCurrent();
+
 		broadcasterRegistration = BroadcasterBoard.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
-					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
+					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION,
+							Position.BOTTOM_END);
 				}
 				reload();
+			});
+		});
+
+		broadcasterUsers = BroadcasterUsers.register(getId().get(), event -> {
+			ui.access(() -> {
+				if (Config.DEBUG) {
+					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION,
+							Position.BOTTOM_END);
+				}
+
+				changeUsersCounter();
 			});
 		});
 
 		broadcasterTimerRegistration = BroadcasterBoardTimer.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
-					Notification.show("receiving broadcast for timer", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
+					Notification.show("receiving broadcast for timer", Config.NOTIFICATION_DURATION,
+							Position.BOTTOM_END);
 				}
 
 				String[] cmd = event.split("\\.");
@@ -178,10 +211,16 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				}
 			});
 		});
+
+		BroadcasterUsers.broadcast(getId().get(), "update");
 	}
 
 	@Override
 	protected void onDetach(DetachEvent detachEvent) {
+		log.info("detaching ui");
+		userRepository.deleteUserById(dataUserId, SessionUtils.getSessionId());
+		BroadcasterUsers.broadcast(getId().get(), "delete");
+
 		if (broadcasterRegistration != null) {
 			broadcasterRegistration.remove();
 			broadcasterRegistration = null;
@@ -194,6 +233,13 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			broadcasterTimerRegistration = null;
 		} else {
 			log.info("cannot remove broadcast timer, because it is null");
+		}
+
+		if (broadcasterUsers != null) {
+			broadcasterUsers.remove();
+			broadcasterUsers = null;
+		} else {
+			log.info("cannot remove broadcast, because it is null");
 		}
 
 		super.onDetach(detachEvent);
@@ -219,13 +265,13 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 
 		// removes deleted columns
-		//@formatter:off
+		// @formatter:off
 		getColumnComponents().stream()
 				.filter(e -> tmp.getColumns().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
 				.collect(Collectors.toList()).forEach(e -> {
 					columns.remove(e);
 				});
-		//@formatter:on
+		// @formatter:on
 
 		// reorder order columns
 		// TODO
@@ -246,15 +292,11 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		log.info("add column: {} ({})", name, id);
 		TKBData tmp = repository.findByIdFetched(getId().get());
 
-		//@formatter:off
-		tmp.addColumn(TKBColumn.builder()
-				.id(id)
-				.name(name)
-				.ownerId(ownerId)
-				.dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns()))
-				.build());
-		//@formatter:on
-		
+		// @formatter:off
+		tmp.addColumn(TKBColumn.builder().id(id).name(name).ownerId(ownerId)
+				.dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns())).build());
+		// @formatter:on
+
 		repository.save(tmp);
 	}
 
@@ -323,7 +365,8 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				Dialog d = new Dialog();
 				d.setWidth("500px");
 				d.setHeight("500px");
-				Label t = new Label(new GsonBuilder().setPrettyPrinting().create().toJson(repository.findById(getId().get())));
+				Label t = new Label(new GsonBuilder().setPrettyPrinting().create()
+						.toJson(repository.findByIdFetched(getId().get())));
 				t.getStyle().set("white-space", "pre-wrap");
 				t.setSizeFull();
 				d.add(t);
@@ -334,7 +377,8 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		right.add(createTimer2());
 
-		themeToggleButton = new ThemeToggleButton(false);
+		btnUsers = new Button(VaadinIcon.GROUP.create());
+		right.add(btnUsers);
 
 		MenuBar menuBar = new MenuBar();
 		ToolTip.add(menuBar, "Settings");
@@ -349,8 +393,9 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		if (KBViewUtils.isAllowed(options, ownerId)) {
 			menuItem.getSubMenu().addItem("Delete Board", e -> {
-				KBConfirmDialog.createQuestion().withCaption("Delete Board")
-						.withMessage(String.format("This will delete the board and '%s' columns", columns.getComponentCount()))
+				KBConfirmDialog
+						.createQuestion().withCaption("Delete Board").withMessage(String
+								.format("This will delete the board and '%s' columns", columns.getComponentCount()))
 						.withOkButton(() -> {
 							repository.deleteById(getId().get());
 							UI.getCurrent().navigate(MainView.class);
@@ -359,8 +404,8 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		}
 
 		menuItem.getSubMenu().addItem("Reset all given Likes", e -> {
-			KBConfirmDialog.createQuestion().withCaption("Reset all given Likes").withMessage("This will delete every like on any card")
-					.withOkButton(() -> {
+			KBConfirmDialog.createQuestion().withCaption("Reset all given Likes")
+					.withMessage("This will delete every like on any card").withOkButton(() -> {
 						TKBData data = repository.findByIdFetched(getId().get());
 						data.resetLikes();
 						repository.save(data);
@@ -375,9 +420,11 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 
 		MenuItem shareMenu = menuItem.getSubMenu().addItem("Share with others", e -> {
-			new ShareLayout("Share Layout", () -> getId().get(), () -> createCurrentUrl(VaadinService.getCurrentRequest())).open();
+			new ShareLayout("Share Layout", () -> getId().get(),
+					() -> createCurrentUrl(VaadinService.getCurrentRequest())).open();
 		});
 
+		themeToggleButton = new ThemeToggleButton(false);
 		menuItem.getSubMenu().addItem(themeToggleButton);
 
 		return layout;
@@ -416,10 +463,15 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		return "Error creating URL Resource";
 	}
-	
+
+	public void changeUsersCounter() {
+		btnUsers.setText(String.valueOf(userRepository.countByDataIdFetched(getId().get())));
+	}
+
 	public void persistTimer(long time) {
 		options = optionRepository.findById(options.getId()).get();
 		options.setTimerInMillis(time);
 		options = optionRepository.save(options);
 	}
+
 }
