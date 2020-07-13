@@ -89,14 +89,17 @@ public class MainLayout extends VerticalLayout implements RouterLayout, IThemeTo
 
 	@Override
 	public void configurePage(InitialPageSettings settings) {
-		//@formatter:off
-		String script = String.format("window.onbeforeunload = function (e) { document.getElementById('%s').$server.detach(); };", getId().get());
-		settings.addInlineWithContents(InitialPageSettings.Position.PREPEND, script, InitialPageSettings.WrapMode.JAVASCRIPT);
-		//@formatter:on
+		// @formatter:off
+		String script = String.format(
+				"window.onbeforeunload = function (e) { document.getElementById('%s').$server.detach(); };",
+				getId().get());
+		settings.addInlineWithContents(InitialPageSettings.Position.PREPEND, script,
+				InitialPageSettings.WrapMode.JAVASCRIPT);
+		// @formatter:on
 	}
 
 	@ClientCallable
-	public void browserIsLeaving() {
+	public void detach() {
 		log.info("closing ui");
 		UI.getCurrent().close();
 	}

@@ -159,7 +159,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
-//		super.onAttach(attachEvent);
 		UI ui = UI.getCurrent();
 
 		broadcasterRegistration = BroadcasterBoard.register(getId().get(), event -> {
@@ -213,6 +212,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		});
 
 		BroadcasterUsers.broadcast(getId().get(), "update");
+		super.onAttach(attachEvent);
 	}
 
 	@Override
