@@ -17,18 +17,16 @@ public class TKBLikeTest {
 
 	@Test
 	public void same_owner_has_2_likes_1_card() {
-		//@formatter:off
+		// @formatter:off
 		TKBData data = TKBData.builder()
 				.columns(Sets.newHashSet(TKBColumn.builder()
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()))
 								.build()))
 						.build()))
 				.build();
-		//@formatter:on
+		// @formatter:on
 
 		assertNotNull(data);
 
@@ -38,57 +36,49 @@ public class TKBLikeTest {
 
 	@Test
 	public void same_owner_has_4_likes_2_columns() {
-		//@formatter:off
-		TKBData data = TKBData.builder()
-				.columns(Sets.newHashSet(TKBColumn.builder()
+		// @formatter:off
+		TKBData data = TKBData.builder().columns(Sets.newHashSet(
+				TKBColumn.builder()
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()))
 								.build()))
 						.build(),
-						
-						TKBColumn.builder()
+
+				TKBColumn.builder()
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build()))
 								.build()))
 						.build()))
 				.build();
-		//@formatter:on
+		// @formatter:on
 
 		assertNotNull(data);
 
 		assertEquals(4, data.cardLikesByOwnerId("owner1"));
 		assertEquals(0, data.cardLikesByOwnerId("owner2"));
 	}
-	
+
 	@Test
 	public void two_owner_has_2_likes_1_columns() {
-		//@formatter:off
-		TKBData data = TKBData.builder()
-				.columns(Sets.newHashSet(TKBColumn.builder()
+		// @formatter:off
+		TKBData data = TKBData.builder().columns(Sets.newHashSet(
+				TKBColumn.builder()
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner2").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner2").likeValue(1).build()))
 								.build()))
 						.build(),
-						
-						TKBColumn.builder()
+
+				TKBColumn.builder()
 						.cards(Sets.newHashSet(TKBCard.builder()
-								.likes(Sets.newHashSet(
-										TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
-										TKBCardLikes.builder().ownerId("owner2").likeValue(1).build()
-										))
+								.likes(Sets.newHashSet(TKBCardLikes.builder().ownerId("owner1").likeValue(1).build(),
+										TKBCardLikes.builder().ownerId("owner2").likeValue(1).build()))
 								.build()))
 						.build()))
 				.build();
-		//@formatter:on
+		// @formatter:on
 
 		assertNotNull(data);
 

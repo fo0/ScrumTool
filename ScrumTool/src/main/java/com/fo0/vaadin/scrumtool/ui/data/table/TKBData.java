@@ -23,9 +23,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.ToString;
 
 @Data
 @EqualsAndHashCode(of = { "id" })
+@ToString(exclude = { "columns", "user" })
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -41,9 +43,14 @@ public class TKBData implements IDataId, Serializable {
 	private String ownerId;
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	private TKBOptions options;
+	@Builder.Default
+	private TKBOptions options = TKBOptions.builder().build();
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private TKBUser user = TKBUser.builder().build();
+
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "dataId")
 	@Builder.Default
 	private Set<TKBColumn> columns = Sets.newHashSet();

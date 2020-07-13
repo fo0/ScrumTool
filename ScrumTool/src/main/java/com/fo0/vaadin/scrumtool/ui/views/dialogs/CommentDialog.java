@@ -1,5 +1,7 @@
 package com.fo0.vaadin.scrumtool.ui.views.dialogs;
 
+import java.util.Comparator;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -7,6 +9,7 @@ import org.apache.logging.log4j.util.Strings;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardComment;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
+import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardCommentRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
@@ -127,7 +130,7 @@ public class CommentDialog extends Dialog {
 		commentsLayout.removeAll();
 		TKBCard card = cardRepository.findById(cardId).get();
 		addTitle(CollectionUtils.size(card.getComments()), cardText);
-		card.getComments().forEach(e -> commentsLayout.add(new CardCommentComponent(cardId, e)));
+		card.getComments().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder).reversed()).forEach(e -> commentsLayout.add(new CardCommentComponent(cardId, e)));
 	}
 
 	private void addComment(TKBCardComment cardComment) {

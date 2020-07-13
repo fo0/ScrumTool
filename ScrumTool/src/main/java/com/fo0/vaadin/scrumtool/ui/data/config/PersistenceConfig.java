@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -15,9 +16,12 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.fo0.vaadin.scrumtool.ui.config.Profiles;
+
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories("com.fo0.vaadin.scrumtool.ui.data.repository")
+@Profile(Profiles.H2_DRIVER)
 public class PersistenceConfig {
 
 	@Bean

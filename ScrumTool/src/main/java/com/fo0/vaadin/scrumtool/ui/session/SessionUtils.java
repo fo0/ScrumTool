@@ -5,7 +5,7 @@ import com.vaadin.flow.server.VaadinSession;
 
 public class SessionUtils {
 
-	public static void createSessionIdIfExists() {
+	public static void createSessionIdIfNotExistsExists() {
 		if (getSessionId() == null) {
 			VaadinSession.getCurrent().setAttribute("session-id", Utils.randomId());
 		}

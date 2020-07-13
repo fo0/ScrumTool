@@ -2,11 +2,13 @@ package com.fo0.vaadin.scrumtool.ui.views.components;
 
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardLike;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardLikesRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBOptionRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardLikes;
-import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
+import com.fo0.vaadin.scrumtool.ui.data.table.TKBOptions;
 import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.utils.Utils;
@@ -32,6 +34,8 @@ public class LikeComponent extends VerticalLayout {
 
 	private KBCardRepository repository = SpringContext.getBean(KBCardRepository.class);
 	private KBDataRepository repositoryData = SpringContext.getBean(KBDataRepository.class);
+	private KBOptionRepository repositoryDataOption = SpringContext.getBean(KBOptionRepository.class);
+	private KBCardLikesRepository repositoryCardLike = SpringContext.getBean(KBCardLikesRepository.class);
 
 	private String boardId;
 	private String cardId;
@@ -120,12 +124,12 @@ public class LikeComponent extends VerticalLayout {
 	}
 
 	public boolean isLikeLimitReachedByOwner(String ownerId) {
-		TKBData data = repositoryData.findById(boardId).get();
-		if (data.getOptions().getMaxLikesPerUser() == 0) {
+		TKBOptions data = repositoryDataOption.findById(view.getOptions().getId()).get();
+		if (data.getMaxLikesPerUser() == 0) {
 			return false;
 		}
 
-		return data.cardLikesByOwnerId(ownerId) >= data.getOptions().getMaxLikesPerUser();
+		return repositoryCardLike.countLikesInDataByOwner(boardId, ownerId) >= data.getMaxLikesPerUser();
 	}
 
 	public int getCurrentLikesByOwner() {

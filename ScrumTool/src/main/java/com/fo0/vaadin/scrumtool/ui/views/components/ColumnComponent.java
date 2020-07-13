@@ -33,8 +33,8 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dnd.DragSource;
+import com.vaadin.flow.component.dnd.DropEffect;
 import com.vaadin.flow.component.dnd.DropTarget;
-import com.vaadin.flow.component.dnd.EffectAllowed;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -224,6 +224,7 @@ public class ColumnComponent extends VerticalLayout {
 		cards.setHeightFull();
 
 		DropTarget<VerticalLayout> dropTarget = DropTarget.create(cards);
+		dropTarget.setDropEffect(DropEffect.MOVE);
 		dropTarget.addDropListener(e -> {
 			e.getDragSourceComponent().ifPresent(card -> {
 				CardComponent droppedCard = (CardComponent) card;
@@ -245,7 +246,7 @@ public class ColumnComponent extends VerticalLayout {
 	private void deleteColumn() {
 		log.info("delete column: " + getId().get());
 		Notification.show("Deleting Column: " + h3.getText(), Config.NOTIFICATION_DURATION, Position.MIDDLE);
-		TKBData c = dataRepository.findById(view.getId().get()).get();
+		TKBData c = dataRepository.findByIdFetched(view.getId().get());
 		c.removeColumnById(id);
 		dataRepository.save(c);
 		BroadcasterBoard.broadcast(view.getId().get(), "update");
@@ -328,7 +329,6 @@ public class ColumnComponent extends VerticalLayout {
 
 		// for dnd support
 		DragSource<CardComponent> dragConfig = DragSource.create(cc);
-		dragConfig.setEffectAllowed(EffectAllowed.MOVE);
 		dragConfig.addDragStartListener(e -> {
 			if (Config.DEBUG) {
 				Notification.show("Start Drag Card: " + e.getComponent().getCard().getText());
