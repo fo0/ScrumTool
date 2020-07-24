@@ -19,18 +19,22 @@ public class BroadcasterUtils {
 				log.info("broadcast message '{}' to id '{}'", message, id);
 			}
 
-			executor.execute(execute(id, message, e));
+			try {
+				executor.execute(execute(id, message, e));
+			} catch (Exception e2) {
+				log.error("failed to sync {} - {}", id, message);
+			}
 		});
 	}
-	
+
 	public static Runnable execute(String id, String message, Consumer<String> e) {
 		return () -> {
 			try {
 				e.accept(message);
-			} catch (Exception e2) {
+			} catch (Exception | Error e2) {
 				log.error("failed to sync {} - {}", id, message);
 			}
 		};
 	}
-	
+
 }
