@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.utils.StreamUtils;
 
@@ -14,7 +16,12 @@ import lombok.extern.log4j.Log4j2;
 public class BroadcasterUtils {
 
 	public static void runParallel(Executor executor, Map<String, List<Consumer<String>>> listeners, String id, String message) {
-		StreamUtils.stream(listeners.get(id)).forEach(e -> {
+		List<Consumer<String>> list = listeners.get(id);
+		if (CollectionUtils.isEmpty(list)) {
+			return;
+		}
+
+		StreamUtils.stream(list).forEach(e -> {
 			if (Config.DEBUG) {
 				log.info("broadcast message '{}' to id '{}'", message, id);
 			}
