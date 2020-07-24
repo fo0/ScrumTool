@@ -13,7 +13,12 @@ import com.fo0.vaadin.scrumtool.ui.config.Profiles;
 public class Main extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
-		new SpringApplicationBuilder(Main.class).profiles(Profiles.H2_DRIVER).run(args);
+		//@formatter:off
+		new SpringApplicationBuilder(Main.class)
+			.properties("vaadin.heartbeatinterval=5")
+			.profiles(Profiles.H2_DRIVER)
+			.run(args);
+		//@formatter:on
 	}
 
 }

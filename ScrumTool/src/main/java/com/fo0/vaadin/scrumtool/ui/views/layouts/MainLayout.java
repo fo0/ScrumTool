@@ -3,7 +3,6 @@ package com.fo0.vaadin.scrumtool.ui.views.layouts;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
@@ -19,6 +18,7 @@ import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.server.InitialPageSettings;
 import com.vaadin.flow.server.PageConfigurator;
+import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 
@@ -51,6 +51,10 @@ public class MainLayout extends VerticalLayout implements RouterLayout, IThemeTo
 		SessionUtils.createSessionIdIfNotExistsExists();
 
 		checkOSTheme();
+
+		VaadinResponse.getCurrent().getService().addSessionDestroyListener(e -> {
+			detach();
+		});
 	}
 
 	/**
@@ -65,8 +69,8 @@ public class MainLayout extends VerticalLayout implements RouterLayout, IThemeTo
 		Object value = ui.getSession().getAttribute(UIUtils.THEME_CHECK);
 
 		if (value == null) {
-			PendingJavaScriptResult jsResult = ui.getPage().executeJs(
-					"return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);");
+			PendingJavaScriptResult jsResult = ui.getPage()
+					.executeJs("return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);");
 
 			jsResult.then(Boolean.class, i -> {
 				if (i) {
@@ -82,9 +86,17 @@ public class MainLayout extends VerticalLayout implements RouterLayout, IThemeTo
 
 	@Override
 	public ThemeToggleButton getThemeToggleButton() {
-		return getChildren().filter(Objects::nonNull).filter(component -> component instanceof IThemeToggleButton)
-				.filter(Objects::nonNull).map(component -> (IThemeToggleButton) component).filter(Objects::nonNull)
-				.map(component -> component.getThemeToggleButton()).findAny().orElse(null);
+		//@formatter:off
+		return getChildren()
+				.filter(Objects::nonNull)
+				.filter(component -> component instanceof IThemeToggleButton)
+				.filter(Objects::nonNull)
+				.map(component -> (IThemeToggleButton) component)
+				.filter(Objects::nonNull)
+				.map(component -> component.getThemeToggleButton())
+				.findAny()
+				.orElse(null);
+		//@formatter:on
 	}
 
 	@Override
@@ -93,9 +105,9 @@ public class MainLayout extends VerticalLayout implements RouterLayout, IThemeTo
 		String script = String.format(
 				"window.onbeforeunload = function (e) { document.getElementById('%s').$server.detach(); };",
 				getId().get());
-		settings.addInlineWithContents(InitialPageSettings.Position.PREPEND, script,
-				InitialPageSettings.WrapMode.JAVASCRIPT);
+		settings.addInlineWithContents(InitialPageSettings.Position.PREPEND, script, InitialPageSettings.WrapMode.JAVASCRIPT);
 		// @formatter:on
+
 	}
 
 	@ClientCallable
