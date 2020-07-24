@@ -14,12 +14,12 @@ import lombok.extern.log4j.Log4j2;
 public class BroadcasterUtils {
 
 	public static void runParallel(Executor executor, Map<String, List<Consumer<String>>> listeners, String id, String message) {
-		StreamUtils.parallelStream(listeners.get(id)).forEach(e -> {
+		StreamUtils.stream(listeners.get(id)).forEach(e -> {
 			if (Config.DEBUG) {
 				log.info("broadcast message '{}' to id '{}'", message, id);
 			}
 
-			executor.execute(BroadcasterUtils.execute(id, message, e));
+			executor.execute(execute(id, message, e));
 		});
 	}
 	
