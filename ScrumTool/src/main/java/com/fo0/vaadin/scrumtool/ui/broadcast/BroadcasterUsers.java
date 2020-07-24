@@ -28,16 +28,12 @@ public class BroadcasterUsers {
 		LISTENERS.get(id).add(listener);
 
 		return () -> {
-			synchronized (BroadcasterUsers.class) {
-				LISTENERS.remove(id);
-			}
+			BroadcasterUtils.removeBroadcaster(LISTENERS, id);
 		};
 	}
 
 	public static synchronized void broadcast(String id, String message) {
 		BroadcasterUtils.runParallel(EXECUTOR, LISTENERS, id, message);
 	}
-
-
 
 }

@@ -26,11 +26,9 @@ public class BroadcasterBoard {
 
 		LISTENERS.putIfAbsent(id, Lists.newLinkedList());
 		LISTENERS.get(id).add(listener);
-
+		
 		return () -> {
-			synchronized (BroadcasterBoard.class) {
-				BroadcasterBoard.LISTENERS.remove(id);
-			}
+			BroadcasterUtils.removeBroadcaster(LISTENERS, id);
 		};
 	}
 

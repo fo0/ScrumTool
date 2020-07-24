@@ -239,7 +239,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 			broadcasterUsers.remove();
 			broadcasterUsers = null;
 		} else {
-			log.info("cannot remove broadcast, because it is null");
+			log.info("cannot remove broadcast User, because it is null");
 		}
 
 		super.onDetach(detachEvent);

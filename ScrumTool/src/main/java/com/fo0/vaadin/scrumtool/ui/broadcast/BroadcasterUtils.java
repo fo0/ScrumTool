@@ -15,7 +15,22 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BroadcasterUtils {
 
-	public static void runParallel(Executor executor, Map<String, List<Consumer<String>>> listeners, String id, String message) {
+	public static synchronized void removeBroadcaster(final Map<String, List<Consumer<String>>> listeners, String id) {
+		try {
+			List<Consumer<String>> list = listeners.get(id);
+			if (CollectionUtils.isEmpty(list)) {
+				if (Config.DEBUG) {
+					log.info("remove broadcast listener id '{}'", id);
+				}
+				listeners.remove(id);
+			}
+		} catch (Exception e) {
+			log.error("failed to remove broadcast listener id '{}'", id);
+		}
+	}
+
+	public static void runParallel(final Executor executor, final Map<String, List<Consumer<String>>> listeners, String id,
+			String message) {
 		List<Consumer<String>> list = listeners.get(id);
 		if (CollectionUtils.isEmpty(list)) {
 			return;

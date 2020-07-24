@@ -28,9 +28,7 @@ public class BroadcasterBoardTimer {
 		LISTENERS.get(id).add(listener);
 
 		return () -> {
-			synchronized (BroadcasterBoardTimer.class) {
-				BroadcasterBoardTimer.LISTENERS.remove(id);
-			}
+			BroadcasterUtils.removeBroadcaster(LISTENERS, id);
 		};
 	}
 

@@ -28,9 +28,7 @@ public class BroadcasterCardComment {
 		LISTENERS.get(id).add(listener);
 
 		return () -> {
-			synchronized (BroadcasterCardComment.class) {
-				LISTENERS.remove(id);
-			}
+			BroadcasterUtils.removeBroadcaster(LISTENERS, id);
 		};
 	}
 
