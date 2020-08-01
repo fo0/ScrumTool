@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
+import com.fo0.vaadin.scrumtool.ui.views.components.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.ui.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.ui.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CreateBoardDialog;
@@ -13,6 +14,7 @@ import com.fo0.vaadin.scrumtool.ui.views.layouts.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -61,8 +63,54 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 
 		root.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, centerLayout);
 		root.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+
+		add(createImprintButton());
 	}
-	
+
+	private HorizontalLayout createImprintButton() {
+		Button btn = new Button("Imprint");
+//		btn.getStyle().set("font-size", "(--material-button-font-size - 4px)");
+
+		btn.addClickListener(e -> {
+			//@formatter:off
+			Div label = new Div();
+			label.getElement().setProperty("innerHTML",
+					"<table>"+
+						"<tr>"+
+							"<td><b>GitHub</b></td>"+
+							"<td>https://github.com/fo0/ScrumTool</td>"+
+						"</tr>"+	
+							
+						"<tr>"+
+							"<td><b>Author</b></td>"+
+							"<td>fo0</td>"+
+						"</tr>"+	
+						
+						"<tr>"+
+							"<td><b>Contributors</b></td>"+
+							"<td>https://github.com/fo0/ScrumTool/graphs/contributors</td>"+
+						"</tr>"+	
+							
+						"<tr>"+
+							"<td><b>Latest Releases</b></td>"+
+							"<td>https://github.com/fo0/ScrumTool/releases</td>"+
+						"</tr>"+	
+					"</table>");
+
+			KBConfirmDialog
+				.createInfo().
+				withCaption("Imprint")
+				.withMessage(label)
+				.open();
+			//@formatter:on
+		});
+
+		HorizontalLayout layout = new HorizontalLayout(btn);
+		layout.setWidthFull();
+		layout.setJustifyContentMode(JustifyContentMode.END);
+		return layout;
+	}
+
 	private Button createBtnJoin() {
 		Button btn = new Button("Join");
 		btn.getStyle().set("border", "1px solid black");
