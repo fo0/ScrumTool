@@ -122,7 +122,7 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 		btn.setWidth("150px");
 		btn.setHeight("100px");
 		btn.addClickListener(e -> {
-			createJoinSessionDialog().open();
+			createJoinSessionDialog();
 		});
 		return btn;
 	}
@@ -144,26 +144,20 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 		return layout;
 	}
 
-	private Dialog createJoinSessionDialog() {
-		Dialog d = new Dialog();
-		TextField t = new TextField("Session-ID");
-		Button b = new Button("Join");
-
-		b.addClickListener(e -> {
-			TKBData p = repository.findById(t.getValue()).get();
-			if (p == null) {
-				Notification.show("No Board found", Config.NOTIFICATION_DURATION, Position.MIDDLE);
-				return;
-			}
-
-			UI.getCurrent().navigate(KanbanView.class, p.getId());
-			d.close();
-		});
-
-		HorizontalLayout l = new HorizontalLayout(t, b);
-		l.setMargin(true);
-		d.add(l);
-		return d;
+	private void createJoinSessionDialog() {
+		//@formatter:off
+		TextField input = new TextField();
+		input.setPlaceholder("Your Session-ID");
+		input.setWidth("350px");
+		
+		KBConfirmDialog
+			.createQuestion()
+			.withCaption("Join an existing session")
+			.withMessage(input)
+			.withCancelButton()
+			.withOkButton(() -> {})
+			.open();
+		//@formatter:on
 	}
 
 }
