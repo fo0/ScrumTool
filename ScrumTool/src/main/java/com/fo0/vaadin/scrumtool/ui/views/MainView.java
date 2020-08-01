@@ -95,6 +95,11 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 							"<td><b>Latest Releases</b></td>"+
 							"<td>https://github.com/fo0/ScrumTool/releases</td>"+
 						"</tr>"+	
+							
+						"<tr>"+
+							"<td><b>Issues</b></td>"+
+							"<td>https://github.com/fo0/ScrumTool/issues</td>"+
+						"</tr>"+	
 					"</table>");
 
 			KBConfirmDialog
