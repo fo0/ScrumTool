@@ -22,13 +22,13 @@ import com.fo0.vaadin.scrumtool.ui.data.table.TKBOptions;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBUser;
 import com.fo0.vaadin.scrumtool.ui.model.User;
 import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
-import com.fo0.vaadin.scrumtool.ui.views.components.ColumnComponent;
-import com.fo0.vaadin.scrumtool.ui.views.components.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.ui.views.components.ThemeToggleButton;
-import com.fo0.vaadin.scrumtool.ui.views.components.TimerComponent;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
+import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
+import com.fo0.vaadin.scrumtool.ui.views.components.timer.TimerComponent;
 import com.fo0.vaadin.scrumtool.ui.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CreateColumnDialog;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.MarkDownDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.ShareLayout;
 import com.fo0.vaadin.scrumtool.ui.views.layouts.MainLayout;
@@ -81,7 +81,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Autowired
 	private KBColumnRepository columnRepository;
-
+	
 	@Autowired
 	private KBOptionRepository optionRepository;
 
@@ -299,7 +299,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		repository.save(tmp);
 	}
-
+	
 	public ColumnComponent addColumnLayout(TKBColumn column) {
 		if (getColumnLayoutById(column.getId()) != null) {
 			log.warn("column already exists: {} - {}", column.getId(), column.getName());

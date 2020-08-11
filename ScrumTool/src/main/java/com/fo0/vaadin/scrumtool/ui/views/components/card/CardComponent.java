@@ -1,4 +1,4 @@
-package com.fo0.vaadin.scrumtool.ui.views.components;
+package com.fo0.vaadin.scrumtool.ui.views.components.card;
 
 import java.util.Comparator;
 import java.util.Set;
@@ -17,6 +17,9 @@ import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardComment;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
+import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
+import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
+import com.fo0.vaadin.scrumtool.ui.views.components.like.LikeComponent;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CommentDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
 import com.fo0.vaadin.scrumtool.ui.views.utils.KBViewUtils;

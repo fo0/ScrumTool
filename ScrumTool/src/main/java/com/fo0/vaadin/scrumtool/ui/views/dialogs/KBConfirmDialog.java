@@ -1,4 +1,4 @@
-package com.fo0.vaadin.scrumtool.ui.views.components;
+package com.fo0.vaadin.scrumtool.ui.views.dialogs;
 
 import org.claspina.confirmdialog.ConfirmDialog;
 

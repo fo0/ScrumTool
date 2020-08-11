@@ -1,23 +1,20 @@
 package com.fo0.vaadin.scrumtool.ui.views.dialogs;
 
-import java.util.Comparator;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 
-import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardComment;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
-import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardCommentRepository;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
-import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
-import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardComment;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBVotingCardRepository;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBVotingItemRepository;
+import com.fo0.vaadin.scrumtool.ui.data.table.TKBVotingCard;
+import com.fo0.vaadin.scrumtool.ui.data.table.TKBVotingItem;
+import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
+import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
-import com.fo0.vaadin.scrumtool.ui.views.components.card.CardCommentComponent;
-import com.fo0.vaadin.scrumtool.ui.views.utils.KBViewUtils;
+import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
+import com.fo0.vaadin.scrumtool.ui.views.components.voting.VotingItemComponent;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -36,34 +33,40 @@ import com.vaadin.flow.shared.Registration;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class CommentDialog extends Dialog {
+public class CreateVotingCardDialog extends Dialog {
 
 	private static final long serialVersionUID = -2119496244059224808L;
 
-	private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
-	private KBCardCommentRepository cardComment = SpringContext.getBean(KBCardCommentRepository.class);
+	private KBColumnRepository columnRepository = SpringContext.getBean(KBColumnRepository.class);
+	private KBVotingCardRepository votingCardRepository = SpringContext.getBean(KBVotingCardRepository.class);
+	private KBVotingItemRepository votingItemRepository = SpringContext.getBean(KBVotingItemRepository.class);
 
 	private Registration broadcasterRegistration;
 
 	private VerticalLayout root;
 	private VerticalLayout commentsLayout;
+	private KanbanView view;
+	private ColumnComponent column;
 
-	private String cardId;
-	private String cardText;
+	private String columnId;
+	private String cardTitle;
 
 	private Label title;
+	private TKBVotingCard card;
 
-	public CommentDialog(String cardId, String cardText) {
-		this.cardId = cardId;
-		this.cardText = cardText;
-
-		setId(cardId);
+	public CreateVotingCardDialog(KanbanView view, ColumnComponent column, String columnId, String text) {
+		this.columnId = columnId;
+		this.view = view;
+		this.column = column;
 		
+		this.card = TKBVotingCard.builder().build();
+		setId(columnId);
+
 		root = new VerticalLayout();
 		root.setSizeFull();
 		add(root);
 
-		HorizontalLayout header = new HorizontalLayout();
+		HorizontalLayout header = new HorizontalLayout();s
 		header.setPadding(true);
 		header.setAlignItems(Alignment.CENTER);
 		header.getStyle().set("border", "1px solid black");
@@ -75,14 +78,18 @@ public class CommentDialog extends Dialog {
 		header.add(title);
 
 		Button btn = new Button(VaadinIcon.PLUS.create());
-		ToolTip.add(btn, "Add Comment to Card");
+		ToolTip.add(btn, "Add Voting-Option");
 		btn.addClickListener(e -> {
 			new TextDialog("Write Comment", Strings.EMPTY, savedText -> {
-				TKBCard tmp = cardRepository.findById(getId().get()).get();
-				addComment(TKBCardComment.builder().text(savedText).dataOrder(KBViewUtils.calculateNextPosition(tmp.getComments())).build());
+				addComment(TKBVotingItem.builder().ownerId(SessionUtils.getSessionId()).text(savedText).build());
 			}).open();
 		});
 
+		Button btnAdd = new Button(VaadinIcon.DISC.create());
+		ToolTip.add(btnAdd, "Save Voting");
+		btnAdd.addClickListener(e -> {
+		});
+		
 		HorizontalLayout btnLayout = new HorizontalLayout();
 		btnLayout.setJustifyContentMode(JustifyContentMode.END);
 		btnLayout.add(btn);
@@ -96,12 +103,13 @@ public class CommentDialog extends Dialog {
 		commentsLayout.setMargin(false);
 		commentsLayout.setPadding(false);
 		root.add(commentsLayout);
-
-		initCards();
+		
+		addTitle(text);
 	}
 
-	private void addTitle(int comments, String cardText) {
-		title.setText(String.format("There are '%s' Comments for Card: %s", comments, StringUtils.abbreviate(cardText, 15)));
+	private void addTitle(String cardText) {
+		title.setText(cardText);
+		card.setText(cardText);
 	}
 
 	@Override
@@ -128,24 +136,15 @@ public class CommentDialog extends Dialog {
 		}
 	}
 
-	private void initCards() {
-		commentsLayout.removeAll();
-		TKBCard card = cardRepository.findById(cardId).get();
-		addTitle(CollectionUtils.size(card.getComments()), cardText);
-		card.getComments().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder).reversed()).forEach(e -> commentsLayout.add(new CardCommentComponent(cardId, e)));
-	}
-
-	private void addComment(TKBCardComment cardComment) {
-		commentsLayout.addComponentAsFirst(new CardCommentComponent(cardId, cardComment));
-		TKBCard card = cardRepository.findById(cardId).get();
-		card.getComments().add(cardComment);
-		cardRepository.save(card);
-		BroadcasterCardComment.broadcast(cardId, "update");
-		BroadcasterCard.broadcast(cardId, "update");
+	private void addComment(TKBVotingItem cardComment) {
+		card.getItems().add(cardComment);
+		VotingItemComponent item = new VotingItemComponent(view, view.getId().get(), getId().get(), cardComment);
+		item.setWidthFull();
+		commentsLayout.addComponentAsFirst(item);
 	}
 
 	public void reload() {
-		initCards();
+		
 	}
 
 }
