@@ -66,7 +66,7 @@ public class CreateVotingCardDialog extends Dialog {
 		root.setSizeFull();
 		add(root);
 
-		HorizontalLayout header = new HorizontalLayout();s
+		HorizontalLayout header = new HorizontalLayout();
 		header.setPadding(true);
 		header.setAlignItems(Alignment.CENTER);
 		header.getStyle().set("border", "1px solid black");
