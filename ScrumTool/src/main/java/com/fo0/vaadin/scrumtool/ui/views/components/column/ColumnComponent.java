@@ -105,7 +105,7 @@ public class ColumnComponent extends VerticalLayout {
 			});
 			captionLayout.add(btnEdit);
 			captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btnEdit);
-			
+
 			Button btnShuffle = new Button(VaadinIcon.RANDOM.create());
 			ToolTip.add(btnShuffle, "Shuffle the cards");
 			btnShuffle.addClickListener(e -> {
@@ -220,7 +220,7 @@ public class ColumnComponent extends VerticalLayout {
 		btnVoting.addClickListener(e -> {
 			new CreateVotingCardDialog(view, this, getId().get(), area.getValue()).open();
 		});
-		
+
 		HorizontalLayout btnGroup = new HorizontalLayout(btnAdd, btnVoting);
 		btnGroup.setSpacing(false);
 		HorizontalLayout btnLayout = new HorizontalLayout(btnCancel, btnGroup);
@@ -262,47 +262,6 @@ public class ColumnComponent extends VerticalLayout {
 		c.removeColumnById(id);
 		dataRepository.save(c);
 		BroadcasterBoard.broadcast(view.getId().get(), "update");
-	}
-
-	@Override
-	protected void onAttach(AttachEvent attachEvent) {
-		UI ui = UI.getCurrent();
-		broadcasterRegistration = BroadcasterColumn.register(getId().get(), event -> {
-			ui.access(() -> {
-				if (Config.DEBUG) {
-					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
-				}
-
-				String[] cmd = event.split("\\.");
-
-				switch (cmd[0]) {
-				case BroadcasterColumn.MESSAGE_SHUFFLE:
-					ColumnComponent.this.cards.removeAll();
-					ColumnComponent.this.reload();
-					break;
-
-				case BroadcasterColumn.ADD_COLUMN:
-					ColumnComponent.this.addCardAndReload(cmd[1]);
-					break;
-
-				default:
-					reload();
-					break;
-				}
-
-			});
-		});
-	}
-
-	@Override
-	protected void onDetach(DetachEvent detachEvent) {
-//		super.onDetach(detachEvent);
-		if (broadcasterRegistration != null) {
-			broadcasterRegistration.remove();
-			broadcasterRegistration = null;
-		} else {
-			log.info("cannot remove broadcast, because it is null");
-		}
 	}
 
 	public void changeTitle(String string, int order) {
@@ -349,7 +308,7 @@ public class ColumnComponent extends VerticalLayout {
 
 		dragConfig.addDragEndListener(e -> {
 			if (!e.isSuccessful()) {
-					Notification.show("Please move the card to a column", 3000, Position.MIDDLE);
+				Notification.show("Please move the card to a column", 3000, Position.MIDDLE);
 				return;
 			}
 
@@ -422,6 +381,47 @@ public class ColumnComponent extends VerticalLayout {
 		}
 
 		return null;
+	}
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+		UI ui = UI.getCurrent();
+		broadcasterRegistration = BroadcasterColumn.register(getId().get(), event -> {
+			ui.access(() -> {
+				if (Config.DEBUG) {
+					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
+				}
+
+				String[] cmd = event.split("\\.");
+
+				switch (cmd[0]) {
+				case BroadcasterColumn.MESSAGE_SHUFFLE:
+					ColumnComponent.this.cards.removeAll();
+					ColumnComponent.this.reload();
+					break;
+
+				case BroadcasterColumn.ADD_COLUMN:
+					ColumnComponent.this.addCardAndReload(cmd[1]);
+					break;
+
+				default:
+					reload();
+					break;
+				}
+
+			});
+		});
+	}
+
+	@Override
+	protected void onDetach(DetachEvent detachEvent) {
+//		super.onDetach(detachEvent);
+		if (broadcasterRegistration != null) {
+			broadcasterRegistration.remove();
+			broadcasterRegistration = null;
+		} else {
+			log.info("cannot remove broadcast, because it is null");
+		}
 	}
 
 }

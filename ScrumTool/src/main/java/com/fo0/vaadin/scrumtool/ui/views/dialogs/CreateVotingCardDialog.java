@@ -85,14 +85,17 @@ public class CreateVotingCardDialog extends Dialog {
 			}).open();
 		});
 
-		Button btnAdd = new Button(VaadinIcon.DISC.create());
+		Button btnAdd = new Button(VaadinIcon.CHECK.create());
 		ToolTip.add(btnAdd, "Save Voting");
 		btnAdd.addClickListener(e -> {
+			// column.add(components);
 		});
 		
 		HorizontalLayout btnLayout = new HorizontalLayout();
 		btnLayout.setJustifyContentMode(JustifyContentMode.END);
 		btnLayout.add(btn);
+		btnLayout.add(btnAdd);
+		
 		header.add(btnLayout);
 
 		setWidth("500px");
