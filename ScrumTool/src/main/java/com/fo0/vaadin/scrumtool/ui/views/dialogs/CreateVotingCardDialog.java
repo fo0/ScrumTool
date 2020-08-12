@@ -11,15 +11,14 @@ import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.enums.ECardType;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
+import com.fo0.vaadin.scrumtool.ui.model.VotingData;
 import com.fo0.vaadin.scrumtool.ui.model.VotingItem;
-import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
 import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IBroadcastRegistry;
 import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IComponent;
-import com.fo0.vaadin.scrumtool.ui.views.components.voting.VotingItemComponent;
 import com.google.gson.Gson;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -80,14 +79,15 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 		ToolTip.add(btn, "Add Voting-Option");
 		btn.addClickListener(e -> {
 			new TextDialog("Write Comment", Strings.EMPTY, savedText -> {
-				addComment(VotingItem.builder().ownerId(SessionUtils.getSessionId()).text(savedText).build());
+				addVoting(savedText);
 			}).open();
 		});
 
 		Button btnAdd = new Button(VaadinIcon.CHECK.create());
 		ToolTip.add(btnAdd, "Save Voting");
 		btnAdd.addClickListener(e -> {
-			TKBCard card = TKBCard.builder().type(ECardType.VotingCard).text(new Gson().toJson(getVotingItems())).build();
+			TKBCard card = TKBCard.builder().type(ECardType.VotingCard)
+					.text(new Gson().toJson(VotingData.builder().text(title.getText()).items(getVotingItems()).build())).build();
 			column.addVotingCardAndSave(card);
 			BroadcasterColumn.broadcastAddColumn(columnId, card.getId());
 			close();
@@ -134,15 +134,16 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 	protected void onDetach(DetachEvent detachEvent) {
 		unRegisterBroadcasters();
 	}
-	
-	public List<VotingItem> getVotingItems(){
-		return getComponentsByType(votingItemLayout, VotingItemComponent.class).stream().map(VotingItemComponent::getVotingItem).collect(Collectors.toList());
+
+	public List<VotingItem> getVotingItems() {
+		return getComponentsByType(votingItemLayout, Label.class).stream().map(e -> VotingItem.builder().text(e.getText()).build())
+				.collect(Collectors.toList());
 	}
 
-	private void addComment(VotingItem cardComment) {
-		VotingItemComponent item = new VotingItemComponent(view, view.getId().get(), getId().get(), cardComment);
-		item.setWidthFull();
-		votingItemLayout.addComponentAsFirst(item);
+	private void addVoting(String voting) {
+		Label l = new Label(voting);
+		l.setWidthFull();
+		votingItemLayout.addComponentAsFirst(l);
 	}
 
 	public void reload() {

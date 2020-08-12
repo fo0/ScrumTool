@@ -58,7 +58,7 @@ public class TextCardType implements ICardTypeTemplate {
 
 		label = new Label();
 		label.getStyle().set("word-break", "break-word");
-		root.changeText(card.getText());
+		changeText(card.getText());
 		label.setWidthFull();
 		root.add(label);
 
@@ -73,10 +73,11 @@ public class TextCardType implements ICardTypeTemplate {
 		btnLayout.add(likeComponent);
 
 		btnComment = new Button(VaadinIcon.COMMENT_O.create());
-		root.changeButtonCommentsCaption(card.getComments());
+		changeButtonCommentsCaption(card.getComments());
 		btnComment.addClickListener(e -> {
 			new CommentDialog(cardId, label.getText()).open();
 		});
+		
 		btnLayout.add(btnComment);
 
 		if (KBViewUtils.isAllowed(view.getOptions(), card.getOwnerId())) {
@@ -131,8 +132,13 @@ public class TextCardType implements ICardTypeTemplate {
 		if (CollectionUtils.size(set) > 0) {
 			btnComment.setText(String.valueOf(set.size()));
 			btnComment.setIcon(VaadinIcon.COMMENT.create());
-			ToolTip.addLines(btnComment, set.stream().sorted(Comparator.comparing(IDataOrder::getDataOrder).reversed())
-					.map(TKBCardComment::getText).collect(Collectors.toList()));
+			
+			//@formatter:off
+			ToolTip.addLines(btnComment, set.stream()
+					.sorted(Comparator.comparing(IDataOrder::getDataOrder).reversed())
+					.map(TKBCardComment::getText)
+					.collect(Collectors.toList()));
+			//@formatter:on
 		} else {
 			btnComment.setIcon(VaadinIcon.COMMENT_O.create());
 			ToolTip.add(btnComment, "Comment the Card");

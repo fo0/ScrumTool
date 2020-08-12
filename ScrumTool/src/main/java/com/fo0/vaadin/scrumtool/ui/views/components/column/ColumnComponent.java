@@ -29,7 +29,6 @@ import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.components.card.CardComponent;
 import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IBroadcastRegistry;
 import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IComponent;
-import com.fo0.vaadin.scrumtool.ui.views.components.voting.VotingCardComponent;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CreateVotingCardDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
@@ -247,10 +246,10 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 				CardComponent droppedCard = (CardComponent) card;
 				log.debug("receive dropped card: " + droppedCard.getId().get());
 				droppedCard.getCard().setId(Utils.randomId());
-				
+
 				// TODO: ??? is this really needed
 				StreamUtils.stream(droppedCard.getCard().getLikes()).forEach(x -> x.setId(Utils.randomId()));
-				
+
 				TKBColumn col = addCardAndSave(droppedCard.getCard());
 				update(col.getId());
 			});
@@ -273,30 +272,25 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 	}
 
 	public TKBColumn addVotingCardAndSave(TKBCard card) {
+		if (ECardType.valueOf(card.getType().name()) == null) {
+			Notification.show("Currently not supported: " + card.getType(), 3000, Position.MIDDLE);
+			return null;
+		}
+
 		TKBColumn tmp = repository.findById(getId().get()).get();
 		tmp.addCard(card);
 		repository.save(tmp);
 		log.info("add card: {}", card.getId());
 		return tmp;
 	}
-	
+
 	private TKBColumn addCardAndSave(TKBCard card) {
 		TKBColumn tmp = repository.findById(getId().get()).get();
+		card.setDataOrder(KBViewUtils.calculateNextPosition(tmp.getCards()));
 		tmp.addCard(card);
 		repository.save(tmp);
 		log.info("add card: {}", card.getId());
 		return tmp;
-	}
-	
-	public VotingCardComponent addVotingCardLayout(TKBCard card) {
-		VotingCardComponent cc = new VotingCardComponent(view, this, getId().get(), card);
-
-		if (view.getOptions().isCardSortDirectionDesc()) {
-			cards.addComponentAsFirst(cc);
-		} else {
-			cards.add(cc);
-		}
-		return cc;
 	}
 
 	private CardComponent addCardLayout(TKBCard card) {
@@ -348,8 +342,9 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 		});
 
 		// remove old
-		getComponentsByType(cards, Component.class).stream().filter(e -> data.getCards().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
-				.collect(Collectors.toList()).forEach(e -> {
+		getComponentsByType(cards, Component.class).stream()
+				.filter(e -> data.getCards().stream().noneMatch(x -> x.getId().equals(e.getId().get()))).collect(Collectors.toList())
+				.forEach(e -> {
 					cards.remove(e);
 				});
 	}

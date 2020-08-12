@@ -15,7 +15,7 @@ public interface IComponent {
 	public default <T extends Component> List<T> getComponentsByType(HasOrderedComponents<?> layout, Class<T> type) {
 		List<T> components = Lists.newArrayList();
 		for (int i = 0; i < layout.getComponentCount(); i++) {
-			if (layout.getComponentAt(i) instanceof IComponent) {
+			if (layout.getComponentAt(i) instanceof Component) {
 				components.add((T) layout.getComponentAt(i));
 			}
 		}
@@ -24,9 +24,9 @@ public interface IComponent {
 
 	public default <T extends Component> T getComponentById(HasOrderedComponents<?> layout, Class<T> type, String id) {
 		for (int i = 0; i < layout.getComponentCount(); i++) {
-			if (layout.getComponentAt(i) instanceof IComponent) {
-				IComponent card = (IComponent) layout.getComponentAt(i);
-				if (card.id().equals(id)) {
+			if (layout.getComponentAt(i) instanceof Component) {
+				Component card = (Component) layout.getComponentAt(i);
+				if (card.getId().get().equals(id)) {
 					return (T) card;
 				}
 			}

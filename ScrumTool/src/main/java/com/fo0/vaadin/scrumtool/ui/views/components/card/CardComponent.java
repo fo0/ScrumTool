@@ -69,6 +69,10 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 			template = new TextCardType(this);
 			break;
 
+		case VotingCard:
+			template = new VotingCardType(this);
+			break;
+			
 		default:
 			log.error("failed to find template for card type: {}", card.getType());
 			break;

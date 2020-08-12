@@ -9,6 +9,8 @@ import lombok.Data;
 @Builder
 public class VotingData {
 
+	private String text;
+	
 	private List<VotingItem> items;
 	
 }

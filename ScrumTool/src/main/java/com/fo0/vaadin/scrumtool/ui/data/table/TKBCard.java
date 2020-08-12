@@ -1,6 +1,8 @@
 package com.fo0.vaadin.scrumtool.ui.data.table;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,6 +16,8 @@ import javax.persistence.OneToMany;
 import com.fo0.vaadin.scrumtool.ui.data.enums.ECardType;
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -65,6 +69,14 @@ public class TKBCard implements Serializable, IDataOrder {
 	
 	public int countAllLikes() {
 		return likes.stream().mapToInt(TKBCardLikes::getLikeValue).sum();
+	}
+	
+	public <T> T getByType(Class<T> type) {
+		return new Gson().fromJson(text, type);
+	}
+	
+	public <T> List<T> getByTypeAsList(Class<T> type) {
+		return new Gson().fromJson(text, TypeToken.getParameterized(ArrayList.class, type).getType());
 	}
 
 }

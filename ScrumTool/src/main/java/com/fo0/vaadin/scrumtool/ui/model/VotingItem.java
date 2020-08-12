@@ -18,8 +18,6 @@ public class VotingItem {
 	
 	private String text;
 	
-	private String ownerId;
-	
 	private List<TKBCardLikes> likes = Lists.newArrayList();
 	
 }
