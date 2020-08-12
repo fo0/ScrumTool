@@ -27,6 +27,7 @@ import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.components.card.CardComponent;
 import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IBroadcastRegistry;
+import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IComponent;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CreateVotingCardDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
@@ -54,7 +55,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class ColumnComponent extends VerticalLayout implements IBroadcastRegistry {
+public class ColumnComponent extends VerticalLayout implements IBroadcastRegistry, IComponent {
 
 	private static final long serialVersionUID = 8415434953831247614L;
 
@@ -64,7 +65,7 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 
 	@Getter
 	private KanbanView view;
-	
+
 	private TextArea area;
 	private H3 h3;
 	private VerticalLayout cards;
@@ -203,8 +204,10 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 				return;
 			}
 
-			addCardAndSaveAndBroadcast(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
-			
+			TKBColumn col = addCardAndSave(
+					TKBCard.builder().id(Utils.randomId()).ownerId(SessionUtils.getSessionId()).text(area.getValue()).build());
+			update(col.getId());
+
 			area.clear();
 			area.focus();
 		});
@@ -242,18 +245,13 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 			e.getDragSourceComponent().ifPresent(card -> {
 				CardComponent droppedCard = (CardComponent) card;
 				log.debug("receive dropped card: " + droppedCard.getId().get());
-				TKBColumn col = addCardAndSave(Utils.randomId(), droppedCard.getCard());
+				droppedCard.getCard().setId(Utils.randomId());
+				TKBColumn col = addCardAndSave(droppedCard.getCard());
 				update(col.getId());
 			});
 		});
 
 		add(cards);
-
-	}
-
-	private void addCardAndSaveAndBroadcast(String id, String owner, String message) {
-		TKBColumn col = addCardAndSave(id, owner, message);
-		update(col.getId());
 	}
 
 	private void update(String columnId) {
@@ -269,38 +267,18 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 		BroadcasterBoard.broadcast(view.getId().get(), "update");
 	}
 
-	public void changeTitle(String string, int order) {
-		if (!h3.getText().equals(string)) {
-			h3.setText(string);
-		}
-
-		if (Config.DEBUG)
-			h3.setText(string + " (" + order + ")");
-	}
-
-	private TKBColumn addCardAndSave(String randomId, String sessionId, String value) {
+	private TKBColumn addCardAndSave(TKBCard card) {
 		TKBColumn tmp = repository.findById(getId().get()).get();
-		TKBCard card = TKBCard.builder().id(randomId).ownerId(sessionId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getCards()))
-				.text(value).build();
-		tmp.addCard(card);
-		repository.save(tmp);
-		log.info("add card: {}", randomId);
-		return tmp;
-	}
-
-	private TKBColumn addCardAndSave(String randomId, TKBCard card) {
-		TKBColumn tmp = repository.findById(getId().get()).get();
-		card.setId(randomId);
 		StreamUtils.stream(card.getLikes()).forEach(e -> {
 			e.setId(Utils.randomId());
 		});
 		tmp.addCard(card);
 		repository.save(tmp);
-		log.info("add card: {}", randomId);
+		log.info("add card: {}", card.getId());
 		return tmp;
 	}
 
-	private CardComponent addCardLayout(TKBCard card, boolean sortOrderDesc) {
+	private CardComponent addCardLayout(TKBCard card) {
 		CardComponent cc = new CardComponent(view, this, getId().get(), card);
 
 		// for dnd support
@@ -325,22 +303,12 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 			e.getComponent().deleteCard();
 		});
 
-		if (sortOrderDesc) {
+		if (view.getOptions().isCardSortDirectionDesc()) {
 			cards.addComponentAsFirst(cc);
 		} else {
 			cards.add(cc);
 		}
 		return cc;
-	}
-
-	public void addCardAndReload(String cardId) {
-		TKBCard pdc = cardRepository.findById(cardId).get();
-		CardComponent card = getCardById(pdc.getId());
-		if (card == null) {
-			card = addCardLayout(pdc, view.getOptions().isCardSortDirectionDesc());
-		}
-
-		card.reload();
 	}
 
 	public void reload() {
@@ -349,10 +317,10 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 
 		// update layout with new missing data
 		data.getCards().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).forEachOrdered(pdc -> {
-			CardComponent card = getCardById(pdc.getId());
+			CardComponent card = getCardById(pdc.getId(), CardComponent.class);
 			if (card == null) {
 				// add card as new card
-				card = addCardLayout(pdc, view.getOptions().isCardSortDirectionDesc());
+				card = addCardLayout(pdc);
 			}
 
 			card.reload();
@@ -368,24 +336,33 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 	public List<CardComponent> getCardComponents() {
 		List<CardComponent> components = Lists.newArrayList();
 		for (int i = 0; i < cards.getComponentCount(); i++) {
-			if (cards.getComponentAt(i) instanceof CardComponent) {
+			if (cards.getComponentAt(i) instanceof IComponent) {
 				components.add((CardComponent) cards.getComponentAt(i));
 			}
 		}
 		return components;
 	}
 
-	public CardComponent getCardById(String cardId) {
+	public <T extends IComponent> T getCardById(String cardId, Class<T> type) {
 		for (int i = 0; i < cards.getComponentCount(); i++) {
-			if (cards.getComponentAt(i) instanceof CardComponent) {
-				CardComponent card = (CardComponent) cards.getComponentAt(i);
-				if (card.getId().get().equals(cardId)) {
-					return card;
+			if (cards.getComponentAt(i) instanceof IComponent) {
+				IComponent card = (IComponent) cards.getComponentAt(i);
+				if (card.id().equals(cardId)) {
+					return (T) card;
 				}
 			}
 		}
 
 		return null;
+	}
+
+	public void changeTitle(String string, int order) {
+		if (!h3.getText().equals(string)) {
+			h3.setText(string);
+		}
+
+		if (Config.DEBUG)
+			h3.setText(string + " (" + order + ")");
 	}
 
 	@Override
@@ -401,12 +378,18 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 
 				switch (cmd[0]) {
 				case BroadcasterColumn.MESSAGE_SHUFFLE:
-					ColumnComponent.this.cards.removeAll();
-					ColumnComponent.this.reload();
+					cards.removeAll();
+					reload();
 					break;
 
 				case BroadcasterColumn.ADD_COLUMN:
-					ColumnComponent.this.addCardAndReload(cmd[1]);
+					TKBCard pdc = cardRepository.findById(cmd[1]).get();
+					CardComponent card = getCardById(pdc.getId(), CardComponent.class);
+					if (card == null) {
+						card = addCardLayout(pdc);
+					}
+
+					card.reload();
 					break;
 
 				default:

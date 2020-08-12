@@ -19,6 +19,7 @@ import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
+import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IComponent;
 import com.fo0.vaadin.scrumtool.ui.views.components.like.LikeComponent;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CommentDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
@@ -42,7 +43,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @CssImport(value = "./styles/card-style.css", themeFor = "vaadin-horizontal-layout")
-public class CardComponent extends HorizontalLayout {
+public class CardComponent extends HorizontalLayout implements IComponent {
 
 	private static final long serialVersionUID = -1213748155629932731L;
 
