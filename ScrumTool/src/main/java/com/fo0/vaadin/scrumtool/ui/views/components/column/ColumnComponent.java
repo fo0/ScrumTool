@@ -26,6 +26,7 @@ import com.fo0.vaadin.scrumtool.ui.utils.Utils;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.components.card.CardComponent;
+import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IBroadcastRegistry;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CreateVotingCardDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
@@ -48,13 +49,12 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.shared.Registration;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class ColumnComponent extends VerticalLayout {
+public class ColumnComponent extends VerticalLayout implements IBroadcastRegistry {
 
 	private static final long serialVersionUID = 8415434953831247614L;
 
@@ -64,9 +64,9 @@ public class ColumnComponent extends VerticalLayout {
 
 	@Getter
 	private KanbanView view;
+	
 	private TextArea area;
 	private H3 h3;
-	private Registration broadcasterRegistration;
 	private VerticalLayout cards;
 	private String id;
 
@@ -204,6 +204,7 @@ public class ColumnComponent extends VerticalLayout {
 			}
 
 			addCardAndSaveAndBroadcast(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
+			
 			area.clear();
 			area.focus();
 		});
@@ -242,7 +243,7 @@ public class ColumnComponent extends VerticalLayout {
 				CardComponent droppedCard = (CardComponent) card;
 				log.debug("receive dropped card: " + droppedCard.getId().get());
 				TKBColumn col = addCardAndSave(Utils.randomId(), droppedCard.getCard());
-				BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.ADD_COLUMN + col.getId());
+				update(col.getId());
 			});
 		});
 
@@ -252,7 +253,11 @@ public class ColumnComponent extends VerticalLayout {
 
 	private void addCardAndSaveAndBroadcast(String id, String owner, String message) {
 		TKBColumn col = addCardAndSave(id, owner, message);
-		BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.ADD_COLUMN + col.getId());
+		update(col.getId());
+	}
+
+	private void update(String columnId) {
+		BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.ADD_COLUMN + columnId);
 	}
 
 	private void deleteColumn() {
@@ -386,7 +391,7 @@ public class ColumnComponent extends VerticalLayout {
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
 		UI ui = UI.getCurrent();
-		broadcasterRegistration = BroadcasterColumn.register(getId().get(), event -> {
+		registerBroadcast("column", BroadcasterColumn.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
@@ -410,18 +415,12 @@ public class ColumnComponent extends VerticalLayout {
 				}
 
 			});
-		});
+		}));
 	}
 
 	@Override
 	protected void onDetach(DetachEvent detachEvent) {
-//		super.onDetach(detachEvent);
-		if (broadcasterRegistration != null) {
-			broadcasterRegistration.remove();
-			broadcasterRegistration = null;
-		} else {
-			log.info("cannot remove broadcast, because it is null");
-		}
+		unRegisterBroadcasters();
 	}
 
 }
