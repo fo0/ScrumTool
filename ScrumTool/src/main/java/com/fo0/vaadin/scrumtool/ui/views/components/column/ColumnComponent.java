@@ -246,6 +246,10 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 				CardComponent droppedCard = (CardComponent) card;
 				log.debug("receive dropped card: " + droppedCard.getId().get());
 				droppedCard.getCard().setId(Utils.randomId());
+				
+				// TODO: ??? is this really needed
+				StreamUtils.stream(droppedCard.getCard().getLikes()).forEach(x -> x.setId(Utils.randomId()));
+				
 				TKBColumn col = addCardAndSave(droppedCard.getCard());
 				update(col.getId());
 			});
@@ -269,9 +273,6 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 
 	private TKBColumn addCardAndSave(TKBCard card) {
 		TKBColumn tmp = repository.findById(getId().get()).get();
-		StreamUtils.stream(card.getLikes()).forEach(e -> {
-			e.setId(Utils.randomId());
-		});
 		tmp.addCard(card);
 		repository.save(tmp);
 		log.info("add card: {}", card.getId());
