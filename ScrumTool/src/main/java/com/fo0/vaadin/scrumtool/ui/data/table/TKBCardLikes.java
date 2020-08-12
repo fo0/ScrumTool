@@ -27,6 +27,8 @@ public class TKBCardLikes {
 	private String id = Utils.randomId();
 
 	private String ownerId;
+	
+	private String value;
 
 	@Builder.Default
 	private int likeValue = 0;

@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 
+import com.fo0.vaadin.scrumtool.ui.data.enums.ECardType;
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.google.common.collect.Sets;
 
@@ -39,6 +40,9 @@ public class TKBCard implements Serializable, IDataOrder {
 	@Builder.Default
 	private int dataOrder = -1;
 
+	@Builder.Default
+	private ECardType type = ECardType.TextCard;
+	
 	private String text;
 	
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)

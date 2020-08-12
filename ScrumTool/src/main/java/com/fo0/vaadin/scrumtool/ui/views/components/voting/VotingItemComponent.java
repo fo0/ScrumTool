@@ -4,13 +4,13 @@ import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardLike;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBOptionRepository;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBVotingItemRepository;
-import com.fo0.vaadin.scrumtool.ui.data.table.TKBVotingItem;
+import com.fo0.vaadin.scrumtool.ui.model.VotingItem;
 import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.utils.Utils;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
+import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IComponent;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -26,7 +26,7 @@ import com.vaadin.flow.shared.Registration;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class VotingItemComponent extends VerticalLayout {
+public class VotingItemComponent extends VerticalLayout implements IComponent {
 
 	private static final long serialVersionUID = -2483871323771596716L;
 
@@ -34,7 +34,6 @@ public class VotingItemComponent extends VerticalLayout {
 
 	private KBDataRepository repositoryData = SpringContext.getBean(KBDataRepository.class);
 	private KBOptionRepository repositoryDataOption = SpringContext.getBean(KBOptionRepository.class);
-	private KBVotingItemRepository votingItemRepository = SpringContext.getBean(KBVotingItemRepository.class);
 
 	private String boardId;
 	private String cardId;
@@ -42,19 +41,18 @@ public class VotingItemComponent extends VerticalLayout {
 	private Button btnLike;
 	private Button btnRemoveLike;
 
-	private Registration broadcasterRegistration;
-
 	private Label label;
-
-	public VotingItemComponent(KanbanView view, String boardId, String cardId, TKBVotingItem item) {
+	
+	public VotingItemComponent(KanbanView view, String boardId, String cardId, VotingItem item) {
 		this.view = view;
 		this.boardId = boardId;
 		this.cardId = cardId;
-		setId(cardId);
+		
+		setId(item.getId());
 
 		btnLike = new Button(VaadinIcon.THUMBS_UP_O.create());
 		ToolTip.add(btnLike, "Like the card");
-		btnLike.setText(String.valueOf(item.getLikeValue()));
+		btnLike.setText(String.valueOf(-1));
 		btnLike.setWidthFull();
 		btnLike.addClickListener(e -> {
 			if (islikeLimitAlreadyExistsByOwner(SessionUtils.getSessionId())) {
@@ -85,6 +83,7 @@ public class VotingItemComponent extends VerticalLayout {
 			removeLike(SessionUtils.getSessionId());
 			BroadcasterCardLike.broadcast(cardId, "update");
 		});
+		
 		add(btnRemoveLike);
 
 		label = new Label();
@@ -106,29 +105,17 @@ public class VotingItemComponent extends VerticalLayout {
 		getStyle().set("border", "1px solid var(--material-disabled-text-color)");
 		addClassName("card-hover");
 	}
+	
+	public VotingItem getVotingItem() {
+		return VotingItem.builder().text(label.getText()).build();
+	}
 
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
-		UI ui = UI.getCurrent();
-		broadcasterRegistration = BroadcasterCardLike.register(getId().get(), event -> {
-			ui.access(() -> {
-				if (Config.DEBUG) {
-					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
-				}
-
-				reload();
-			});
-		});
 	}
 
 	@Override
 	protected void onDetach(DetachEvent detachEvent) {
-		if (broadcasterRegistration != null) {
-			broadcasterRegistration.remove();
-			broadcasterRegistration = null;
-		} else {
-			log.info("cannot remove broadcast, because it is null");
-		}
 	}
 
 	public boolean islikeLimitAlreadyExistsByOwner(String ownerId) {

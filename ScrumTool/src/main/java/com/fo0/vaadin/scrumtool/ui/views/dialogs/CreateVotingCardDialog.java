@@ -1,20 +1,26 @@
 package com.fo0.vaadin.scrumtool.ui.views.dialogs;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.util.Strings;
 
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardComment;
+import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumn;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
+import com.fo0.vaadin.scrumtool.ui.data.enums.ECardType;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBVotingCardRepository;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBVotingItemRepository;
-import com.fo0.vaadin.scrumtool.ui.data.table.TKBVotingCard;
-import com.fo0.vaadin.scrumtool.ui.data.table.TKBVotingItem;
+import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
+import com.fo0.vaadin.scrumtool.ui.model.VotingItem;
 import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
+import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IBroadcastRegistry;
+import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IComponent;
 import com.fo0.vaadin.scrumtool.ui.views.components.voting.VotingItemComponent;
+import com.google.gson.Gson;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -28,23 +34,18 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.shared.Registration;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class CreateVotingCardDialog extends Dialog {
+public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry, IComponent {
 
 	private static final long serialVersionUID = -2119496244059224808L;
 
 	private KBColumnRepository columnRepository = SpringContext.getBean(KBColumnRepository.class);
-	private KBVotingCardRepository votingCardRepository = SpringContext.getBean(KBVotingCardRepository.class);
-	private KBVotingItemRepository votingItemRepository = SpringContext.getBean(KBVotingItemRepository.class);
-
-	private Registration broadcasterRegistration;
 
 	private VerticalLayout root;
-	private VerticalLayout commentsLayout;
+	private VerticalLayout votingItemLayout;
 	private KanbanView view;
 	private ColumnComponent column;
 
@@ -52,14 +53,12 @@ public class CreateVotingCardDialog extends Dialog {
 	private String cardTitle;
 
 	private Label title;
-	private TKBVotingCard card;
 
 	public CreateVotingCardDialog(KanbanView view, ColumnComponent column, String columnId, String text) {
 		this.columnId = columnId;
 		this.view = view;
 		this.column = column;
-		
-		this.card = TKBVotingCard.builder().build();
+
 		setId(columnId);
 
 		root = new VerticalLayout();
@@ -81,44 +80,46 @@ public class CreateVotingCardDialog extends Dialog {
 		ToolTip.add(btn, "Add Voting-Option");
 		btn.addClickListener(e -> {
 			new TextDialog("Write Comment", Strings.EMPTY, savedText -> {
-				addComment(TKBVotingItem.builder().ownerId(SessionUtils.getSessionId()).text(savedText).build());
+				addComment(VotingItem.builder().ownerId(SessionUtils.getSessionId()).text(savedText).build());
 			}).open();
 		});
 
 		Button btnAdd = new Button(VaadinIcon.CHECK.create());
 		ToolTip.add(btnAdd, "Save Voting");
 		btnAdd.addClickListener(e -> {
-			// column.add(components);
+			TKBCard card = TKBCard.builder().type(ECardType.VotingCard).text(new Gson().toJson(getVotingItems())).build();
+			column.addVotingCardAndSave(card);
+			BroadcasterColumn.broadcastAddColumn(columnId, card.getId());
+			close();
 		});
-		
+
 		HorizontalLayout btnLayout = new HorizontalLayout();
 		btnLayout.setJustifyContentMode(JustifyContentMode.END);
 		btnLayout.add(btn);
 		btnLayout.add(btnAdd);
-		
+
 		header.add(btnLayout);
 
 		setWidth("500px");
 		setHeight("400px");
 
-		commentsLayout = new VerticalLayout();
-		commentsLayout.setWidthFull();
-		commentsLayout.setMargin(false);
-		commentsLayout.setPadding(false);
-		root.add(commentsLayout);
-		
+		votingItemLayout = new VerticalLayout();
+		votingItemLayout.setWidthFull();
+		votingItemLayout.setMargin(false);
+		votingItemLayout.setPadding(false);
+		root.add(votingItemLayout);
+
 		addTitle(text);
 	}
 
 	private void addTitle(String cardText) {
 		title.setText(cardText);
-		card.setText(cardText);
 	}
 
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
 		UI ui = UI.getCurrent();
-		broadcasterRegistration = BroadcasterCardComment.register(getId().get(), event -> {
+		registerBroadcast("card", BroadcasterCardComment.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
@@ -126,28 +127,26 @@ public class CreateVotingCardDialog extends Dialog {
 
 				reload();
 			});
-		});
+		}));
 	}
 
 	@Override
 	protected void onDetach(DetachEvent detachEvent) {
-		if (broadcasterRegistration != null) {
-			broadcasterRegistration.remove();
-			broadcasterRegistration = null;
-		} else {
-			log.info("cannot remove broadcast, because it is null");
-		}
+		unRegisterBroadcasters();
+	}
+	
+	public List<VotingItem> getVotingItems(){
+		return getComponentsByType(votingItemLayout, VotingItemComponent.class).stream().map(VotingItemComponent::getVotingItem).collect(Collectors.toList());
 	}
 
-	private void addComment(TKBVotingItem cardComment) {
-		card.getItems().add(cardComment);
+	private void addComment(VotingItem cardComment) {
 		VotingItemComponent item = new VotingItemComponent(view, view.getId().get(), getId().get(), cardComment);
 		item.setWidthFull();
-		commentsLayout.addComponentAsFirst(item);
+		votingItemLayout.addComponentAsFirst(item);
 	}
 
 	public void reload() {
-		
+
 	}
 
 }

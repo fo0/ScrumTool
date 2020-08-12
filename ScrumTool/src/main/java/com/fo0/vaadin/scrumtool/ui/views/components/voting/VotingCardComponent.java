@@ -2,10 +2,9 @@ package com.fo0.vaadin.scrumtool.ui.views.components.voting;
 
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
+import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBVotingCardRepository;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBVotingItemRepository;
-import com.fo0.vaadin.scrumtool.ui.data.table.TKBVotingCard;
+import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
@@ -28,19 +27,18 @@ public class VotingCardComponent extends HorizontalLayout {
 
 	private static final long serialVersionUID = -7851628346339445219L;
 
-	private KBVotingCardRepository cardRepository = SpringContext.getBean(KBVotingCardRepository.class);
-	private KBVotingItemRepository votingItemRepository = SpringContext.getBean(KBVotingItemRepository.class);
+	private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
 	private KBColumnRepository columnRepository = SpringContext.getBean(KBColumnRepository.class);
 
 	@Getter
-	private TKBVotingCard card;
+	private TKBCard card;
 	private ColumnComponent column;
 	private VotingItemComponent likeComponent;
 	private String columnId;
 	private String cardId;
 	private Registration broadcasterRegistration;
 
-	public VotingCardComponent(KanbanView view, ColumnComponent column, String columnId, TKBVotingCard card) {
+	public VotingCardComponent(KanbanView view, ColumnComponent column, String columnId, TKBCard card) {
 		this.card = card;
 		this.columnId = columnId;
 		this.column = column;
@@ -67,11 +65,9 @@ public class VotingCardComponent extends HorizontalLayout {
 
 	public void deleteCard() {
 		log.info("delete card: " + getId().get());
-		TKBVotingCard c = cardRepository.findById(column.getId().get()).get();
-		
+		TKBCard c = cardRepository.findById(column.getId().get()).get();
 		 //c.getItems().add(getId().get()); columnRepository.save(c);
 		 //BroadcasterColumn.broadcast(column.getId().get(), "update");
-		
 	}
 
 	@Override

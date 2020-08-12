@@ -39,4 +39,8 @@ public class BroadcasterColumn {
 		BroadcasterUtils.runParallel(EXECUTOR, LISTENERS, id, message);
 	}
 
+	public static synchronized void broadcastAddColumn(String id, String message) {
+		BroadcasterUtils.runParallel(EXECUTOR, LISTENERS, id, ADD_COLUMN + message);
+	}
+
 }

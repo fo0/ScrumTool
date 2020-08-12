@@ -16,7 +16,7 @@ import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardComment;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
-import com.fo0.vaadin.scrumtool.ui.views.components.card.CardCommentComponent;
+import com.fo0.vaadin.scrumtool.ui.views.components.comment.CommentComponent;
 import com.fo0.vaadin.scrumtool.ui.views.utils.KBViewUtils;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -132,11 +132,11 @@ public class CommentDialog extends Dialog {
 		commentsLayout.removeAll();
 		TKBCard card = cardRepository.findById(cardId).get();
 		addTitle(CollectionUtils.size(card.getComments()), cardText);
-		card.getComments().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder).reversed()).forEach(e -> commentsLayout.add(new CardCommentComponent(cardId, e)));
+		card.getComments().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder).reversed()).forEach(e -> commentsLayout.add(new CommentComponent(cardId, e)));
 	}
 
 	private void addComment(TKBCardComment cardComment) {
-		commentsLayout.addComponentAsFirst(new CardCommentComponent(cardId, cardComment));
+		commentsLayout.addComponentAsFirst(new CommentComponent(cardId, cardComment));
 		TKBCard card = cardRepository.findById(cardId).get();
 		card.getComments().add(cardComment);
 		cardRepository.save(card);

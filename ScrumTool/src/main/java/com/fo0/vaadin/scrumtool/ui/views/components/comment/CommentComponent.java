@@ -1,4 +1,4 @@
-package com.fo0.vaadin.scrumtool.ui.views.components.card;
+package com.fo0.vaadin.scrumtool.ui.views.components.comment;
 
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardComment;
@@ -22,7 +22,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @CssImport(value = "./styles/card-style.css", themeFor = "vaadin-horizontal-layout")
-public class CardCommentComponent extends HorizontalLayout {
+public class CommentComponent extends HorizontalLayout {
 
 	private static final long serialVersionUID = -1213748155629932731L;
 
@@ -33,7 +33,7 @@ public class CardCommentComponent extends HorizontalLayout {
 	private TKBCardComment comment;
 	private Label label;
 
-	public CardCommentComponent(String cardId, TKBCardComment comment) {
+	public CommentComponent(String cardId, TKBCardComment comment) {
 		this.comment = comment;
 		this.cardId = cardId;
 
@@ -80,7 +80,7 @@ public class CardCommentComponent extends HorizontalLayout {
 		Icon editIcon = VaadinIcon.EDIT.create();
 		add(editIcon);
 	}
-	
+
 	public void delete() {
 		log.info("delete card comment: {}", getId().get());
 		TKBCardComment cc = cardCommentRepository.findById(getId().get()).get();
@@ -97,15 +97,15 @@ public class CardCommentComponent extends HorizontalLayout {
 		// update layout with new missing data
 		changeText(tmp.getText());
 	}
-	
+
 	private void changeText(String text) {
 		if (!label.getText().equals(text)) {
 			label.setText(text);
 		}
-		
+
 		if (Config.DEBUG) {
 			label.setText(text + " (" + comment.getDataOrder() + ")");
 		}
 	}
-	
+
 }
