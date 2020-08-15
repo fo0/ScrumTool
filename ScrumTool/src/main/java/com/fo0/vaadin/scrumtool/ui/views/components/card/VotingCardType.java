@@ -12,7 +12,6 @@ import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
-import com.fo0.vaadin.scrumtool.ui.views.components.like.LikeComponent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -38,7 +37,7 @@ public class VotingCardType implements ICardTypeTemplate {
 
 	private Button btnComment;
 	private KanbanView view;
-	
+
 	private VotingData data;
 
 	public VotingCardType(CardComponent root) {
@@ -51,26 +50,29 @@ public class VotingCardType implements ICardTypeTemplate {
 		VerticalLayout rootLayout = new VerticalLayout();
 		addStyles(root, rootLayout);
 
-		label = new Label("Voting: "+data.getText());
+		label = new Label(data.getText());
 		HorizontalLayout layoutTitle = new HorizontalLayout(label);
-		layoutTitle.setMargin(true);
+		layoutTitle.setPadding(true);
+		layoutTitle.getStyle().set("box-shadow", "black 0px 2px 10px 3px");
 		layoutTitle.setWidthFull();
 		rootLayout.add(layoutTitle);
-		
+
 		data.getItems().stream().forEachOrdered(e -> {
 			rootLayout.add(addItem(e));
 		});
 	}
-	
+
 	public VerticalLayout addItem(VotingItem item) {
 		VerticalLayout layout = new VerticalLayout();
 		layout.getStyle().set("border", "0.5px solid black");
 		layout.setWidthFull();
 		layout.add(new Label(item.getText()));
-		
+		layout.setPadding(false);
+		layout.setMargin(false);
+
 		HorizontalLayout l = new HorizontalLayout();
 		l.setWidthFull();
-		
+
 		Button btnLike = new Button(VaadinIcon.THUMBS_UP_O.create());
 		ToolTip.add(btnLike, "Like the card");
 		btnLike.setText(String.valueOf(-1));
@@ -88,15 +90,15 @@ public class VotingCardType implements ICardTypeTemplate {
 
 		});
 		l.add(btnRemoveLike);
-		
+
 		layout.add(l);
-		
+
 		return layout;
 	}
 
 	private void addStyles(CardComponent root, VerticalLayout rootLayout) {
 		rootLayout.setWidthFull();
-		rootLayout.setSpacing(false);
+		rootLayout.setSpacing(true);
 		rootLayout.setMargin(false);
 		rootLayout.setPadding(false);
 		root.add(rootLayout);
