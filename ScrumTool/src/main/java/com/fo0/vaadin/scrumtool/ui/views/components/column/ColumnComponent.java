@@ -225,6 +225,18 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 		Button btnVoting = new Button(FontAwesome.Solid.POLL_H.create());
 		ToolTip.add(btnVoting, "Create a Voting-Card");
 		btnVoting.addClickListener(e -> {
+			if (view.getOptions().getMaxCards() > 0) {
+				if (cards.getComponentCount() >= view.getOptions().getMaxCards()) {
+					Notification.show("Card limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
+					return;
+				}
+			}
+
+			if (StringUtils.isBlank(area.getValue())) {
+				Notification.show("Please enter a text", Config.NOTIFICATION_DURATION, Position.MIDDLE);
+				return;
+			}
+			
 			new CreateVotingCardDialog(view, this, getId().get(), area.getValue()).open();
 			area.clear();
 		});

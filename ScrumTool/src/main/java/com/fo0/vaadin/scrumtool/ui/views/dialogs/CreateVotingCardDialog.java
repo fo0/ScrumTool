@@ -1,6 +1,8 @@
 package com.fo0.vaadin.scrumtool.ui.views.dialogs;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.util.Strings;
@@ -19,6 +21,7 @@ import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
 import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IBroadcastRegistry;
 import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IComponent;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -58,6 +61,27 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 		this.view = view;
 		this.column = column;
 
+		String caption;
+		List<String> items = Lists.newArrayList();
+		try {
+			Pattern p1 = Pattern.compile("(.*)^.*");
+			Matcher m1 = p1.matcher(text);
+			caption = text;
+			while (m1.find()) {
+				caption = m1.group();
+			}
+
+			Pattern p2 = Pattern.compile("\n(-.+)+");
+			Matcher m2 = p2.matcher(text);
+			while (m2.find()) {
+				String group = m2.group(1);
+				items.add(group);
+			}
+		} catch (Exception e) {
+			log.error("something went wrong when parsing voting input", e);
+			caption = text;
+		}
+
 		setId(columnId);
 
 		root = new VerticalLayout();
@@ -78,7 +102,7 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 		Button btn = new Button(VaadinIcon.PLUS.create());
 		ToolTip.add(btn, "Add Question");
 		btn.addClickListener(e -> {
-			new TextDialog("Write Comment", Strings.EMPTY, savedText -> {
+			new TextDialog("Add Voting Option", Strings.EMPTY, savedText -> {
 				addVoting(savedText);
 			}).open();
 		});
@@ -109,7 +133,11 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 		votingItemLayout.setPadding(false);
 		root.add(votingItemLayout);
 
-		addTitle(text);
+		addTitle(caption);
+
+		items.stream().forEachOrdered(e -> {
+			addVoting(e);
+		});
 	}
 
 	private void addTitle(String cardText) {
@@ -136,16 +164,21 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 	}
 
 	public List<VotingItem> getVotingItems() {
-		return getComponentsByType(votingItemLayout, VerticalLayout.class).stream()
-				.map(e -> VotingItem.builder().text(((Label)(e.getComponentAt(0))).getText()).build()).collect(Collectors.toList());
+		//@formatter:off
+		return getComponentsByType(votingItemLayout, HorizontalLayout.class)
+				.stream()
+				.map(e -> VotingItem.builder().text(((Label)(e.getComponentAt(1))).getText()).build())
+				.collect(Collectors.toList());
+		//@formatter:on
 	}
 
 	private void addVoting(String voting) {
-		VerticalLayout layout = new VerticalLayout();
+		HorizontalLayout layout = new HorizontalLayout();
 		layout.getStyle().set("border", "0.5px solid black");
 		layout.setWidthFull();
+		Label title = new Label("Voting Option: ");
 		Label l = new Label(voting);
-		layout.add(l);
+		layout.add(title, l);
 		votingItemLayout.addComponentAsFirst(layout);
 	}
 
