@@ -79,7 +79,7 @@ public class VotingCardType implements ICardTypeTemplate, IComponent {
 		layoutTitle.setPadding(false);
 		layoutTitle.setSpacing(false);
 		layoutTitle.setMargin(false);
-		layoutTitle.getStyle().set("box-shadow", "black 0px 1px 5px 2px");
+		layoutTitle.getStyle().set("box-shadow", "rgb(33, 33, 33) 0px 1px 5px 3px");
 		layoutTitle.setWidthFull();
 		rootLayout.add(layoutTitle);
 		itemLayout = new VerticalLayout();
