@@ -9,6 +9,7 @@ import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardComment;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
+import com.fo0.vaadin.scrumtool.ui.model.TextItem;
 import com.google.common.collect.Lists;
 
 public class JiraMarkDown {
@@ -34,12 +35,17 @@ public class JiraMarkDown {
 		list.add("|| No || Likes || Description || Comments ||");
 
 		column.getCards().stream().sorted(Comparator.comparing(TKBCard::getDataOrder)).forEachOrdered(card -> {
-			list.add(String.format("| %d | %d | %s | %s |", card.getDataOrder(), card.countAllLikes(), card.getText(),
+			list.add(String.format("| %d | %d | %s | %s |", card.getDataOrder(),
+					getItem(card).countAllLikes(), getItem(card).getText(),
 					card.getComments().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).map(TKBCardComment::getText)
 							.collect(Collectors.joining(" \\\\ "))));
 		});
 
 		return list;
+	}
+
+	private static TextItem getItem(TKBCard card) {
+		return card.getByType(TextItem.class).orElseGet(() -> TextItem.builder().build());
 	}
 
 }

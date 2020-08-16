@@ -1,6 +1,9 @@
 package com.fo0.vaadin.scrumtool.ui.data.table;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -9,10 +12,14 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 
+import com.fo0.vaadin.scrumtool.ui.data.enums.ECardType;
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,28 +46,39 @@ public class TKBCard implements Serializable, IDataOrder {
 	@Builder.Default
 	private int dataOrder = -1;
 
-	private String text;
-	
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "cardId")
 	@Builder.Default
-	private Set<TKBCardLikes> likes = Sets.newHashSet();
-	
+	private ECardType type = ECardType.TextCard;
+
+	@Lob
+	private String text;
+
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "cardId")
 	@Builder.Default
 	private Set<TKBCardComment> comments = Sets.newHashSet();
 
-	public void removeLikeByOwnerId(String ownerId) {
-		likes.stream().filter(e -> e.getOwnerId().equals(ownerId)).findFirst().ifPresent(likes::remove);
-	}
-
-	public int cardLikesByOwnerId(String ownerId) {
-		return likes.stream().filter(e -> e.getOwnerId().equals(ownerId)).mapToInt(TKBCardLikes::getLikeValue).sum();
+	public void setTextByType(Object o) {
+		setText(new Gson().toJson(o));
 	}
 	
-	public int countAllLikes() {
-		return likes.stream().mapToInt(TKBCardLikes::getLikeValue).sum();
+	public <T> Optional<T> getByType(Class<T> type) {
+		T data = null;
+		try {
+			data = new Gson().fromJson(text, type);
+		} catch (Exception e) {
+		}
+
+		return Optional.ofNullable(data);
+	}
+
+	public <T> Optional<List<T>> getByTypeAsList(Class<T> type) {
+		List<T> data = null;
+		try {
+			data = new Gson().fromJson(text, TypeToken.getParameterized(ArrayList.class, type).getType());
+		} catch (Exception e) {
+		}
+
+		return Optional.ofNullable(data);
 	}
 
 }

@@ -11,7 +11,6 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.fo0.vaadin.scrumtool.ui.config.Profiles;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardLikesRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
@@ -31,35 +30,30 @@ public class TKBDataDeleteTest {
 	@Autowired
 	private KBCardRepository cardRepository;
 
-	@Autowired
-	private KBCardLikesRepository cardLikerepository;
-
 	@Test
 	public void save() {
-		TKBData data = TKBUtils.randomTkbData();
+		TKBData data = TKBUtils.randomTkbData_1_column_2_likes();
 		dataRepository.save(data);
 
 		assertEquals(1, CollectionUtils.size(dataRepository.findAll()));
 		assertEquals(1, CollectionUtils.size(columnRepository.findAll()));
 		assertEquals(1, CollectionUtils.size(cardRepository.findAll()));
-		assertEquals(2, CollectionUtils.size(cardLikerepository.findAll()));
 	}
 
 	@Test
 	public void deleteData() {
-		TKBData data = TKBUtils.randomTkbData();
+		TKBData data = TKBUtils.randomTkbData_1_column_2_likes();
 		dataRepository.save(data);
 		dataRepository.delete(data);
 
 		assertEquals(0, CollectionUtils.size(dataRepository.findAll()));
 		assertEquals(0, CollectionUtils.size(columnRepository.findAll()));
 		assertEquals(0, CollectionUtils.size(cardRepository.findAll()));
-		assertEquals(0, CollectionUtils.size(cardLikerepository.findAll()));
 	}
 
 	@Test
 	public void deleteColumn() {
-		TKBData data = TKBUtils.randomTkbData();
+		TKBData data = TKBUtils.randomTkbData_1_column_2_likes();
 		dataRepository.save(data);
 		data.getColumns().clear();
 		dataRepository.save(data);
@@ -67,7 +61,6 @@ public class TKBDataDeleteTest {
 		assertEquals(1, CollectionUtils.size(dataRepository.findAll()));
 		assertEquals(0, CollectionUtils.size(columnRepository.findAll()));
 		assertEquals(0, CollectionUtils.size(cardRepository.findAll()));
-		assertEquals(0, CollectionUtils.size(cardLikerepository.findAll()));
 	}
 
 }

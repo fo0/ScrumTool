@@ -10,7 +10,6 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.fo0.vaadin.scrumtool.ui.config.Profiles;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardLikesRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
@@ -30,13 +29,10 @@ public class TKBDataFetchTest {
 	@Autowired
 	private KBCardRepository cardRepository;
 
-	@Autowired
-	private KBCardLikesRepository cardLikerepository;
-
 	@Test
 	public void findAllColumnsByRepo() {
 		// persist data with 2 columns
-		TKBData data = TKBUtils.randomTkbData4();
+		TKBData data = TKBUtils.randomTkbData_3_columns_2_likes();
 		dataRepository.save(data);
 
 		assertEquals(3, dataRepository.findByIdFetched(data.getId()).getColumns().size());

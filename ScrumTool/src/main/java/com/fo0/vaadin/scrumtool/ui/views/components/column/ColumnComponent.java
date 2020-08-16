@@ -1,4 +1,4 @@
-package com.fo0.vaadin.scrumtool.ui.views.components;
+package com.fo0.vaadin.scrumtool.ui.views.components.column;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,9 +8,11 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.flowingcode.vaadin.addons.fontawesome.FontAwesome;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumn;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
+import com.fo0.vaadin.scrumtool.ui.data.enums.ECardType;
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
@@ -18,17 +20,23 @@ import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
+import com.fo0.vaadin.scrumtool.ui.model.TextItem;
 import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.styles.STYLES;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
-import com.fo0.vaadin.scrumtool.ui.utils.StreamUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.Utils;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
+import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
+import com.fo0.vaadin.scrumtool.ui.views.components.card.CardComponent;
+import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IBroadcastRegistry;
+import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IComponent;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.CreateVotingCardDialog;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
 import com.fo0.vaadin.scrumtool.ui.views.utils.KBViewUtils;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -44,13 +52,12 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.shared.Registration;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class ColumnComponent extends VerticalLayout {
+public class ColumnComponent extends VerticalLayout implements IBroadcastRegistry, IComponent {
 
 	private static final long serialVersionUID = 8415434953831247614L;
 
@@ -60,9 +67,9 @@ public class ColumnComponent extends VerticalLayout {
 
 	@Getter
 	private KanbanView view;
+
 	private TextArea area;
 	private H3 h3;
-	private Registration broadcasterRegistration;
 	private VerticalLayout cards;
 	private String id;
 
@@ -101,7 +108,7 @@ public class ColumnComponent extends VerticalLayout {
 			});
 			captionLayout.add(btnEdit);
 			captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btnEdit);
-			
+
 			Button btnShuffle = new Button(VaadinIcon.RANDOM.create());
 			ToolTip.add(btnShuffle, "Shuffle the cards");
 			btnShuffle.addClickListener(e -> {
@@ -199,7 +206,11 @@ public class ColumnComponent extends VerticalLayout {
 				return;
 			}
 
-			addCardAndSaveAndBroadcast(Utils.randomId(), SessionUtils.getSessionId(), area.getValue());
+			TKBCard card = TKBCard.builder().type(ECardType.TextCard).ownerId(SessionUtils.getSessionId()).build();
+			card.setTextByType(TextItem.builder().text(area.getValue()).build());
+			TKBColumn col = addCardAndSave(card);
+			update(col.getId());
+
 			area.clear();
 			area.focus();
 		});
@@ -211,7 +222,16 @@ public class ColumnComponent extends VerticalLayout {
 			area.clear();
 		});
 
-		HorizontalLayout btnLayout = new HorizontalLayout(btnCancel, btnAdd);
+		Button btnVoting = new Button(FontAwesome.Solid.POLL_H.create());
+		ToolTip.add(btnVoting, "Create a Voting-Card");
+		btnVoting.addClickListener(e -> {
+			new CreateVotingCardDialog(view, this, getId().get(), area.getValue()).open();
+			area.clear();
+		});
+
+		HorizontalLayout btnGroup = new HorizontalLayout(btnAdd, btnVoting);
+		btnGroup.setSpacing(false);
+		HorizontalLayout btnLayout = new HorizontalLayout(btnCancel, btnGroup);
 		btnLayout.setWidthFull();
 		layoutHeader.add(btnLayout);
 		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, h3);
@@ -229,18 +249,22 @@ public class ColumnComponent extends VerticalLayout {
 			e.getDragSourceComponent().ifPresent(card -> {
 				CardComponent droppedCard = (CardComponent) card;
 				log.debug("receive dropped card: " + droppedCard.getId().get());
-				TKBColumn col = addCardAndSave(Utils.randomId(), droppedCard.getCard());
-				BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.ADD_COLUMN + col.getId());
+				droppedCard.getCard().setId(Utils.randomId());
+
+				// TODO: ??? is this really needed
+				// StreamUtils.stream(droppedCard.getCard().getLikes()).forEach(x ->
+				// x.setId(Utils.randomId()));
+
+				TKBColumn col = addCardAndSave(droppedCard.getCard());
+				update(col.getId());
 			});
 		});
 
 		add(cards);
-
 	}
 
-	private void addCardAndSaveAndBroadcast(String id, String owner, String message) {
-		TKBColumn col = addCardAndSave(id, owner, message);
-		BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.ADD_COLUMN + col.getId());
+	private void update(String columnId) {
+		BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.ADD_COLUMN + columnId);
 	}
 
 	private void deleteColumn() {
@@ -252,79 +276,29 @@ public class ColumnComponent extends VerticalLayout {
 		BroadcasterBoard.broadcast(view.getId().get(), "update");
 	}
 
-	@Override
-	protected void onAttach(AttachEvent attachEvent) {
-		UI ui = UI.getCurrent();
-		broadcasterRegistration = BroadcasterColumn.register(getId().get(), event -> {
-			ui.access(() -> {
-				if (Config.DEBUG) {
-					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
-				}
-
-				String[] cmd = event.split("\\.");
-
-				switch (cmd[0]) {
-				case BroadcasterColumn.MESSAGE_SHUFFLE:
-					ColumnComponent.this.cards.removeAll();
-					ColumnComponent.this.reload();
-					break;
-
-				case BroadcasterColumn.ADD_COLUMN:
-					ColumnComponent.this.addCardAndReload(cmd[1]);
-					break;
-
-				default:
-					reload();
-					break;
-				}
-
-			});
-		});
-	}
-
-	@Override
-	protected void onDetach(DetachEvent detachEvent) {
-//		super.onDetach(detachEvent);
-		if (broadcasterRegistration != null) {
-			broadcasterRegistration.remove();
-			broadcasterRegistration = null;
-		} else {
-			log.info("cannot remove broadcast, because it is null");
-		}
-	}
-
-	public void changeTitle(String string, int order) {
-		if (!h3.getText().equals(string)) {
-			h3.setText(string);
+	public TKBColumn addVotingCardAndSave(TKBCard card) {
+		if (ECardType.valueOf(card.getType().name()) == null) {
+			Notification.show("Currently not supported: " + card.getType(), 3000, Position.MIDDLE);
+			return null;
 		}
 
-		if (Config.DEBUG)
-			h3.setText(string + " (" + order + ")");
-	}
-
-	private TKBColumn addCardAndSave(String randomId, String sessionId, String value) {
 		TKBColumn tmp = repository.findById(getId().get()).get();
-		TKBCard card = TKBCard.builder().id(randomId).ownerId(sessionId).dataOrder(KBViewUtils.calculateNextPosition(tmp.getCards()))
-				.text(value).build();
 		tmp.addCard(card);
 		repository.save(tmp);
-		log.info("add card: {}", randomId);
+		log.info("add card: {}", card.getId());
 		return tmp;
 	}
 
-	private TKBColumn addCardAndSave(String randomId, TKBCard card) {
+	private TKBColumn addCardAndSave(TKBCard card) {
 		TKBColumn tmp = repository.findById(getId().get()).get();
-		card.setId(randomId);
-		StreamUtils.stream(card.getLikes()).forEach(e -> {
-			e.setId(Utils.randomId());
-		});
+		card.setDataOrder(KBViewUtils.calculateNextPosition(tmp.getCards()));
 		tmp.addCard(card);
 		repository.save(tmp);
-		log.info("add card: {}", randomId);
+		log.info("add card: {}", card.getId());
 		return tmp;
 	}
 
-	private CardComponent addCardLayout(TKBCard card, boolean sortOrderDesc) {
+	private CardComponent addCardLayout(TKBCard card) {
 		CardComponent cc = new CardComponent(view, this, getId().get(), card);
 
 		// for dnd support
@@ -337,7 +311,7 @@ public class ColumnComponent extends VerticalLayout {
 
 		dragConfig.addDragEndListener(e -> {
 			if (!e.isSuccessful()) {
-					Notification.show("Please move the card to a column", 3000, Position.MIDDLE);
+				Notification.show("Please move the card to a column", 3000, Position.MIDDLE);
 				return;
 			}
 
@@ -349,22 +323,12 @@ public class ColumnComponent extends VerticalLayout {
 			e.getComponent().deleteCard();
 		});
 
-		if (sortOrderDesc) {
+		if (view.getOptions().isCardSortDirectionDesc()) {
 			cards.addComponentAsFirst(cc);
 		} else {
 			cards.add(cc);
 		}
 		return cc;
-	}
-
-	public void addCardAndReload(String cardId) {
-		TKBCard pdc = cardRepository.findById(cardId).get();
-		CardComponent card = getCardById(pdc.getId());
-		if (card == null) {
-			card = addCardLayout(pdc, view.getOptions().isCardSortDirectionDesc());
-		}
-
-		card.reload();
 	}
 
 	public void reload() {
@@ -373,43 +337,71 @@ public class ColumnComponent extends VerticalLayout {
 
 		// update layout with new missing data
 		data.getCards().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).forEachOrdered(pdc -> {
-			CardComponent card = getCardById(pdc.getId());
+			CardComponent card = getComponentById(cards, CardComponent.class, pdc.getId());
 			if (card == null) {
 				// add card as new card
-				card = addCardLayout(pdc, view.getOptions().isCardSortDirectionDesc());
+				card = addCardLayout(pdc);
 			}
 
 			card.reload();
 		});
 
 		// remove old
-		getCardComponents().stream().filter(e -> data.getCards().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
-				.collect(Collectors.toList()).forEach(e -> {
+		getComponentsByType(cards, Component.class).stream()
+				.filter(e -> data.getCards().stream().noneMatch(x -> x.getId().equals(e.getId().get()))).collect(Collectors.toList())
+				.forEach(e -> {
 					cards.remove(e);
 				});
 	}
 
-	public List<CardComponent> getCardComponents() {
-		List<CardComponent> components = Lists.newArrayList();
-		for (int i = 0; i < cards.getComponentCount(); i++) {
-			if (cards.getComponentAt(i) instanceof CardComponent) {
-				components.add((CardComponent) cards.getComponentAt(i));
-			}
+	public void changeTitle(String string, int order) {
+		if (!h3.getText().equals(string)) {
+			h3.setText(string);
 		}
-		return components;
+
+		if (Config.DEBUG)
+			h3.setText(string + " (" + order + ")");
 	}
 
-	public CardComponent getCardById(String cardId) {
-		for (int i = 0; i < cards.getComponentCount(); i++) {
-			if (cards.getComponentAt(i) instanceof CardComponent) {
-				CardComponent card = (CardComponent) cards.getComponentAt(i);
-				if (card.getId().get().equals(cardId)) {
-					return card;
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+		UI ui = UI.getCurrent();
+		registerBroadcast("column", BroadcasterColumn.register(getId().get(), event -> {
+			ui.access(() -> {
+				if (Config.DEBUG) {
+					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
 				}
-			}
-		}
 
-		return null;
+				String[] cmd = event.split("\\.");
+
+				switch (cmd[0]) {
+				case BroadcasterColumn.MESSAGE_SHUFFLE:
+					cards.removeAll();
+					reload();
+					break;
+
+				case BroadcasterColumn.ADD_COLUMN:
+					TKBCard pdc = cardRepository.findById(cmd[1]).get();
+					CardComponent card = getComponentById(cards, CardComponent.class, pdc.getId());
+					if (card == null) {
+						card = addCardLayout(pdc);
+					}
+
+					card.reload();
+					break;
+
+				default:
+					reload();
+					break;
+				}
+
+			});
+		}));
+	}
+
+	@Override
+	protected void onDetach(DetachEvent detachEvent) {
+		unRegisterBroadcasters();
 	}
 
 }

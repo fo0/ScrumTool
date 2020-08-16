@@ -22,13 +22,14 @@ import com.fo0.vaadin.scrumtool.ui.data.table.TKBOptions;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBUser;
 import com.fo0.vaadin.scrumtool.ui.model.User;
 import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
-import com.fo0.vaadin.scrumtool.ui.views.components.ColumnComponent;
-import com.fo0.vaadin.scrumtool.ui.views.components.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.ui.views.components.ThemeToggleButton;
-import com.fo0.vaadin.scrumtool.ui.views.components.TimerComponent;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
+import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
+import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IBroadcastRegistry;
+import com.fo0.vaadin.scrumtool.ui.views.components.timer.TimerComponent;
 import com.fo0.vaadin.scrumtool.ui.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CreateColumnDialog;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.MarkDownDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.ShareLayout;
 import com.fo0.vaadin.scrumtool.ui.views.layouts.MainLayout;
@@ -58,7 +59,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.shared.Registration;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -70,7 +70,7 @@ import lombok.extern.log4j.Log4j2;
 @Route(value = KanbanView.NAME, layout = MainLayout.class)
 @CssImport(value = "./styles/custom-menu-bar.css", themeFor = "vaadin-menu-bar")
 @CssImport(value = "./styles/custom-menu-bar-button.css", themeFor = "vaadin-menu-bar-button")
-public class KanbanView extends Div implements HasUrlParameter<String>, IThemeToggleButton {
+public class KanbanView extends Div implements HasUrlParameter<String>, IThemeToggleButton, IBroadcastRegistry {
 
 	public static final String NAME = "kanbanboard";
 
@@ -81,7 +81,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Autowired
 	private KBColumnRepository columnRepository;
-
+	
 	@Autowired
 	private KBOptionRepository optionRepository;
 
@@ -104,9 +104,9 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	@Getter
 	private String dataUserId;
 
-	private Registration broadcasterRegistration;
-	private Registration broadcasterTimerRegistration;
-	private Registration broadcasterUsers;
+	//private Registration broadcasterRegistration;
+	//private Registration broadcasterTimerRegistration;
+	//private Registration broadcasterUsers;
 
 	private TimerComponent timer;
 	private Button btnUsers;
@@ -161,7 +161,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	protected void onAttach(AttachEvent attachEvent) {
 		UI ui = UI.getCurrent();
 
-		broadcasterRegistration = BroadcasterBoard.register(getId().get(), event -> {
+		registerBroadcast("board", BroadcasterBoard.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION,
@@ -169,9 +169,9 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 				}
 				reload();
 			});
-		});
+		}));
 
-		broadcasterUsers = BroadcasterUsers.register(getId().get(), event -> {
+		registerBroadcast("users", BroadcasterUsers.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION,
@@ -180,9 +180,9 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 				changeUsersCounter();
 			});
-		});
+		}));
 
-		broadcasterTimerRegistration = BroadcasterBoardTimer.register(getId().get(), event -> {
+		registerBroadcast("timer", BroadcasterBoardTimer.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
 					Notification.show("receiving broadcast for timer", Config.NOTIFICATION_DURATION,
@@ -209,7 +209,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 					break;
 				}
 			});
-		});
+		}));
 
 		BroadcasterUsers.broadcast(getId().get(), "update");
 		super.onAttach(attachEvent);
@@ -221,26 +221,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		userRepository.deleteUserById(dataUserId, SessionUtils.getSessionId());
 		BroadcasterUsers.broadcast(getId().get(), "delete");
 
-		if (broadcasterRegistration != null) {
-			broadcasterRegistration.remove();
-			broadcasterRegistration = null;
-		} else {
-			log.info("cannot remove broadcast, because it is null");
-		}
-
-		if (broadcasterTimerRegistration != null) {
-			broadcasterTimerRegistration.remove();
-			broadcasterTimerRegistration = null;
-		} else {
-			log.info("cannot remove broadcast timer, because it is null");
-		}
-
-		if (broadcasterUsers != null) {
-			broadcasterUsers.remove();
-			broadcasterUsers = null;
-		} else {
-			log.info("cannot remove broadcast User, because it is null");
-		}
+		unRegisterBroadcasters();
 
 		super.onDetach(detachEvent);
 	}
@@ -299,7 +280,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		repository.save(tmp);
 	}
-
+	
 	public ColumnComponent addColumnLayout(TKBColumn column) {
 		if (getColumnLayoutById(column.getId()) != null) {
 			log.warn("column already exists: {} - {}", column.getId(), column.getName());

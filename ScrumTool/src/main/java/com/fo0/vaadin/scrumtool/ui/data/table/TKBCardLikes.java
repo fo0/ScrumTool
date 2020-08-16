@@ -1,8 +1,5 @@
 package com.fo0.vaadin.scrumtool.ui.data.table;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-
 import com.fo0.vaadin.scrumtool.ui.utils.Utils;
 
 import lombok.AllArgsConstructor;
@@ -14,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Data
 @EqualsAndHashCode(of = { "id" })
 @Builder
-@Entity
 @AllArgsConstructor
 @NoArgsConstructor
 public class TKBCardLikes {
@@ -22,11 +18,14 @@ public class TKBCardLikes {
 	/**
 	 * ID = OwnerId
 	 */
-	@Id
 	@Builder.Default
 	private String id = Utils.randomId();
 
+	private String cardId;
+	
 	private String ownerId;
+	
+	private String value;
 
 	@Builder.Default
 	private int likeValue = 0;

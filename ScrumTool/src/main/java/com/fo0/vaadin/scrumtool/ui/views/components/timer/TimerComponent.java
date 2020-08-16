@@ -1,9 +1,10 @@
-package com.fo0.vaadin.scrumtool.ui.views.components;
+package com.fo0.vaadin.scrumtool.ui.views.components.timer;
 
 import java.util.concurrent.TimeUnit;
 
 import com.flowingcode.vaadin.addons.simpletimer.SimpleTimer;
 import com.flowingcode.vaadin.addons.simpletimer.SimpleTimer.TimerEndedEvent;
+import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
