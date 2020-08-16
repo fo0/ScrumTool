@@ -1,8 +1,7 @@
 package com.fo0.vaadin.scrumtool.ui.views.components.like;
 
 import java.util.Collection;
-
-import org.apache.commons.lang3.StringUtils;
+import java.util.function.UnaryOperator;
 
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
@@ -12,6 +11,7 @@ import com.fo0.vaadin.scrumtool.ui.data.repository.KBOptionRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardLikes;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBOptions;
+import com.fo0.vaadin.scrumtool.ui.model.VotingData;
 import com.fo0.vaadin.scrumtool.ui.model.VotingItem;
 import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
@@ -135,39 +135,49 @@ public class VotingCardLikeComponent extends HorizontalLayout {
 	}
 
 	public void addLike() {
-		TKBCard tmp = repository.findById(cardId).get();
-		VotingItem item = getCard(tmp);
-		item.getLikes().add(TKBCardLikes.builder().ownerId(SessionUtils.getSessionId()).likeValue(1).build());
-		tmp.setTextByType(item);
-		repository.save(tmp);
+		updateItem(e -> {
+			e.getLikes().add(TKBCardLikes.builder().ownerId(SessionUtils.getSessionId()).likeValue(1).build());
+			return e;
+		});
 	}
 
 	public void removeLike() {
-		TKBCard tmp = repository.findById(cardId).get();
-		VotingItem item = getCard(tmp);
-		item.removeLikeByOwnerId(SessionUtils.getSessionId());
-		tmp.setTextByType(item);
-		repository.save(tmp);
+		updateItem(e -> {
+			e.removeLikeByOwnerId(SessionUtils.getSessionId());
+			return e;
+		});
 	}
 
 	public void reload() {
 		// update layout with new missing data
-		changeText(getCard().countAllLikes());
-		changeButtonIconToLiked(getCard().cardLikesByOwnerId(SessionUtils.getSessionId()) != 0);
+		changeText(getItem().countAllLikes());
+		changeButtonIconToLiked(getItem().cardLikesByOwnerId(SessionUtils.getSessionId()) != 0);
 	}
 
 	private boolean isLikedByOwner() {
-		return getCard().cardLikesByOwnerId(SessionUtils.getSessionId()) != 0;
+		return getItem().cardLikesByOwnerId(SessionUtils.getSessionId()) != 0;
 	}
 
-	public VotingItem getCard(TKBCard card) {
-		return card.getByTypeAsList(VotingItem.class).orElseGet(() -> Lists.newArrayList()).stream()
-				.filter(e -> StringUtils.equals(e.getId(), votingId)).findFirst().orElseGet(() -> VotingItem.builder().build());
+	public void updateItem(UnaryOperator<VotingItem> update) {
+		TKBCard tmp = getCard();
+		VotingData data = tmp.getByType(VotingData.class).get();
+		VotingItem item = data.getItemById(votingId);
+		item = update.apply(item);
+		tmp.setTextByType(data);
+		repository.save(tmp);
 	}
 
-	public VotingItem getCard() {
+	public VotingItem getItem(TKBCard card) {
+		return card.getByType(VotingData.class).get().getItemById(votingId);
+	}
+
+	public VotingItem getItem() {
 		TKBCard tmp = repository.findById(cardId).get();
-		return getCard(tmp);
+		return getItem(tmp);
+	}
+
+	public TKBCard getCard() {
+		return repository.findById(cardId).get();
 	}
 
 	public void changeText(int likes) {

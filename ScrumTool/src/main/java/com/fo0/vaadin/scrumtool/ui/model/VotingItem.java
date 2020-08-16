@@ -9,9 +9,11 @@ import com.google.common.collect.Lists;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @Builder
+@EqualsAndHashCode(of = { "id" })
 public class VotingItem implements ILike {
 
 	@Builder.Default

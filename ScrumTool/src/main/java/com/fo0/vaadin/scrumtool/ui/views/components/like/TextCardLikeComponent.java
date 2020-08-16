@@ -1,5 +1,7 @@
 package com.fo0.vaadin.scrumtool.ui.views.components.like;
 
+import java.util.function.UnaryOperator;
+
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
@@ -124,19 +126,37 @@ public class TextCardLikeComponent extends VerticalLayout {
 	}
 
 	public void addLike() {
-		TKBCard tmp = repository.findById(cardId).get();
-		TextItem item = tmp.getByType(TextItem.class).orElseGet(() -> TextItem.builder().build());
-		item.getLikes().add(TKBCardLikes.builder().ownerId(SessionUtils.getSessionId()).likeValue(1).build());
-		tmp.setTextByType(item);
-		repository.save(tmp);
+		updateItem(e -> {
+			e.getLikes().add(TKBCardLikes.builder().ownerId(SessionUtils.getSessionId()).likeValue(1).build());
+			return e;
+		});
 	}
 
 	public void removeLike() {
-		TKBCard tmp = repository.findById(cardId).get();
-		TextItem item = tmp.getByType(TextItem.class).orElseGet(() -> TextItem.builder().build());
-		item.removeLikeByOwnerId(SessionUtils.getSessionId());
-		tmp.setTextByType(item);
+		updateItem(e -> {
+			e.removeLikeByOwnerId(SessionUtils.getSessionId());
+			return e;
+		});
+	}
+
+	public void updateItem(UnaryOperator<TextItem> update) {
+		TKBCard tmp = getCard();
+		TextItem item = getItem(tmp);
+		tmp.setTextByType(update.apply(item));
 		repository.save(tmp);
+	}
+
+	public TextItem getItem(TKBCard card) {
+		return card.getByType(TextItem.class).get();
+	}
+
+	public TextItem getItem() {
+		TKBCard tmp = repository.findById(cardId).get();
+		return getItem(tmp);
+	}
+
+	public TKBCard getCard() {
+		return repository.findById(cardId).get();
 	}
 
 	public void reload() {
