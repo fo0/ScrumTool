@@ -4,8 +4,6 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.flowingcode.vaadin.addons.fontawesome.FontAwesome;
-import com.flowingcode.vaadin.addons.fontawesome.FontAwesome.Solid.Icon;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
@@ -14,17 +12,20 @@ import com.fo0.vaadin.scrumtool.ui.model.VotingData;
 import com.fo0.vaadin.scrumtool.ui.model.VotingItem;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
+import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
+import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IComponent;
 import com.fo0.vaadin.scrumtool.ui.views.components.like.VotingCardLikeComponent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import lombok.Getter;
 
-public class VotingCardType implements ICardTypeTemplate {
+public class VotingCardType implements ICardTypeTemplate, IComponent {
 
 	private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
 	private KBColumnRepository columnRepository = SpringContext.getBean(KBColumnRepository.class);
@@ -37,13 +38,13 @@ public class VotingCardType implements ICardTypeTemplate {
 	private ColumnComponent column;
 	private String columnId;
 	private String cardId;
-	private Label label;
 
 	private Button btnComment;
 	private KanbanView view;
 
 	private VotingData data;
-	private VotingCardLikeComponent likeComponent;
+	private VerticalLayout rootLayout;
+	private VerticalLayout itemLayout;
 
 	public VotingCardType(CardComponent root) {
 		this.root = root;
@@ -53,21 +54,44 @@ public class VotingCardType implements ICardTypeTemplate {
 		this.column = root.getColumn();
 		this.data = card.getByType(VotingData.class).get();
 
-		VerticalLayout rootLayout = new VerticalLayout();
+		rootLayout = new VerticalLayout();
 		addStyles(root, rootLayout);
 
-		label = new Label(data.getText());
-		Icon icn = FontAwesome.Solid.QUESTION.create();
-		HorizontalLayout layoutTitle = new HorizontalLayout(icn, label);
+		Label label = new Label(data.getText());
+		// Icon icn = FontAwesome.Solid.QUESTION.create();
+		Button btnDelete = new Button(VaadinIcon.TRASH.create());
+		ToolTip.add(btnDelete, "Delete the card");
+		btnDelete.addClickListener(e -> root.deleteCard());
+
+		HorizontalLayout layoutText = new HorizontalLayout(label);
+		layoutText.setWidthFull();
+		layoutText.setPadding(true);
+		layoutText.setSpacing(false);
+		layoutText.setMargin(false);
+		
+		HorizontalLayout layoutButton = new HorizontalLayout(btnDelete);
+		layoutButton.setPadding(false);
+		layoutButton.setSpacing(false);
+		layoutButton.setMargin(false);
+		
+		HorizontalLayout layoutTitle = new HorizontalLayout(layoutText, layoutButton);
 		layoutTitle.setJustifyContentMode(JustifyContentMode.START);
-		layoutTitle.setPadding(true);
+		layoutTitle.setPadding(false);
+		layoutTitle.setSpacing(false);
+		layoutTitle.setMargin(false);
 		layoutTitle.getStyle().set("box-shadow", "black 0px 2px 10px 3px");
 		layoutTitle.setWidthFull();
 		rootLayout.add(layoutTitle);
+		itemLayout = new VerticalLayout();
+		itemLayout.setMargin(false);
+		itemLayout.setPadding(false);
+		itemLayout.setSpacing(false);
+		itemLayout.setWidthFull();
+		rootLayout.add(itemLayout);
 
 		if (CollectionUtils.isNotEmpty(data.getItems())) {
 			data.getItems().stream().forEachOrdered(e -> {
-				rootLayout.add(addItem(e));
+				itemLayout.add(addItem(e));
 			});
 		}
 	}
@@ -81,7 +105,7 @@ public class VotingCardType implements ICardTypeTemplate {
 		layout.setSpacing(false);
 		layout.setMargin(false);
 
-		likeComponent = new VotingCardLikeComponent(view, view.getId().get(), card.getId(), item.getId());
+		VotingCardLikeComponent likeComponent = new VotingCardLikeComponent(view, view.getId().get(), card.getId(), item.getId());
 		likeComponent.setWidthFull();
 		layout.add(likeComponent);
 
@@ -107,9 +131,8 @@ public class VotingCardType implements ICardTypeTemplate {
 		card = cardRepository.findById(root.id()).get();
 		changeText(card.getText());
 		changeButtonCommentsCaption(card.getComments());
-		if (likeComponent != null) {
-			likeComponent.reload();
-		}
+		getComponentsByType(itemLayout, VerticalLayout.class).stream().map(e -> ((VotingCardLikeComponent) e.getComponentAt(1)))
+				.forEach(VotingCardLikeComponent::reload);
 	}
 
 	@Override

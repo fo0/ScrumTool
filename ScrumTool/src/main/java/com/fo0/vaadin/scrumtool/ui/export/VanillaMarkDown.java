@@ -37,12 +37,16 @@ public class VanillaMarkDown {
 
 		column.getCards().stream().sorted(Comparator.comparing(TKBCard::getDataOrder)).forEachOrdered(card -> {
 			list.add(String.format("| %d | %d | %s | %s |", card.getDataOrder(),
-					card.getByType(TextItem.class).orElseGet(() -> TextItem.builder().build()).countAllLikes(), card.getText(),
+					getItem(card).countAllLikes(), getItem(card).getText(),
 					card.getComments().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).map(TKBCardComment::getText)
 							.collect(Collectors.joining(" <br/> "))));
 		});
 
 		return list;
+	}
+
+	private static TextItem getItem(TKBCard card) {
+		return card.getByType(TextItem.class).orElseGet(() -> TextItem.builder().build());
 	}
 
 }
