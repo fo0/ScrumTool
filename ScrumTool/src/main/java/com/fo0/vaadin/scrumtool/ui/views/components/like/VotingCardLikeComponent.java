@@ -129,9 +129,7 @@ public class VotingCardLikeComponent extends HorizontalLayout {
 	}
 
 	public int getCurrentLikesByOwner() {
-		TKBCard tmp = repository.findById(cardId).get();
-		return tmp.getByType(VotingItem.class).orElseGet(() -> VotingItem.builder().build())
-				.cardLikesByOwnerId(SessionUtils.getSessionId());
+		return getItem().cardLikesByOwnerId(SessionUtils.getSessionId());
 	}
 
 	public void addLike() {

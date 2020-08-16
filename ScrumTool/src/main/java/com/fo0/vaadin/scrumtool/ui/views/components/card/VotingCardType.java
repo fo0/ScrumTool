@@ -131,8 +131,7 @@ public class VotingCardType implements ICardTypeTemplate, IComponent {
 		card = cardRepository.findById(root.id()).get();
 		changeText(card.getText());
 		changeButtonCommentsCaption(card.getComments());
-		getComponentsByType(itemLayout, VerticalLayout.class).stream().map(e -> ((VotingCardLikeComponent) e.getComponentAt(1)))
-				.forEach(VotingCardLikeComponent::reload);
+		getComponentsByType(itemLayout, VerticalLayout.class).stream().map(e -> ((VotingCardLikeComponent) e.getComponentAt(1))).forEach(VotingCardLikeComponent::reload);
 	}
 
 	@Override
