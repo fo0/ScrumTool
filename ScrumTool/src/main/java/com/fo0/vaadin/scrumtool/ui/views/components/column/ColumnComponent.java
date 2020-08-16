@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.flowingcode.vaadin.addons.fontawesome.FontAwesome;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterBoard;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumn;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
@@ -19,10 +20,10 @@ import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
+import com.fo0.vaadin.scrumtool.ui.model.TextItem;
 import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.styles.STYLES;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
-import com.fo0.vaadin.scrumtool.ui.utils.StreamUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.Utils;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
@@ -205,7 +206,9 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 				return;
 			}
 
-			TKBColumn col = addCardAndSave(TKBCard.builder().type(ECardType.TextCard).ownerId(SessionUtils.getSessionId()).text(area.getValue()).build());
+			TKBCard card = TKBCard.builder().type(ECardType.TextCard).ownerId(SessionUtils.getSessionId()).build();
+			card.setTextByType(TextItem.builder().text(area.getValue()).build());
+			TKBColumn col = addCardAndSave(card);
 			update(col.getId());
 
 			area.clear();
@@ -219,10 +222,11 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 			area.clear();
 		});
 
-		Button btnVoting = new Button(VaadinIcon.CLIPBOARD_CHECK.create());
+		Button btnVoting = new Button(FontAwesome.Solid.POLL_H.create());
 		ToolTip.add(btnVoting, "Create a Voting-Card");
 		btnVoting.addClickListener(e -> {
 			new CreateVotingCardDialog(view, this, getId().get(), area.getValue()).open();
+			area.clear();
 		});
 
 		HorizontalLayout btnGroup = new HorizontalLayout(btnAdd, btnVoting);
@@ -248,7 +252,8 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 				droppedCard.getCard().setId(Utils.randomId());
 
 				// TODO: ??? is this really needed
-				StreamUtils.stream(droppedCard.getCard().getLikes()).forEach(x -> x.setId(Utils.randomId()));
+				// StreamUtils.stream(droppedCard.getCard().getLikes()).forEach(x ->
+				// x.setId(Utils.randomId()));
 
 				TKBColumn col = addCardAndSave(droppedCard.getCard());
 				update(col.getId());

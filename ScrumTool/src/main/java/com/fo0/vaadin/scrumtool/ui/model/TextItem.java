@@ -12,7 +12,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class VotingItem implements ILike {
+public class TextItem implements ILike {
 
 	@Builder.Default
 	private String id = Utils.randomId();

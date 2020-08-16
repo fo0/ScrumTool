@@ -201,6 +201,11 @@
 			<artifactId>jaxb-runtime</artifactId>
 			<version>2.3.1</version>
 		</dependency>
+		<dependency>
+			<groupId>com.flowingcode.addons</groupId>
+			<artifactId>font-awesome-iron-iconset</artifactId>
+			<version>2.1.2</version>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>

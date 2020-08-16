@@ -13,11 +13,12 @@ import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardComment;
+import com.fo0.vaadin.scrumtool.ui.model.TextItem;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
-import com.fo0.vaadin.scrumtool.ui.views.components.like.LikeComponent;
+import com.fo0.vaadin.scrumtool.ui.views.components.like.TextCardLikeComponent;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CommentDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
 import com.fo0.vaadin.scrumtool.ui.views.utils.KBViewUtils;
@@ -42,7 +43,7 @@ public class TextCardType implements ICardTypeTemplate {
 	private TKBCard card;
 
 	private ColumnComponent column;
-	private LikeComponent likeComponent;
+	private TextCardLikeComponent likeComponent;
 	private String columnId;
 	private String cardId;
 	private Label label;
@@ -55,6 +56,7 @@ public class TextCardType implements ICardTypeTemplate {
 		this.card = root.getCard();
 		this.view = root.getView();
 		this.column = root.getColumn();
+		this.cardId = root.getCardId();
 
 		label = new Label();
 		label.getStyle().set("word-break", "break-word");
@@ -69,7 +71,7 @@ public class TextCardType implements ICardTypeTemplate {
 		btnLayout.setPadding(false);
 		root.add(btnLayout);
 
-		likeComponent = new LikeComponent(view, view.getId().get(), card.getId(), card.countAllLikes());
+		likeComponent = new TextCardLikeComponent(view, view.getId().get(), card.getId());
 		btnLayout.add(likeComponent);
 
 		btnComment = new Button(VaadinIcon.COMMENT_O.create());
@@ -98,7 +100,9 @@ public class TextCardType implements ICardTypeTemplate {
 			new TextDialog("Edit Text", label.getText(), savedText -> {
 				log.info("edit card: " + root.id());
 				TKBCard c = cardRepository.findById(cardId).get();
-				c.setText(savedText);
+				TextItem item = c.getByType(TextItem.class).get();
+				item.setText(savedText);
+				c.setTextByType(item);
 				cardRepository.save(c);
 				BroadcasterCard.broadcast(cardId, "update");
 			}).open();
@@ -111,7 +115,7 @@ public class TextCardType implements ICardTypeTemplate {
 	@Override
 	public void reload() {
 		card = cardRepository.findById(root.id()).get();
-		changeText(card.getText());
+		changeText(card.getByType(TextItem.class).get().getText());
 		likeComponent.reload();
 		changeButtonCommentsCaption(card.getComments());
 	}

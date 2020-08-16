@@ -2,6 +2,8 @@ package com.fo0.vaadin.scrumtool.ui.model;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,6 +13,7 @@ public class VotingData {
 
 	private String text;
 	
-	private List<VotingItem> items;
+	@Builder.Default
+	private List<VotingItem> items = Lists.newArrayList();
 	
 }

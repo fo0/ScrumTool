@@ -76,7 +76,7 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 		header.add(title);
 
 		Button btn = new Button(VaadinIcon.PLUS.create());
-		ToolTip.add(btn, "Add Voting-Option");
+		ToolTip.add(btn, "Add Question");
 		btn.addClickListener(e -> {
 			new TextDialog("Write Comment", Strings.EMPTY, savedText -> {
 				addVoting(savedText);
@@ -84,7 +84,7 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 		});
 
 		Button btnAdd = new Button(VaadinIcon.CHECK.create());
-		ToolTip.add(btnAdd, "Save Voting");
+		ToolTip.add(btnAdd, "Create Voting");
 		btnAdd.addClickListener(e -> {
 			TKBCard card = TKBCard.builder().type(ECardType.VotingCard)
 					.text(new Gson().toJson(VotingData.builder().text(title.getText()).items(getVotingItems()).build())).build();
@@ -136,14 +136,17 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 	}
 
 	public List<VotingItem> getVotingItems() {
-		return getComponentsByType(votingItemLayout, Label.class).stream().map(e -> VotingItem.builder().text(e.getText()).build())
-				.collect(Collectors.toList());
+		return getComponentsByType(votingItemLayout, VerticalLayout.class).stream()
+				.map(e -> VotingItem.builder().text(((Label)(e.getComponentAt(0))).getText()).build()).collect(Collectors.toList());
 	}
 
 	private void addVoting(String voting) {
+		VerticalLayout layout = new VerticalLayout();
+		layout.getStyle().set("border", "0.5px solid black");
+		layout.setWidthFull();
 		Label l = new Label(voting);
-		l.setWidthFull();
-		votingItemLayout.addComponentAsFirst(l);
+		layout.add(l);
+		votingItemLayout.addComponentAsFirst(layout);
 	}
 
 	public void reload() {
