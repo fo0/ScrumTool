@@ -40,11 +40,13 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropEffect;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -92,66 +94,7 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 		captionLayout.setMargin(false);
 		captionLayout.setSpacing(false);
 
-		if (KBViewUtils.isAllowed(view.getOptions(), column.getOwnerId())) {
-			Button btnEdit = new Button(VaadinIcon.EDIT.create());
-			ToolTip.add(btnEdit, "Edit the column");
-			btnEdit.addClickListener(e -> {
-				//@formatter:off
-				new TextDialog("Change Caption", h3.getText(), savedText -> {
-					log.info("Edit column: " + getId().get());
-					TKBColumn c = repository.findById(id).get();
-					c.setName(savedText);
-					repository.save(c);
-					BroadcasterColumn.broadcast(id, "update");
-				}).open();
-				//@formatter:on
-			});
-			captionLayout.add(btnEdit);
-			captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btnEdit);
-
-			Button btnShuffle = new Button(VaadinIcon.RANDOM.create());
-			ToolTip.add(btnShuffle, "Shuffle the cards");
-			btnShuffle.addClickListener(e -> {
-				//@formatter:off
-				TKBColumn tmp = repository.findById(getId().get()).get();
-				
-				List<TKBCard> toShuffle = tmp.getCards()
-						.stream()
-						.collect(Collectors.toList());
-				
-				Collections.shuffle(toShuffle);
-				
-				// fix order
-				IntStream.range(0, toShuffle.size()).forEachOrdered(counter -> {
-					TKBCard cc = toShuffle.get(counter);
-					cc.setDataOrder(counter);
-				});
-				
-				tmp.setCards(Sets.newHashSet(toShuffle));
-				tmp = repository.save(tmp);
-				BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.MESSAGE_SHUFFLE);
-				//@formatter:on
-			});
-			captionLayout.add(btnShuffle);
-			captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btnShuffle);
-
-			Button btnDelete = new Button(VaadinIcon.TRASH.create());
-			ToolTip.add(btnDelete, "Delete the column");
-			btnDelete.addClickListener(e -> {
-				//@formatter:off
-				KBConfirmDialog.createQuestion()
-					.withCaption("Deleting Column: " + column.getName())
-					.withMessage(String.format("This will remove '%s' cards", cards.getComponentCount()))
-					.withOkButton(() -> {
-						deleteColumn();
-					})
-					.withCancelButton()
-					.open();	
-				//@formatter:on
-			});
-			captionLayout.add(btnDelete);
-			captionLayout.setVerticalComponentAlignment(Alignment.CENTER, btnDelete);
-		}
+		addTitleOptions(view, column, captionLayout);
 
 		captionLayout.setWidthFull();
 		captionLayout.setVerticalComponentAlignment(Alignment.CENTER, h3);
@@ -169,6 +112,7 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 		area = new TextArea();
 		area.setWidthFull();
 		area.getStyle().set("flex-grow", "1");
+		area.setPlaceholder("Enter your text.");
 
 		if (view.getOptions().getMaxCardTextLength() > 0) {
 			area.setMaxLength(view.getOptions().getMaxCardTextLength());
@@ -236,7 +180,7 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 				Notification.show("Please enter a text", Config.NOTIFICATION_DURATION, Position.MIDDLE);
 				return;
 			}
-			
+
 			new CreateVotingCardDialog(view, this, getId().get(), area.getValue()).open();
 			area.clear();
 		});
@@ -273,6 +217,63 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 		});
 
 		add(cards);
+	}
+
+	private void addTitleOptions(KanbanView view, TKBColumn column, HorizontalLayout captionLayout) {
+		MenuBar menuBar = new MenuBar();
+		ToolTip.add(menuBar, "Settings");
+
+		menuBar.getStyle().set("margin-right", "1px");
+		menuBar.getStyle().set("margin-left", "1px");
+		menuBar.addThemeName("no-overflow-button");
+
+		captionLayout.add(menuBar);
+
+		MenuItem menuItem = menuBar.addItem(FontAwesome.Solid.ELLIPSIS_V.create());
+		if (KBViewUtils.isAllowed(view.getOptions(), column.getOwnerId())) {
+			menuItem.getSubMenu().addItem("Edit", e -> {
+				//@formatter:off
+				new TextDialog("Change Caption", h3.getText(), savedText -> {
+					log.info("Edit column: " + getId().get());
+					TKBColumn c = repository.findById(id).get();
+					c.setName(savedText);
+					repository.save(c);
+					BroadcasterColumn.broadcast(id, "update");
+				}).open();
+				//@formatter:on
+			});
+
+			menuItem.getSubMenu().addItem("Shuffle Cards", e -> {
+				TKBColumn tmp = repository.findById(getId().get()).get();
+				List<TKBCard> toShuffle = tmp.getCards().stream().collect(Collectors.toList());
+
+				Collections.shuffle(toShuffle);
+
+				// fix order
+				IntStream.range(0, toShuffle.size()).forEachOrdered(counter -> {
+					TKBCard cc = toShuffle.get(counter);
+					cc.setDataOrder(counter);
+				});
+
+				tmp.setCards(Sets.newHashSet(toShuffle));
+				tmp = repository.save(tmp);
+				BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.MESSAGE_SHUFFLE);
+			});
+
+			menuItem.getSubMenu().addItem("Delete Column", e -> {
+				//@formatter:off
+				KBConfirmDialog.createQuestion()
+					.withCaption("Deleting Column: " + column.getName())
+					.withMessage(String.format("This will remove '%s' cards", cards.getComponentCount()))
+					.withOkButton(() -> {
+						deleteColumn();
+					})
+					.withCancelButton()
+					.open();	
+				//@formatter:on
+			});
+		}
+
 	}
 
 	private void update(String columnId) {
