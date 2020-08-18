@@ -206,11 +206,6 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 				CardComponent droppedCard = (CardComponent) card;
 				log.debug("receive dropped card: " + droppedCard.getId().get());
 				droppedCard.getCard().setId(Utils.randomId());
-
-				// TODO: ??? is this really needed
-				// StreamUtils.stream(droppedCard.getCard().getLikes()).forEach(x ->
-				// x.setId(Utils.randomId()));
-
 				TKBColumn col = addCardAndSave(droppedCard.getCard());
 				update(col.getId());
 			});
@@ -232,7 +227,7 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 		MenuItem menuItem = menuBar.addItem(FontAwesome.Solid.ELLIPSIS_V.create());
 		if (KBViewUtils.isAllowed(view.getOptions(), column.getOwnerId())) {
 			menuItem.getSubMenu().addItem("Edit", e -> {
-				//@formatter:off
+				// @formatter:off
 				new TextDialog("Change Caption", h3.getText(), savedText -> {
 					log.info("Edit column: " + getId().get());
 					TKBColumn c = repository.findById(id).get();
@@ -240,7 +235,7 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 					repository.save(c);
 					BroadcasterColumn.broadcast(id, "update");
 				}).open();
-				//@formatter:on
+				// @formatter:on
 			});
 
 			menuItem.getSubMenu().addItem("Shuffle Cards", e -> {
@@ -261,16 +256,13 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 			});
 
 			menuItem.getSubMenu().addItem("Delete Column", e -> {
-				//@formatter:off
-				KBConfirmDialog.createQuestion()
-					.withCaption("Deleting Column: " + column.getName())
-					.withMessage(String.format("This will remove '%s' cards", cards.getComponentCount()))
-					.withOkButton(() -> {
-						deleteColumn();
-					})
-					.withCancelButton()
-					.open();	
-				//@formatter:on
+				// @formatter:off
+				KBConfirmDialog.createQuestion().withCaption("Deleting Column: " + column.getName())
+						.withMessage(String.format("This will remove '%s' cards", cards.getComponentCount()))
+						.withOkButton(() -> {
+							deleteColumn();
+						}).withCancelButton().open();
+				// @formatter:on
 			});
 		}
 
@@ -361,8 +353,8 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 
 		// remove old
 		getComponentsByType(cards, Component.class).stream()
-				.filter(e -> data.getCards().stream().noneMatch(x -> x.getId().equals(e.getId().get()))).collect(Collectors.toList())
-				.forEach(e -> {
+				.filter(e -> data.getCards().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
+				.collect(Collectors.toList()).forEach(e -> {
 					cards.remove(e);
 				});
 	}
@@ -382,7 +374,8 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 		registerBroadcast("column", BroadcasterColumn.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
-					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
+					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION,
+							Position.BOTTOM_END);
 				}
 
 				String[] cmd = event.split("\\.");

@@ -255,9 +255,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		// @formatter:off
 		getColumnComponents().stream()
 				.filter(e -> tmp.getColumns().stream().noneMatch(x -> x.getId().equals(e.getId().get())))
-				.collect(Collectors.toList()).forEach(e -> {
-					columns.remove(e);
-				});
+				.collect(Collectors.toList()).forEach(columns::remove);
 		// @formatter:on
 
 		// reorder order columns
@@ -280,8 +278,12 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		TKBData tmp = repository.findByIdFetched(getId().get());
 
 		// @formatter:off
-		tmp.addColumn(TKBColumn.builder().id(id).name(name).ownerId(ownerId)
-				.dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns())).build());
+		tmp.addColumn(TKBColumn.builder()
+				.id(id)
+				.name(name)
+				.ownerId(ownerId)
+				.dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns()))
+				.build());
 		// @formatter:on
 
 		repository.save(tmp);
@@ -419,6 +421,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	private TimerComponent createTimer2() {
 		timer = new TimerComponent();
+		
 		timer.setTime(options.getTimerInMillis());
 		timer.addStartListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "start." + timer.getTime()));
 		timer.addPauseListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "pause"));
@@ -428,7 +431,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		timer.addTimerEndEvent(e -> {
 			Notification.show("Timer ends", 5000, Position.MIDDLE);
 		});
-
 		return timer;
 	}
 
