@@ -25,12 +25,16 @@ public class CustomKBUserRepositoryImpl implements CustomKBUserRepository {
 				return repository.save(data.get());
 			}
 		}
-		
+
 		return null;
 	}
 
 	@Override
 	public TKBUser deleteUserById(String dataUserId, String userId) {
+		if (dataUserId == null) {
+			return null;
+		}
+
 		Optional<TKBUser> data = repository.findById(dataUserId);
 		if (data.isPresent()) {
 			data.get().getUsers().removeIf(e -> StringUtils.equals(e.getId(), userId));
@@ -42,7 +46,12 @@ public class CustomKBUserRepositoryImpl implements CustomKBUserRepository {
 
 	@Override
 	public int countByDataIdFetched(String dataId) {
-		return CollectionUtils.size(repository.findByDataIdFetched(dataId).getUsers());
+		TKBUser user = repository.findByDataIdFetched(dataId);
+		if (user == null) {
+			return 0;
+		}
+
+		return CollectionUtils.size(user.getUsers());
 	}
 
 }

@@ -81,7 +81,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Autowired
 	private KBColumnRepository columnRepository;
-	
+
 	@Autowired
 	private KBOptionRepository optionRepository;
 
@@ -104,9 +104,9 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	@Getter
 	private String dataUserId;
 
-	//private Registration broadcasterRegistration;
-	//private Registration broadcasterTimerRegistration;
-	//private Registration broadcasterUsers;
+	// private Registration broadcasterRegistration;
+	// private Registration broadcasterTimerRegistration;
+	// private Registration broadcasterUsers;
 
 	private TimerComponent timer;
 	private Button btnUsers;
@@ -132,7 +132,13 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		if (!repository.findById(getId().get()).isPresent()) {
 			Button b = new Button("No Session Found -> Navigate to Dashbaord");
 			b.addClickListener(e -> UI.getCurrent().navigate(MainView.class));
-			add(b);
+			setSizeFull();
+			VerticalLayout layout = new VerticalLayout();
+			layout.setJustifyContentMode(JustifyContentMode.CENTER);
+			layout.setSizeFull();
+			add(layout);
+			layout.add(b);
+			layout.setAlignSelf(Alignment.CENTER, b);
 			return;
 		}
 
@@ -280,7 +286,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 		repository.save(tmp);
 	}
-	
+
 	public ColumnComponent addColumnLayout(TKBColumn column) {
 		if (getColumnLayoutById(column.getId()) != null) {
 			log.warn("column already exists: {} - {}", column.getId(), column.getName());
@@ -446,7 +452,10 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	}
 
 	public void changeUsersCounter() {
-		btnUsers.setText(String.valueOf(userRepository.countByDataIdFetched(getId().get())));
+		getId().ifPresent(e -> {
+			if (btnUsers != null)
+				btnUsers.setText(String.valueOf(userRepository.countByDataIdFetched(e)));
+		});
 	}
 
 	public void persistTimer(long time) {
