@@ -1,14 +1,13 @@
 package com.fo0.vaadin.scrumtool.ui.views;
 
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.ui.views.data.IThemeToggleButton;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CreateBoardDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.ui.views.layouts.MainLayout;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -26,9 +25,6 @@ import lombok.Getter;
 public class MainView extends VerticalLayout implements IThemeToggleButton {
 
 	private static final long serialVersionUID = 8874200985319706829L;
-
-	@Autowired
-	private KBDataRepository repository;
 
 	private HorizontalLayout root;
 
@@ -149,7 +145,9 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 			.withCaption("Join an existing session")
 			.withMessage(input)
 			.withCancelButton()
-			.withOkButton(() -> {})
+			.withOkButton(() -> {
+				UI.getCurrent().navigate(KanbanView.class, input.getValue());
+			})
 			.open();
 		//@formatter:on
 	}

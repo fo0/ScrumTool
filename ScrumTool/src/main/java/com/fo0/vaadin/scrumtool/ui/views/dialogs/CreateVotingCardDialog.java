@@ -11,11 +11,9 @@ import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCardComment;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterColumn;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.enums.ECardType;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.model.VotingData;
 import com.fo0.vaadin.scrumtool.ui.model.VotingItem;
-import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
@@ -44,16 +42,12 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 
 	private static final long serialVersionUID = -2119496244059224808L;
 
-	private KBColumnRepository columnRepository = SpringContext.getBean(KBColumnRepository.class);
-
 	private VerticalLayout root;
 	private VerticalLayout votingItemLayout;
 	private KanbanView view;
 	private ColumnComponent column;
-
 	private String columnId;
 	private String cardTitle;
-
 	private Label title;
 
 	public CreateVotingCardDialog(KanbanView view, ColumnComponent column, String columnId, String text) {
@@ -90,12 +84,16 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 
 		HorizontalLayout header = new HorizontalLayout();
 		header.setPadding(true);
+		header.setSpacing(false);
+		header.setMargin(false);
 		header.setAlignItems(Alignment.CENTER);
 		header.getStyle().set("border", "1px solid black");
+		header.getStyle().set("padding-left", "12px");
 		header.setWidthFull();
 		root.add(header);
 
 		title = new Label();
+		title.getStyle().set("font-size", "x-large");
 		title.setWidthFull();
 		header.add(title);
 
@@ -110,11 +108,18 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 		Button btnAdd = new Button(VaadinIcon.CHECK.create());
 		ToolTip.add(btnAdd, "Create Voting");
 		btnAdd.addClickListener(e -> {
-			TKBCard card = TKBCard.builder().type(ECardType.VotingCard)
-					.text(new Gson().toJson(VotingData.builder().text(title.getText()).items(getVotingItems()).build())).build();
-			column.addVotingCardAndSave(card);
+			//@formatter:off
+			TKBCard card = TKBCard.builder()
+					.type(ECardType.VotingCard)
+					.text(new Gson().toJson(VotingData.builder()
+							.text(title.getText())
+							.items(getVotingItems()).build()))
+					.build();
+			
+			column.addCardAndSave(card);
 			BroadcasterColumn.broadcastAddColumn(columnId, card.getId());
 			close();
+			//@formatter:on
 		});
 
 		HorizontalLayout btnLayout = new HorizontalLayout();
@@ -174,9 +179,10 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 
 	private void addVoting(String voting) {
 		HorizontalLayout layout = new HorizontalLayout();
-		layout.getStyle().set("border", "0.5px solid black");
+		layout.getStyle().set("border", "1.0px dashed black");
 		layout.setWidthFull();
-		Label title = new Label("Voting Option: ");
+		layout.setPadding(true);
+		Label title = new Label("- ");
 		Label l = new Label(voting);
 		layout.add(title, l);
 		votingItemLayout.addComponentAsFirst(layout);

@@ -166,29 +166,13 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 			area.clear();
 		});
 
-		Button btnVoting = new Button(FontAwesome.Solid.POLL_H.create());
-		ToolTip.add(btnVoting, "Create a Voting-Card");
-		btnVoting.addClickListener(e -> {
-			if (view.getOptions().getMaxCards() > 0) {
-				if (cards.getComponentCount() >= view.getOptions().getMaxCards()) {
-					Notification.show("Card limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
-					return;
-				}
-			}
-
-			if (StringUtils.isBlank(area.getValue())) {
-				Notification.show("Please enter a text", Config.NOTIFICATION_DURATION, Position.MIDDLE);
-				return;
-			}
-
-			new CreateVotingCardDialog(view, this, getId().get(), area.getValue()).open();
-			area.clear();
-		});
-
-		HorizontalLayout btnGroup = new HorizontalLayout(btnAdd, btnVoting);
+		MenuBar cardOptionButton = createCardOptionButton();
+		HorizontalLayout btnGroup = new HorizontalLayout(btnAdd, cardOptionButton);
 		btnGroup.setSpacing(false);
+
 		HorizontalLayout btnLayout = new HorizontalLayout(btnCancel, btnGroup);
 		btnLayout.setWidthFull();
+
 		layoutHeader.add(btnLayout);
 		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, h3);
 
@@ -212,6 +196,35 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 		});
 
 		add(cards);
+	}
+
+	private MenuBar createCardOptionButton() {
+		MenuBar menuBar = new MenuBar();
+		ToolTip.add(menuBar, "Card-Options");
+
+		menuBar.getStyle().set("margin-right", "1px");
+		menuBar.getStyle().set("margin-left", "1px");
+		menuBar.addThemeName("no-overflow-button");
+
+		MenuItem menuItem = menuBar.addItem(FontAwesome.Solid.ELLIPSIS_V.create());
+		menuItem.getSubMenu().addItem("Voting-Card", e -> {
+			if (view.getOptions().getMaxCards() > 0) {
+				if (cards.getComponentCount() >= view.getOptions().getMaxCards()) {
+					Notification.show("Card limit reached", Config.NOTIFICATION_DURATION, Position.MIDDLE);
+					return;
+				}
+			}
+
+			if (StringUtils.isBlank(area.getValue())) {
+				Notification.show("Please enter a text", Config.NOTIFICATION_DURATION, Position.MIDDLE);
+				return;
+			}
+
+			new CreateVotingCardDialog(view, this, getId().get(), area.getValue()).open();
+			area.clear();
+		});
+
+		return menuBar;
 	}
 
 	private void addTitleOptions(KanbanView view, TKBColumn column, HorizontalLayout captionLayout) {
@@ -281,20 +294,7 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 		BroadcasterBoard.broadcast(view.getId().get(), "update");
 	}
 
-	public TKBColumn addVotingCardAndSave(TKBCard card) {
-		if (ECardType.valueOf(card.getType().name()) == null) {
-			Notification.show("Currently not supported: " + card.getType(), 3000, Position.MIDDLE);
-			return null;
-		}
-
-		TKBColumn tmp = repository.findById(getId().get()).get();
-		tmp.addCard(card);
-		repository.save(tmp);
-		log.info("add card: {}", card.getId());
-		return tmp;
-	}
-
-	private TKBColumn addCardAndSave(TKBCard card) {
+	public TKBColumn addCardAndSave(TKBCard card) {
 		TKBColumn tmp = repository.findById(getId().get()).get();
 		card.setDataOrder(KBViewUtils.calculateNextPosition(tmp.getCards()));
 		tmp.addCard(card);

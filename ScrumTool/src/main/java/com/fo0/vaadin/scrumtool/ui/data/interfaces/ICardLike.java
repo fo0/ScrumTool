@@ -6,7 +6,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardLikes;
 
-public interface ILike {
+public interface ICardLike {
 
 	public String getId();
 

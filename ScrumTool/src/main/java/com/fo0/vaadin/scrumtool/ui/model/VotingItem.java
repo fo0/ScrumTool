@@ -2,7 +2,7 @@ package com.fo0.vaadin.scrumtool.ui.model;
 
 import java.util.List;
 
-import com.fo0.vaadin.scrumtool.ui.data.interfaces.ILike;
+import com.fo0.vaadin.scrumtool.ui.data.interfaces.ICardLike;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardLikes;
 import com.fo0.vaadin.scrumtool.ui.utils.Utils;
 import com.google.common.collect.Lists;
@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @Builder
 @EqualsAndHashCode(of = { "id" })
-public class VotingItem implements ILike {
+public class VotingItem implements ICardLike {
 
 	@Builder.Default
 	private String id = Utils.randomId();

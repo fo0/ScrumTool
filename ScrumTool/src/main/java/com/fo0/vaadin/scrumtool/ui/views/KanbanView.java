@@ -12,7 +12,6 @@ import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterBoardTimer;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterUsers;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBOptionRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBUserRepository;
@@ -38,6 +37,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
@@ -80,9 +80,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private KBDataRepository repository;
 
 	@Autowired
-	private KBColumnRepository columnRepository;
-
-	@Autowired
 	private KBOptionRepository optionRepository;
 
 	@Autowired
@@ -92,8 +89,10 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 	private VerticalLayout root;
 	@Getter
 	private HorizontalLayout header;
+
 	@Getter
 	private ThemeToggleButton themeToggleButton;
+
 	@Getter
 	public HorizontalLayout columns;
 
@@ -103,11 +102,6 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	@Getter
 	private String dataUserId;
-
-	// private Registration broadcasterRegistration;
-	// private Registration broadcasterTimerRegistration;
-	// private Registration broadcasterUsers;
-
 	private TimerComponent timer;
 	private Button btnUsers;
 
@@ -130,15 +124,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		setId(parameter);
 
 		if (!repository.findById(getId().get()).isPresent()) {
-			Button b = new Button("No Session Found -> Navigate to Dashbaord");
-			b.addClickListener(e -> UI.getCurrent().navigate(MainView.class));
-			setSizeFull();
-			VerticalLayout layout = new VerticalLayout();
-			layout.setJustifyContentMode(JustifyContentMode.CENTER);
-			layout.setSizeFull();
-			add(layout);
-			layout.add(b);
-			layout.setAlignSelf(Alignment.CENTER, b);
+			createBoardNotFound(this);
 			return;
 		}
 
@@ -160,7 +146,20 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		userRepository.insertUserById(dataUserId, User.builder().id(SessionUtils.getSessionId()).active(true).build());
 
 		init();
-		sync();
+		reload();
+	}
+
+	private void createBoardNotFound(HasComponents rootLayout) {
+		log.info("could not find any board with ID: {}", getId().get());
+		Button b = new Button("No Session found with ID '" + getId().get() + "'");
+		b.addClickListener(e -> UI.getCurrent().navigate(MainView.class));
+		setSizeFull();
+		VerticalLayout layout = new VerticalLayout();
+		layout.setJustifyContentMode(JustifyContentMode.CENTER);
+		layout.setSizeFull();
+		rootLayout.add(layout);
+		layout.add(b);
+		layout.setAlignSelf(Alignment.CENTER, b);
 	}
 
 	@Override
@@ -232,12 +231,8 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		super.onDetach(detachEvent);
 	}
 
-	public void sync() {
-		log.info("sync & refreshing data: {}", getId().get());
-		reload();
-	}
-
 	public void reload() {
+		log.info("sync & refreshing data: {}", getId().get());
 		TKBData tmp = repository.findByIdFetched(getId().get());
 
 		// update layout with new missing data
@@ -278,12 +273,8 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		TKBData tmp = repository.findByIdFetched(getId().get());
 
 		// @formatter:off
-		tmp.addColumn(TKBColumn.builder()
-				.id(id)
-				.name(name)
-				.ownerId(ownerId)
-				.dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns()))
-				.build());
+		tmp.addColumn(TKBColumn.builder().id(id).name(name).ownerId(ownerId)
+				.dataOrder(KBViewUtils.calculateNextPosition(tmp.getColumns())).build());
 		// @formatter:on
 
 		repository.save(tmp);
@@ -402,13 +393,13 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 					}).withCancelButton().open();
 		});
 
-		menuItem.getSubMenu().addItem("Refresh", e -> sync());
+		menuItem.getSubMenu().addItem("Refresh", e -> reload());
 
 		menuItem.getSubMenu().addItem("Export", e -> {
 			new MarkDownDialog(repository.findByIdFetched(getId().get())).open();
 		});
 
-		MenuItem shareMenu = menuItem.getSubMenu().addItem("Share with others", e -> {
+		menuItem.getSubMenu().addItem("Share with others", e -> {
 			new ShareLayout("Share Layout", () -> getId().get(),
 					() -> createCurrentUrl(VaadinService.getCurrentRequest())).open();
 		});
@@ -421,7 +412,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 
 	private TimerComponent createTimer2() {
 		timer = new TimerComponent();
-		
+
 		timer.setTime(options.getTimerInMillis());
 		timer.addStartListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "start." + timer.getTime()));
 		timer.addPauseListener(e -> BroadcasterBoardTimer.broadcast(getId().get(), "pause"));

@@ -2,11 +2,8 @@ package com.fo0.vaadin.scrumtool.ui.export;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
-import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardComment;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBColumn;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
 import com.fo0.vaadin.scrumtool.ui.model.TextItem;
@@ -32,13 +29,15 @@ public class JiraMarkDown {
 		List<String> list = Lists.newArrayList();
 
 		list.add("h2. " + column.getName());
-		list.add("|| No || Likes || Description || Comments ||");
+		list.add("|| No || Likes || Description || Description || Comments ||");
 
 		column.getCards().stream().sorted(Comparator.comparing(TKBCard::getDataOrder)).forEachOrdered(card -> {
-			list.add(String.format("| %d | %d | %s | %s |", card.getDataOrder(),
-					getItem(card).countAllLikes(), getItem(card).getText(),
-					card.getComments().stream().sorted(Comparator.comparing(IDataOrder::getDataOrder)).map(TKBCardComment::getText)
-							.collect(Collectors.joining(" \\\\ "))));
+			list.add(String.format("| %d | %d | %s | %s | %s |", 
+					card.getDataOrder(),
+					ExportUtils.getItem(card).countAllLikes(),
+					getItem(card).getText(),
+					ExportUtils.getText(card), 
+					ExportUtils.getComments(EExportType.Markup_Confluence, card)));
 		});
 
 		return list;
