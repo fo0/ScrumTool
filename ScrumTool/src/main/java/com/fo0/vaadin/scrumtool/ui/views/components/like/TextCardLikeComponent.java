@@ -5,7 +5,6 @@ import java.util.function.UnaryOperator;
 import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBOptionRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardLikes;
@@ -15,6 +14,7 @@ import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
+import com.fo0.vaadin.scrumtool.ui.views.components.card.IComponentUpdate;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.button.Button;
@@ -26,14 +26,13 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class TextCardLikeComponent extends VerticalLayout {
+public class TextCardLikeComponent extends VerticalLayout implements IComponentUpdate<TKBCard> {
 
 	private static final long serialVersionUID = -2483871323771596716L;
 
 	private KanbanView view;
 
 	private KBCardRepository repository = SpringContext.getBean(KBCardRepository.class);
-	private KBDataRepository repositoryData = SpringContext.getBean(KBDataRepository.class);
 	private KBOptionRepository repositoryDataOption = SpringContext.getBean(KBOptionRepository.class);
 
 	private String boardId;
@@ -159,15 +158,6 @@ public class TextCardLikeComponent extends VerticalLayout {
 		return repository.findById(cardId).get();
 	}
 
-	public void reload() {
-		TKBCard tmp = repository.findById(cardId).get();
-
-		// update layout with new missing data
-		changeText(tmp.getByType(TextItem.class).orElseGet(() -> TextItem.builder().build()).countAllLikes());
-		changeButtonIconToLiked(tmp.getByType(TextItem.class).orElseGet(() -> TextItem.builder().build())
-				.cardLikesByOwnerId(SessionUtils.getSessionId()) != 0);
-	}
-
 	private boolean isLikedByOwner() {
 		TKBCard tmp = repository.findById(cardId).get();
 		return tmp.getByType(TextItem.class).orElseGet(() -> TextItem.builder().build())
@@ -190,4 +180,21 @@ public class TextCardLikeComponent extends VerticalLayout {
 		}
 	}
 
+	public void reload() {
+		TKBCard tmp = repository.findById(cardId).get();
+		reload(tmp);
+	}
+
+	@Override
+	public void reload(TKBCard data) {
+		//@formatter:off
+		changeText(data.getByType(TextItem.class)
+				.orElseGet(() -> TextItem.builder().build())
+				.countAllLikes());
+		
+		changeButtonIconToLiked(data.getByType(TextItem.class)
+				.orElseGet(() -> TextItem.builder().build())
+				.cardLikesByOwnerId(SessionUtils.getSessionId()) != 0);
+		//@formatter:on
+	}
 }

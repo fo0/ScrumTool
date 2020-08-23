@@ -10,7 +10,6 @@ import com.fo0.vaadin.scrumtool.ui.broadcast.BroadcasterCard;
 import com.fo0.vaadin.scrumtool.ui.config.Config;
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBCardRepository;
-import com.fo0.vaadin.scrumtool.ui.data.repository.KBColumnRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardComment;
 import com.fo0.vaadin.scrumtool.ui.model.TextItem;
@@ -32,10 +31,9 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class TextCardType implements ICardTypeTemplate {
+public class TextCardType implements ICardTypeTemplate<TKBCard> {
 
 	private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
-	private KBColumnRepository columnRepository = SpringContext.getBean(KBColumnRepository.class);
 
 	private CardComponent root;
 
@@ -79,7 +77,7 @@ public class TextCardType implements ICardTypeTemplate {
 		btnComment.addClickListener(e -> {
 			new CommentDialog(cardId, label.getText()).open();
 		});
-		
+
 		btnLayout.add(btnComment);
 
 		if (KBViewUtils.isAllowed(view.getOptions(), card.getOwnerId())) {
@@ -112,13 +110,7 @@ public class TextCardType implements ICardTypeTemplate {
 		root.add(editIcon);
 	}
 
-	@Override
-	public void reload() {
-		card = cardRepository.findById(root.id()).get();
-		changeText(card.getByType(TextItem.class).get().getText());
-		likeComponent.reload();
-		changeButtonCommentsCaption(card.getComments());
-	}
+	
 
 	@Override
 	public void changeText(String text) {
@@ -136,7 +128,7 @@ public class TextCardType implements ICardTypeTemplate {
 		if (CollectionUtils.size(set) > 0) {
 			btnComment.setText(String.valueOf(set.size()));
 			btnComment.setIcon(VaadinIcon.COMMENT.create());
-			
+
 			//@formatter:off
 			ToolTip.addLines(btnComment, set.stream()
 					.sorted(Comparator.comparing(IDataOrder::getDataOrder).reversed())
@@ -147,6 +139,22 @@ public class TextCardType implements ICardTypeTemplate {
 			btnComment.setIcon(VaadinIcon.COMMENT_O.create());
 			ToolTip.add(btnComment, "Comment the Card");
 		}
+	}
+	
+	@Override
+	public void reload() {
+		card = cardRepository.findById(root.id()).get();
+		reload(card);
+	}
+
+	@Override
+	public void reload(TKBCard data) {
+		if (!label.getText().equals(card.getByType(TextItem.class).get().getText()))
+			changeText(data.getByType(TextItem.class).get().getText());
+
+		likeComponent.reload();
+
+		changeButtonCommentsCaption(data.getComments());
 	}
 
 }

@@ -37,13 +37,13 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 
 	@Getter
 	private TKBCard card;
-	
+
 	@Getter
 	private ColumnComponent column;
-	
+
 	@Getter
 	private String columnId;
-	
+
 	@Getter
 	private String cardId;
 
@@ -72,7 +72,7 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 		case VotingCard:
 			template = new VotingCardType(this);
 			break;
-			
+
 		default:
 			log.error("failed to find template for card type: {}", card.getType());
 			break;
@@ -109,12 +109,12 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 		template.changeText(text);
 	}
 
-	public void reload() {
-		template.reload();
-	}
-
 	public void changeButtonCommentsCaption(Set<TKBCardComment> set) {
 		template.changeButtonCommentsCaption(set);
+	}
+
+	public void reload() {
+		template.reload();
 	}
 
 }

@@ -17,6 +17,7 @@ import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
+import com.fo0.vaadin.scrumtool.ui.views.components.card.IComponentUpdate;
 import com.google.common.collect.Lists;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -29,7 +30,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class VotingCardLikeComponent extends HorizontalLayout {
+public class VotingCardLikeComponent extends HorizontalLayout implements IComponentUpdate<TKBCard> {
 
 	private static final long serialVersionUID = -2483871323771596716L;
 
@@ -146,12 +147,6 @@ public class VotingCardLikeComponent extends HorizontalLayout {
 		});
 	}
 
-	public void reload() {
-		// update layout with new missing data
-		changeText(getItem().countAllLikes());
-		changeButtonIconToLiked(getItem().cardLikesByOwnerId(SessionUtils.getSessionId()) != 0);
-	}
-
 	private boolean isLikedByOwner() {
 		return getItem().cardLikesByOwnerId(SessionUtils.getSessionId()) != 0;
 	}
@@ -192,6 +187,17 @@ public class VotingCardLikeComponent extends HorizontalLayout {
 		} else {
 			btnLike.setIcon(VaadinIcon.THUMBS_UP_O.create());
 		}
+	}
+
+	public void reload() {
+		reload(repository.findById(cardId).get());
+	}
+
+	@Override
+	public void reload(TKBCard data) {
+		// TODO Auto-generated method stub
+		changeText(getItem(data).countAllLikes());
+		changeButtonIconToLiked(getItem(data).cardLikesByOwnerId(SessionUtils.getSessionId()) != 0);
 	}
 
 }
