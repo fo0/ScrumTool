@@ -7,6 +7,8 @@ import com.fo0.vaadin.scrumtool.ui.views.KanbanView;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -22,6 +24,11 @@ public class CreateColumnDialog extends Dialog {
 		Button b = new Button("Create");
 		b.addClickShortcut(Key.ENTER);
 		b.addClickListener(e -> {
+			if(t.isEmpty()) {
+				Notification.show("Please enter a column name", 3000, Position.BOTTOM_CENTER);
+				return;
+			}
+			
 			view.addColumn(Utils.randomId(), SessionUtils.getSessionId(), t.getValue());
 			BroadcasterBoard.broadcast(view.getId().get(), "update");
 			close();

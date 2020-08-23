@@ -268,7 +268,7 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 				BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.MESSAGE_SHUFFLE);
 			});
 
-			menuItem.getSubMenu().addItem("Delete Column", e -> {
+			menuItem.getSubMenu().addItem("Delete", e -> {
 				// @formatter:off
 				KBConfirmDialog.createQuestion().withCaption("Deleting Column: " + column.getName())
 						.withMessage(String.format("This will remove '%s' cards", cards.getComponentCount()))
