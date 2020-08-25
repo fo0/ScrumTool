@@ -340,7 +340,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		left.add(b);
 
 		if (Config.DEBUG) {
-			Button btnDebug = new Button("Debug", VaadinIcon.INFO.create());
+			Button btnDebug = new Button("Debug", VaadinIcon.BUG.create());
 			btnDebug.addClickListener(e -> {
 				Dialog d = new Dialog();
 				d.setWidth("500px");
