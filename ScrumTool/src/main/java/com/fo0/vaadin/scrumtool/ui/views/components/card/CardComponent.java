@@ -19,6 +19,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -36,9 +37,6 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 	private KBColumnRepository columnRepository = SpringContext.getBean(KBColumnRepository.class);
 
 	@Getter
-	private TKBCard card;
-
-	@Getter
 	private ColumnComponent column;
 
 	@Getter
@@ -53,7 +51,6 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 	private ICardTypeTemplate template;
 
 	public CardComponent(KanbanView view, ColumnComponent column, String columnId, TKBCard card) {
-		this.card = card;
 		this.columnId = columnId;
 		this.column = column;
 		this.view = view;
@@ -77,8 +74,34 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 			log.error("failed to find template for card type: {}", card.getType());
 			break;
 		}
+
+		// for dnd support
+		DragSource<CardComponent> dragConfig = DragSource.create(this);
+		dragConfig.addDragStartListener(e -> {
+			if (Config.DEBUG) {
+				Notification.show("Start Drag Card: " + e.getComponent().getCard().getText());
+			}
+		});
+
+		dragConfig.addDragEndListener(e -> {
+			if (!e.isSuccessful()) {
+				Notification.show("Please move the card to a column", 3000, Position.MIDDLE);
+				return;
+			}
+
+			if (Config.DEBUG) {
+				Notification.show("Stop drag Card: " + e.getComponent().getCard().getText());
+			}
+
+			Notification.show("Card moved", 3000, Position.BOTTOM_END);
+			e.getComponent().deleteCard();
+		});
 	}
 
+	public TKBCard getCard() {
+		return cardRepository.findById(getCardId()).get();
+	}
+	
 	public void deleteCard() {
 		log.info("delete card: " + getId().get());
 		TKBColumn c = columnRepository.findById(column.getId().get()).get();

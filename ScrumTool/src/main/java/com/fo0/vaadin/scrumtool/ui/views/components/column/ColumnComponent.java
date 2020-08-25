@@ -306,28 +306,6 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 	private CardComponent addCardLayout(TKBCard card) {
 		CardComponent cc = new CardComponent(view, this, getId().get(), card);
 
-		// for dnd support
-		DragSource<CardComponent> dragConfig = DragSource.create(cc);
-		dragConfig.addDragStartListener(e -> {
-			if (Config.DEBUG) {
-				Notification.show("Start Drag Card: " + e.getComponent().getCard().getText());
-			}
-		});
-
-		dragConfig.addDragEndListener(e -> {
-			if (!e.isSuccessful()) {
-				Notification.show("Please move the card to a column", 3000, Position.MIDDLE);
-				return;
-			}
-
-			if (Config.DEBUG) {
-				Notification.show("Stop drag Card: " + e.getComponent().getCard().getText());
-			}
-
-			Notification.show("Card moved", 3000, Position.BOTTOM_END);
-			e.getComponent().deleteCard();
-		});
-
 		if (view.getOptions().isCardSortDirectionDesc()) {
 			cards.addComponentAsFirst(cc);
 		} else {
