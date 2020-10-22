@@ -20,10 +20,15 @@ Latest Stable: https://github.com/fo0/ScrumTool/releases/tag/v0.10
 ## info for devs
 add property `app.debug=true` to your i.e. eclipse run-configuration via `Override Properties` to see more informations
 
+# Configurations
+for applying configurations just create a spring application.properties file in the folder of your scrumtool.jar and add the following properties 
+
+- scrumtool.database.inmem=false [true]
+
 ## interact with the database
 You can easy read the h2-database file which is default located in the same directory like your `ScrumTool-VERSION.jar`
 To access the file you just need to download the latest h2 client from the official site: https://h2database.com/h2-2019-10-14.zip
-Unzip the .zip and use the client `h2-VERSION-.jar` from the `bin` directory.
+Unzip the .zip and use the client `h2-VERSION-.jar` from the `bin` directory. The Configuration must be `scrumtool.database.inmem=false`
 
 ### The command to show the tables is i.e. 
 ``` sql
