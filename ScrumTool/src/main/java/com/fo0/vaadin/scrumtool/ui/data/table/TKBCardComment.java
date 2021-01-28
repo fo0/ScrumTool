@@ -2,6 +2,7 @@ package com.fo0.vaadin.scrumtool.ui.data.table;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 
 import com.fo0.vaadin.scrumtool.ui.data.interfaces.IDataOrder;
 import com.fo0.vaadin.scrumtool.ui.utils.Utils;
@@ -29,6 +30,7 @@ public class TKBCardComment implements IDataOrder{
 	
 	private String ownerId;
 
+	@Lob
 	private String text;
 
 }
