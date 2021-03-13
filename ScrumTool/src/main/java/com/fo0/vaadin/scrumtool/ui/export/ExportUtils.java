@@ -1,6 +1,5 @@
 package com.fo0.vaadin.scrumtool.ui.export;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -14,7 +13,6 @@ import com.fo0.vaadin.scrumtool.ui.model.VotingItem;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.logging.log4j.util.Strings;
 
 import j2html.TagCreator;
@@ -22,7 +20,21 @@ import j2html.tags.ContainerTag;
 
 public class ExportUtils {
 
-	private static final String TABLE_STYLE = "";
+	private static final String TABLE_STYLE = "table { " +
+		"font-family: arial, sans-serif; " +
+		"border-collapse: collapse; " +
+		"width: 100%; " +
+	  "}" + 
+	  "" +
+	  "td, th { " +
+		"border: 1px solid #dddddd; " +
+		"text-align: left; " +
+		"padding: 8px; " +
+	  "} " +
+	  "" +
+	  "tr:nth-child(even) { " +
+		"background-color: #dddddd; " +
+	  "}";
 
 	static String getComments(EExportType type, TKBCard card) {
 		// @formatter:off
@@ -41,7 +53,9 @@ public class ExportUtils {
 				.map(TKBCardComment::getText)
 				.forEachOrdered(e -> list.add(TagCreator.td().withText(e)));
 
-			return TagCreator.table().with(list).render();
+				return TagCreator.html()
+					.with(TagCreator.head(TagCreator.style(TABLE_STYLE)))
+					.with(TagCreator.table().with(list)).render();
 
 		case VotingCard:
 			if(!card.getByType(VotingData.class).isPresent() || CollectionUtils.isEmpty(card.getByType(VotingData.class).get().getItems())){
@@ -61,7 +75,9 @@ public class ExportUtils {
 
 				Collections.reverse(list2);
 
-				return TagCreator.table().with(list2).render();
+				return TagCreator.html()
+					.with(TagCreator.head(TagCreator.style(TABLE_STYLE)))
+					.with(TagCreator.table().with(list2)).render();
 
 		default:
 			return null;
