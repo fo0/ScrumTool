@@ -3,7 +3,6 @@ package com.fo0.vaadin.scrumtool.ui.views.dialogs;
 import java.util.stream.Collectors;
 
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
-import com.fo0.vaadin.scrumtool.ui.export.JiraMarkDown;
 import com.fo0.vaadin.scrumtool.ui.export.VanillaMarkDown;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -34,44 +33,34 @@ public class MarkDownDialog extends Dialog {
 		setHeight("600px");
 
 		VerticalLayout root = new VerticalLayout();
-		
 
 		HorizontalLayout header = new HorizontalLayout();
 		header.setPadding(true);
 		header.getStyle().set("border", "2px solid black");
 		header.setWidthFull();
-		
+
 		header.add(createBtnCommonMarkdown());
-		header.add(createBtnJiraMarkdown());
 
 		area = new TextArea();
 		area.setSizeFull();
-		
+
 		VerticalLayout body = new VerticalLayout();
 		body.setWidthFull();
 		body.getStyle().set("border", "1px solid black");
 		body.add(area);
 		body.setFlexGrow(1, area);
-		
+
 		root.add(header, body);
 		root.setSizeFull();
 		root.setFlexGrow(1, body);
-	
+
 		add(root);
 	}
 
 	private Button createBtnCommonMarkdown() {
-		Button btnCommonMarkdown= new Button("Markdown");
+		Button btnCommonMarkdown = new Button("Create Markdown");
 		btnCommonMarkdown.addClickListener(e -> {
 			area.setValue(VanillaMarkDown.create(data).stream().collect(Collectors.joining("\n")));
-		});
-		return btnCommonMarkdown;
-	}
-	
-	private Button createBtnJiraMarkdown() {
-		Button btnCommonMarkdown= new Button("Jira-Markup");
-		btnCommonMarkdown.addClickListener(e -> {
-			area.setValue(JiraMarkDown.create(data).stream().collect(Collectors.joining("\n")));
 		});
 		return btnCommonMarkdown;
 	}
