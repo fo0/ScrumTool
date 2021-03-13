@@ -95,7 +95,14 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 			log.info("card: {}", cardComponent.getId());
 			log.info("parent-layout: {}", layout);
 			ColumnComponent columnComponent = (ColumnComponent) layout.getParent().stream().findFirst().get();
-			
+			log.info("card is in column?: {}", columnComponent.hasCardById(cardComponent.getId().get()));
+
+			CardComponent sourceCardComponent = e.getSource();
+			VerticalLayout sourceLayout = (VerticalLayout) sourceCardComponent.getParent().get();
+			log.info("source card: {}", sourceCardComponent.getId());
+			log.info("source parent-layout: {}", sourceLayout);
+			ColumnComponent sourceColumnComponent = (ColumnComponent) sourceLayout.getParent().stream().findFirst().get();
+			log.info("source card is in column?: {}", sourceColumnComponent.hasCardById(sourceCardComponent.getId().get()));
 
 			if (Config.DEBUG) {
 				Notification.show("Stop drag Card: " + e.getComponent().getCard().getText());

@@ -347,7 +347,7 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 	}
 
 	public boolean hasCardById(String id){
-		
+		return cards.getChildren().anyMatch(e -> e.getId().get().equals(id));
 	}
 
 	@Override
