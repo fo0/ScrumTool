@@ -25,7 +25,7 @@ import com.fo0.vaadin.scrumtool.ui.config.Profiles;
 @Profile(Profiles.H2_DRIVER)
 public class PersistenceConfig {
 
-	@Value("${scrumtool.database.inmem:false}")
+	@Value("${scrumtool.database.inmem:true}")
 	private boolean databaseInMemory;
 	
 	@Bean
