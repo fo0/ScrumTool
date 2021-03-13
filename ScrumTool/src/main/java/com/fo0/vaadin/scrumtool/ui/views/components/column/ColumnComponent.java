@@ -346,6 +346,10 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 			h3.setText(string + " (" + order + ")");
 	}
 
+	public boolean hasCardById(String id){
+		
+	}
+
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
 		UI ui = UI.getCurrent();

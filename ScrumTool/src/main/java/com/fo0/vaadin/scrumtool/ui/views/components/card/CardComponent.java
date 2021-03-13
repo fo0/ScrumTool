@@ -23,6 +23,7 @@ import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -89,19 +90,26 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 				return;
 			}
 
+			CardComponent cardComponent = e.getComponent();
+			VerticalLayout layout = (VerticalLayout) cardComponent.getParent().get();
+			log.info("card: {}", cardComponent.getId());
+			log.info("parent-layout: {}", layout);
+			ColumnComponent columnComponent = (ColumnComponent) layout.getParent().stream().findFirst().get();
+			
+
 			if (Config.DEBUG) {
 				Notification.show("Stop drag Card: " + e.getComponent().getCard().getText());
 			}
 
 			Notification.show("Card moved", 3000, Position.BOTTOM_END);
-			e.getComponent().deleteCard();
+			cardComponent.deleteCard();
 		});
 	}
 
 	public TKBCard getCard() {
 		return cardRepository.findById(getCardId()).get();
 	}
-	
+
 	public void deleteCard() {
 		log.info("delete card: " + getId().get());
 		TKBColumn c = columnRepository.findById(column.getId().get()).get();
@@ -116,7 +124,8 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 		registerBroadcast("card", BroadcasterCard.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
-					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
+					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION,
+							Position.BOTTOM_END);
 				}
 				reload();
 			});
