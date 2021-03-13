@@ -20,6 +20,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dnd.DragSource;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -96,13 +97,7 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 			log.info("parent-layout: {}", layout);
 			ColumnComponent columnComponent = (ColumnComponent) layout.getParent().stream().findFirst().get();
 			log.info("card is in column?: {}", columnComponent.hasCardById(cardComponent.getId().get()));
-
-			CardComponent sourceCardComponent = e.getSource();
-			VerticalLayout sourceLayout = (VerticalLayout) sourceCardComponent.getParent().get();
-			log.info("source card: {}", sourceCardComponent.getId());
-			log.info("source parent-layout: {}", sourceLayout);
-			ColumnComponent sourceColumnComponent = (ColumnComponent) sourceLayout.getParent().stream().findFirst().get();
-			log.info("source card is in column?: {}", sourceColumnComponent.hasCardById(sourceCardComponent.getId().get()));
+			log.info("column title: {}", ((H3) columnComponent.getParent().getChildren().findFirst().get().getParent().getChildren().findFirst().get()).getText());
 
 			if (Config.DEBUG) {
 				Notification.show("Stop drag Card: " + e.getComponent().getCard().getText());
