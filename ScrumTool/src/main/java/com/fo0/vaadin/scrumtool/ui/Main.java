@@ -19,6 +19,7 @@ public class Main extends SpringBootServletInitializer {
 			.profiles(Profiles.H2_DRIVER)
 			.run(args);
 		//@formatter:on
+		
 	}
 
 }
