@@ -81,6 +81,8 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 			if (Config.DEBUG) {
 				Notification.show("Start Drag Card: " + e.getComponent().getCard().getText());
 			}
+
+			e.setDragData(getId().get());
 		});
 
 		dragConfig.addDragEndListener(e -> {
@@ -94,14 +96,13 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 			}
 
 			Notification.show("Card moved", 3000, Position.BOTTOM_END);
-			e.getComponent().deleteCard();
 		});
 	}
 
 	public TKBCard getCard() {
 		return cardRepository.findById(getCardId()).get();
 	}
-	
+
 	public void deleteCard() {
 		log.info("delete card: " + getId().get());
 		TKBColumn c = columnRepository.findById(column.getId().get()).get();
@@ -116,7 +117,8 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 		registerBroadcast("card", BroadcasterCard.register(getId().get(), event -> {
 			ui.access(() -> {
 				if (Config.DEBUG) {
-					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION, Position.BOTTOM_END);
+					Notification.show("receiving broadcast for update", Config.NOTIFICATION_DURATION,
+							Position.BOTTOM_END);
 				}
 				reload();
 			});

@@ -13,6 +13,7 @@ import com.fo0.vaadin.scrumtool.ui.model.VotingItem;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 
 import j2html.TagCreator;
@@ -20,21 +21,10 @@ import j2html.tags.ContainerTag;
 
 public class ExportUtils {
 
-	private static final String TABLE_STYLE = "table { " +
-		"font-family: arial, sans-serif; " +
-		"border-collapse: collapse; " +
-		"width: 100%; " +
-	  "}" + 
-	  "" +
-	  "td, th { " +
-		"border: 1px solid #dddddd; " +
-		"text-align: left; " +
-		"padding: 8px; " +
-	  "} " +
-	  "" +
-	  "tr:nth-child(even) { " +
-		"background-color: #dddddd; " +
-	  "}";
+	private static final String TABLE_STYLE = "table { " + "font-family: arial, sans-serif; "
+			+ "border-collapse: collapse; " + "width: 100%; " + "}" + "" + "td, th { " + "border: 1px solid #dddddd; "
+			+ "text-align: left; " + "padding: 8px; " + "} " + "" + "tr:nth-child(even) { "
+			+ "background-color: #dddddd; " + "}";
 
 	static String getComments(EExportType type, TKBCard card) {
 		// @formatter:off
@@ -51,7 +41,7 @@ public class ExportUtils {
 				.stream()
 				.sorted(Comparator.comparing(IDataOrder::getDataOrder))
 				.map(TKBCardComment::getText)
-				.forEachOrdered(e -> list.add(TagCreator.td().withText(e)));
+				.forEachOrdered(e -> list.add(TagCreator.tr(TagCreator.td().withText(StringUtils.normalizeSpace(e)))));
 
 				return TagCreator.html()
 					.with(TagCreator.head(TagCreator.style(TABLE_STYLE)))
@@ -69,11 +59,10 @@ public class ExportUtils {
 				.get().getItems().stream()
 				.sorted(Comparator.comparing(VotingItem::countAllLikes).reversed())
 				.forEachOrdered(e -> {
-					list2.add(TagCreator.td().withText(String.valueOf(e.countAllLikes())));
-					list2.add(TagCreator.td().withText(e.getText()));
+					list2.add(TagCreator.tr(
+						TagCreator.td().withText(String.valueOf(e.countAllLikes())),
+					 	TagCreator.td().withText(StringUtils.normalizeSpace(e.getText()))));
 				});
-
-				Collections.reverse(list2);
 
 				return TagCreator.html()
 					.with(TagCreator.head(TagCreator.style(TABLE_STYLE)))
@@ -89,10 +78,10 @@ public class ExportUtils {
 		// @formatter:off
 		switch (card.getType()) {
 		case TextCard:
-			return card.getByType(TextItem.class).get().getText();
+			return StringUtils.normalizeSpace(card.getByType(TextItem.class).get().getText());
 
 		case VotingCard:
-			return card.getByType(VotingData.class).get().getText();
+			return StringUtils.normalizeSpace(card.getByType(VotingData.class).get().getText());
 
 		default:
 			return "Unsupported Type";
