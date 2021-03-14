@@ -20,11 +20,9 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dnd.DragSource;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -83,6 +81,8 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 			if (Config.DEBUG) {
 				Notification.show("Start Drag Card: " + e.getComponent().getCard().getText());
 			}
+
+			e.setDragData(getId().get());
 		});
 
 		dragConfig.addDragEndListener(e -> {
@@ -91,20 +91,11 @@ public class CardComponent extends HorizontalLayout implements IComponent, IBroa
 				return;
 			}
 
-			CardComponent cardComponent = e.getComponent();
-			VerticalLayout layout = (VerticalLayout) cardComponent.getParent().get();
-			log.info("card: {}", cardComponent.getId());
-			log.info("parent-layout: {}", layout);
-			ColumnComponent columnComponent = (ColumnComponent) layout.getParent().stream().findFirst().get();
-			log.info("card is in column?: {}", columnComponent.hasCardById(cardComponent.getId().get()));
-			log.info("column title: {}", ((H3) columnComponent.getParent().getChildren().findFirst().get().getParent().getChildren().findFirst().get()).getText());
-
 			if (Config.DEBUG) {
 				Notification.show("Stop drag Card: " + e.getComponent().getCard().getText());
 			}
 
 			Notification.show("Card moved", 3000, Position.BOTTOM_END);
-			cardComponent.deleteCard();
 		});
 	}
 

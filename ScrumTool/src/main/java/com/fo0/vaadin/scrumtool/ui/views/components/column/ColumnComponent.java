@@ -187,11 +187,22 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 		dropTarget.setDropEffect(DropEffect.MOVE);
 		dropTarget.addDropListener(e -> {
 			e.getDragSourceComponent().ifPresent(card -> {
+				String dragColumnId = e.getDragData().get().toString();
+				if(hasCardById(dragColumnId)){
+					log.debug("dropping in same layout is not supported");
+					return;
+				}
+
 				CardComponent droppedCard = (CardComponent) card;
+
+				// update
 				log.debug("receive dropped card: " + droppedCard.getId().get());
 				droppedCard.getCard().setId(Utils.randomId());
 				TKBColumn col = addCardAndSave(droppedCard.getCard());
 				update(col.getId());
+
+				// delete old and update
+				droppedCard.deleteCard();
 			});
 		});
 
