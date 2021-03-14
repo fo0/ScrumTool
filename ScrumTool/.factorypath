@@ -220,4 +220,7 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/com/flowingcode/addons/font-awesome-iron-iconset/2.1.2/font-awesome-iron-iconset-2.1.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/net/steppschuh/markdowngenerator/markdowngenerator/1.3.2/markdowngenerator-1.3.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/j2html/j2html/1.4.0/j2html-1.4.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/de/dentrassi/crypto/pem-keystore/2.2.0/pem-keystore-2.2.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/bouncycastle/bcprov-jdk15on/1.62/bcprov-jdk15on-1.62.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/bouncycastle/bcpkix-jdk15on/1.62/bcpkix-jdk15on-1.62.jar" enabled="true" runInBatchMode="false"/>
 </factorypath>
