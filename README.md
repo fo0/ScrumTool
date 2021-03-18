@@ -23,25 +23,5 @@ for applying configurations just create a spring application.properties file in 
 scrumtool.database.inmem=false #default=true
 ```
 
-# SSL Cert
-I support two ways of SSL Cert
-## PEM (i.e. lets encrypt)
-create or add to your application.properties
-```properties
-server.ssl.enabled=true
-server.ssl.key-store-type=PEMCFG.MOD
-server.ssl.key-store=file:keystore.properties
-server.ssl.key-store-password=dummy
-server.ssl.alias=keycert
-security.require-ssl=true
-```
-
-create or add to your keystore.properties
-```properties
-alias=keycert
-source.key=/etc/letsencrypt/live/<YOUR_DOMAIN>/privkey.pem
-source.cert=/etc/letsencrypt/live/<YOUR_DOMAIN>/cert.pem
-```
-
-# Keystore
-read the spring docs or use https://www.baeldung.com/spring-boot-https-self-signed-certificate
+# SSL
+https://github.com/fo0/ScrumTool/wiki/SSL-Cert
