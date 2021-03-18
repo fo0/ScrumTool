@@ -13,12 +13,7 @@ java -jar ScrumTool-VERSION.jar
 https://github.com/fo0/ScrumTool/wiki
 
 ## Releases
-Latest Stable: https://github.com/fo0/ScrumTool/releases/tag/v0.10 
-
-
-
-## info for devs
-add property `app.debug=true` to your i.e. eclipse run-configuration via `Override Properties` to see more informations
+Latest Stable: https://github.com/fo0/ScrumTool/releases
 
 # Configurations
 for applying configurations just create a spring application.properties file in the folder of your scrumtool.jar and add the following properties 
