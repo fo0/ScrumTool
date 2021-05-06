@@ -20,7 +20,7 @@
 		<spring.version>2.3.0.RELEASE</spring.version>
 
 		<!-- Vaadin -->
-		<vaadin.version>14.4.1</vaadin.version>
+		<vaadin.version>19.0.6</vaadin.version>
 
 		<!-- Vaadin-Addons -->
 		<clipboardhelper.vaadin.addon.version>1.1.2</clipboardhelper.vaadin.addon.version> <!-- 
