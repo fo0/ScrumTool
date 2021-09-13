@@ -263,25 +263,34 @@
     </dependencies>
   </dependencyManagement>
 
+  <pluginRepositories>
+    <pluginRepository>
+      <id>central</id>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
   <build>
-    <defaultGoal>spring-boot:run</defaultGoal>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <!-- Clean build and startup time for Vaadin apps sometimes may exceed
-             the default Spring Boot's 30sec timeout.  -->
-        <configuration>
-          <wait>500</wait>
-          <maxAttempts>240</maxAttempts>
-        </configuration>
+        <version>${spring.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>build-info</goal>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
-      <!--
-          Take care of synchronizing java dependencies and imports in
-          package.json and main.js files.
-          It also creates webpack.config.js if not exists yet.
-      -->
+      <!-- Take care of synchronizing java dependencies and imports in package.json
+  and main.js files. It also creates webpack.config.js if not exists yet. -->
       <plugin>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-maven-plugin</artifactId>
@@ -299,10 +308,27 @@
 
   <profiles>
     <profile>
-      <!-- Production mode is activated using -Pproduction -->
       <id>production</id>
+      <properties>
+        <vaadin.productionMode>true</vaadin.productionMode>
+      </properties>
+
+      <dependencies>
+        <dependency>
+          <groupId>com.vaadin</groupId>
+          <artifactId>flow-server-production-mode</artifactId>
+        </dependency>
+      </dependencies>
+
       <build>
         <plugins>
+          <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+              <jvmArguments>-Dvaadin.productionMode</jvmArguments>
+            </configuration>
+          </plugin>
           <plugin>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-maven-plugin</artifactId>
@@ -315,8 +341,15 @@
                 <phase>compile</phase>
               </execution>
             </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.1.0</version>
             <configuration>
-              <productionMode>true</productionMode>
+              <excludes>
+                <exclude>**/*.properties</exclude>
+              </excludes>
             </configuration>
           </plugin>
         </plugins>
@@ -324,7 +357,7 @@
     </profile>
 
     <profile>
-      <id>it</id>
+      <id>integration-tests</id>
       <build>
         <plugins>
           <plugin>
@@ -363,7 +396,39 @@
             <configuration>
               <trimStackTrace>false</trimStackTrace>
               <enableAssertions>true</enableAssertions>
+              <systemPropertyVariables>
+                <!-- Pass location of downloaded webdrivers to the tests -->
+                <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
+              </systemPropertyVariables>
             </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>com.lazerycode.selenium</groupId>
+            <artifactId>driver-binary-downloader-maven-plugin</artifactId>
+            <version>1.0.17</version>
+            <configuration>
+              <onlyGetDriversForHostOperatingSystem>true
+              </onlyGetDriversForHostOperatingSystem>
+              <rootStandaloneServerDirectory>
+                ${project.basedir}/drivers/driver
+              </rootStandaloneServerDirectory>
+              <downloadedZipFileDirectory>
+                ${project.basedir}/drivers/driver_zips
+              </downloadedZipFileDirectory>
+              <customRepositoryMap>
+                ${project.basedir}/drivers.xml
+              </customRepositoryMap>
+            </configuration>
+            <executions>
+              <execution>
+                <!-- use phase "none" to skip download step -->
+                <phase>${drivers.downloader.phase}</phase>
+                <goals>
+                  <goal>selenium</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
