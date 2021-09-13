@@ -1,10 +1,8 @@
 package com.fo0.vaadin.scrumtool.ui.views;
 
-import org.apache.logging.log4j.util.Strings;
-
 import com.fo0.vaadin.scrumtool.ui.views.components.ThemeToggleButton;
 import com.fo0.vaadin.scrumtool.ui.views.data.IThemeToggleButton;
-import com.fo0.vaadin.scrumtool.ui.views.dialogs.CreateBoardDialog;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.ChooseCreationDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.KBConfirmDialog;
 import com.fo0.vaadin.scrumtool.ui.views.layouts.MainLayout;
 import com.vaadin.flow.component.UI;
@@ -15,8 +13,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-
 import lombok.Getter;
+import org.apache.logging.log4j.util.Strings;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -24,45 +22,45 @@ import lombok.Getter;
 @Route(value = Strings.EMPTY, layout = MainLayout.class)
 public class MainView extends VerticalLayout implements IThemeToggleButton {
 
-	private static final long serialVersionUID = 8874200985319706829L;
+  private static final long serialVersionUID = 8874200985319706829L;
 
-	private HorizontalLayout root;
+  private HorizontalLayout root;
 
-	@Getter
-	private ThemeToggleButton themeToggleButton;
+  @Getter
+  private ThemeToggleButton themeToggleButton;
 
-	public MainView() {
-		super();
+  public MainView() {
+    super();
 
-		setSizeFull();
-		setJustifyContentMode(JustifyContentMode.CENTER);
+    setSizeFull();
+    setJustifyContentMode(JustifyContentMode.CENTER);
 
-		root = createRootLayout();
-		add(root);
+    root = createRootLayout();
+    add(root);
 
-		HorizontalLayout centerLayout = new HorizontalLayout();
-		root.add(centerLayout);
-		Button btnCreate = createBtnCreate();
-		Button btnJoin = createBtnJoin();
-		centerLayout.add(btnCreate);
-		centerLayout.add(btnJoin);
+    HorizontalLayout centerLayout = new HorizontalLayout();
+    root.add(centerLayout);
+    Button btnCreate = createBtnCreate();
+    Button btnJoin = createBtnJoin();
+    centerLayout.add(btnCreate);
+    centerLayout.add(btnJoin);
 
-		themeToggleButton = new ThemeToggleButton();
+    themeToggleButton = new ThemeToggleButton();
 
-		add(themeToggleButton);
+    add(themeToggleButton);
 
-		root.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, centerLayout);
-		root.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+    root.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, centerLayout);
+    root.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
-		add(createImprintButton());
-	}
+    add(createImprintButton());
+  }
 
-	private HorizontalLayout createImprintButton() {
-		Button btn = new Button("Imprint");
+  private HorizontalLayout createImprintButton() {
+    Button btn = new Button("Imprint");
 //		btn.getStyle().set("font-size", "(--material-button-font-size - 4px)");
 
-		btn.addClickListener(e -> {
-			//@formatter:off
+    btn.addClickListener(e -> {
+      //@formatter:off
 			Div label = new Div();
 			label.getElement().setProperty("innerHTML",
 					"<table>"+
@@ -98,44 +96,46 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 				.withMessage(label)
 				.open();
 			//@formatter:on
-		});
+    });
 
-		HorizontalLayout layout = new HorizontalLayout(btn);
-		layout.setWidthFull();
-		layout.setJustifyContentMode(JustifyContentMode.END);
-		return layout;
-	}
+    HorizontalLayout layout = new HorizontalLayout(btn);
+    layout.setWidthFull();
+    layout.setJustifyContentMode(JustifyContentMode.END);
+    return layout;
+  }
 
-	private Button createBtnJoin() {
-		Button btn = new Button("Join");
-		btn.getStyle().set("border", "1px solid black");
-		btn.setWidth("150px");
-		btn.setHeight("100px");
-		btn.addClickListener(e -> {
-			createJoinSessionDialog();
-		});
-		return btn;
-	}
+  private Button createBtnJoin() {
+    Button btn = new Button("Join");
+    btn.getStyle()
+       .set("border", "1px solid black");
+    btn.setWidth("150px");
+    btn.setHeight("100px");
+    btn.addClickListener(e -> {
+      createJoinSessionDialog();
+    });
+    return btn;
+  }
 
-	private Button createBtnCreate() {
-		Button btn = new Button("Create");
-		btn.getStyle().set("border", "1px solid black");
-		btn.addClickListener(e -> {
-			new CreateBoardDialog().open();
-		});
-		btn.setWidth("150px");
-		btn.setHeight("100px");
-		return btn;
-	}
+  private Button createBtnCreate() {
+    Button btn = new Button("Create");
+    btn.getStyle()
+       .set("border", "1px solid black");
+    btn.addClickListener(e -> {
+      new ChooseCreationDialog().open();
+    });
+    btn.setWidth("150px");
+    btn.setHeight("100px");
+    return btn;
+  }
 
-	private HorizontalLayout createRootLayout() {
-		HorizontalLayout layout = new HorizontalLayout();
-		layout.setSizeFull();
-		return layout;
-	}
+  private HorizontalLayout createRootLayout() {
+    HorizontalLayout layout = new HorizontalLayout();
+    layout.setSizeFull();
+    return layout;
+  }
 
-	private void createJoinSessionDialog() {
-		//@formatter:off
+  private void createJoinSessionDialog() {
+    //@formatter:off
 		TextField input = new TextField();
 		input.setPlaceholder("Your Session-ID");
 		input.setWidth("350px");
@@ -150,6 +150,6 @@ public class MainView extends VerticalLayout implements IThemeToggleButton {
 			})
 			.open();
 		//@formatter:on
-	}
+  }
 
 }

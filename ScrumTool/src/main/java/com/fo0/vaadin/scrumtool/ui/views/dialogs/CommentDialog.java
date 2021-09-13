@@ -77,7 +77,7 @@ public class CommentDialog extends Dialog {
 		Button btn = new Button(VaadinIcon.PLUS.create());
 		ToolTip.add(btn, "Add Comment to Card");
 		btn.addClickListener(e -> {
-			new TextDialog("Write Comment", Strings.EMPTY, savedText -> {
+			new TextAreaDialog("Write Comment", Strings.EMPTY, savedText -> {
 				TKBCard tmp = cardRepository.findById(getId().get()).get();
 				addComment(TKBCardComment.builder().text(savedText).dataOrder(KBViewUtils.calculateNextPosition(tmp.getComments())).build());
 			}).open();

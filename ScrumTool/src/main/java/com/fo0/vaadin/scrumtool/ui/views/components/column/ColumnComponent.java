@@ -32,7 +32,7 @@ import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IBroadcastRegistr
 import com.fo0.vaadin.scrumtool.ui.views.components.interfaces.IComponent;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CreateVotingCardDialog;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.KBConfirmDialog;
-import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextAreaDialog;
 import com.fo0.vaadin.scrumtool.ui.views.utils.KBViewUtils;
 import com.google.common.collect.Sets;
 import com.vaadin.flow.component.AttachEvent;
@@ -41,7 +41,6 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropEffect;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.html.H3;
@@ -252,7 +251,7 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 		if (KBViewUtils.isAllowed(view.getOptions(), column.getOwnerId())) {
 			menuItem.getSubMenu().addItem("Edit", e -> {
 				// @formatter:off
-				new TextDialog("Change Caption", h3.getText(), savedText -> {
+				new TextAreaDialog("Change Caption", h3.getText(), savedText -> {
 					log.info("Edit column: " + getId().get());
 					TKBColumn c = repository.findById(id).get();
 					c.setName(savedText);

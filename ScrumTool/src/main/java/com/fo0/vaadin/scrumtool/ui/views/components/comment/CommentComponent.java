@@ -9,7 +9,7 @@ import com.fo0.vaadin.scrumtool.ui.data.table.TKBCard;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBCardComment;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
-import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextAreaDialog;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Label;
@@ -67,7 +67,7 @@ public class CommentComponent extends HorizontalLayout {
 		btnLayout.add(btnDelete);
 
 		label.getElement().addEventListener("click", e -> {
-			new TextDialog("Edit Text", label.getText(), savedText -> {
+			new TextAreaDialog("Edit Text", label.getText(), savedText -> {
 				log.info("edit comment: " + getId().get());
 				TKBCardComment c = cardCommentRepository.findById(comment.getId()).get();
 				c.setText(savedText);

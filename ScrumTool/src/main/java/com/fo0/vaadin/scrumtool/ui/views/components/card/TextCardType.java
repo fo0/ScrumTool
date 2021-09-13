@@ -19,7 +19,7 @@ import com.fo0.vaadin.scrumtool.ui.views.components.ToolTip;
 import com.fo0.vaadin.scrumtool.ui.views.components.column.ColumnComponent;
 import com.fo0.vaadin.scrumtool.ui.views.components.like.TextCardLikeComponent;
 import com.fo0.vaadin.scrumtool.ui.views.dialogs.CommentDialog;
-import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextDialog;
+import com.fo0.vaadin.scrumtool.ui.views.dialogs.TextAreaDialog;
 import com.fo0.vaadin.scrumtool.ui.views.utils.KBViewUtils;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
@@ -95,7 +95,7 @@ public class TextCardType implements ICardTypeTemplate<TKBCard> {
 		root.addClassName("card-hover");
 
 		label.getElement().addEventListener("click", e -> {
-			new TextDialog("Edit Text", label.getText(), savedText -> {
+			new TextAreaDialog("Edit Text", label.getText(), savedText -> {
 				log.info("edit card: " + root.id());
 				TKBCard c = cardRepository.findById(cardId).get();
 				TextItem item = c.getByType(TextItem.class).get();

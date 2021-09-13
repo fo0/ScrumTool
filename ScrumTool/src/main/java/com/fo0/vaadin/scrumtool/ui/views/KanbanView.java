@@ -231,7 +231,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
 		super.onDetach(detachEvent);
 	}
 
-	public void reload() {
+	public void reload(){
 		log.info("sync & refreshing data: {}", getId().get());
 		TKBData tmp = repository.findByIdFetched(getId().get());
 

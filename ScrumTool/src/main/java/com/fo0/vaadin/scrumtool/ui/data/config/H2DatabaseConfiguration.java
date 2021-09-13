@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
@@ -23,7 +24,7 @@ import com.fo0.vaadin.scrumtool.ui.config.Profiles;
 @EnableTransactionManagement
 @EnableJpaRepositories("com.fo0.vaadin.scrumtool.ui.data.repository")
 @Profile(Profiles.H2_DRIVER)
-public class PersistenceConfig {
+public class H2DatabaseConfiguration {
 
 	@Value("${scrumtool.database.inmem:true}")
 	private boolean databaseInMemory;

@@ -26,7 +26,7 @@ public class ExportUtils {
 			+ "text-align: left; " + "padding: 8px; " + "} " + "" + "tr:nth-child(even) { "
 			+ "background-color: #dddddd; " + "}";
 
-	static String getComments(EExportType type, TKBCard card) {
+	public static String getComments(EExportType type, TKBCard card) {
 		// @formatter:off
 		
 		switch (card.getType()) {

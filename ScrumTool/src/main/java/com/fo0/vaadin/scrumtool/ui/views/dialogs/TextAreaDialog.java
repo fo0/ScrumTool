@@ -10,14 +10,22 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
+import lombok.Getter;
+import org.apache.logging.log4j.util.Strings;
 
-public class TextDialog extends Dialog {
+public class TextAreaDialog extends Dialog {
 
 	private static final long serialVersionUID = -5714183761044782095L;
 
 	private VerticalLayout layout;
+	@Getter
+	private TextArea textArea;
 
-	public TextDialog(String caption, String initValue, Consumer<String> text) {
+	public TextAreaDialog(String caption, String initValue, Consumer<String> text) {
+		this(caption, Strings.EMPTY, initValue, text);
+	}
+
+	public TextAreaDialog(String caption, String placeholder, String initValue, Consumer<String> text) {
 		layout = new VerticalLayout();
 		add(layout);
 		setWidth("400px");
@@ -27,15 +35,16 @@ public class TextDialog extends Dialog {
 		layout.add(captionLabel);
 		layout.setAlignSelf(Alignment.CENTER, captionLabel);
 
-		TextArea area = new TextArea();
-		area.setWidthFull();
-		layout.add(area);
-		area.setValue(initValue);
+		textArea = new TextArea();
+		textArea.setWidthFull();
+		layout.add(textArea);
+		textArea.setValue(initValue);
+		textArea.setPlaceholder(placeholder);
 
 		Button save = new Button(VaadinIcon.CHECK.create());
 		save.setWidthFull();
 		save.addClickListener(e -> {
-			text.accept(area.getValue());
+			text.accept(textArea.getValue());
 			close();
 		});
 
@@ -48,7 +57,7 @@ public class TextDialog extends Dialog {
 		footer.setWidthFull();
 		layout.add(footer);
 
-		area.focus();
+		textArea.focus();
 	}
 
 }

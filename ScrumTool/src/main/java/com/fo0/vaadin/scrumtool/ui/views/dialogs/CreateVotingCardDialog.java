@@ -100,7 +100,7 @@ public class CreateVotingCardDialog extends Dialog implements IBroadcastRegistry
 		Button btn = new Button(VaadinIcon.PLUS.create());
 		ToolTip.add(btn, "Add Question");
 		btn.addClickListener(e -> {
-			new TextDialog("Add Voting Option", Strings.EMPTY, savedText -> {
+			new TextAreaDialog("Add Voting Option", Strings.EMPTY, savedText -> {
 				addVoting(savedText);
 			}).open();
 		});
