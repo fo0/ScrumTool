@@ -48,11 +48,7 @@
     <repository>
       <id>central</id>
       <url>https://repo.maven.apache.org/maven2</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
     </repository>
-    <!-- Repository used by many Vaadin add-ons -->
     <repository>
       <id>Vaadin Directory</id>
       <url>https://maven.vaadin.com/vaadin-addons</url>
@@ -63,7 +59,6 @@
   </repositories>
 
   <pluginRepositories>
-    <!-- Main Maven repository -->
     <pluginRepository>
       <id>central</id>
       <url>https://repo.maven.apache.org/maven2</url>
@@ -74,7 +69,6 @@
   </pluginRepositories>
 
   <dependencies>
-    <!-- Vaadin & Spring -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
@@ -82,12 +76,9 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
-      <!-- Replace artifactId with vaadin-core to use only free components -->
       <artifactId>vaadin</artifactId>
       <version>${vaadin.version}</version>
       <exclusions>
-        <!-- Webjars are only needed when running in Vaadin 13 compatibility
-          mode -->
         <exclusion>
           <groupId>com.vaadin.webjar</groupId>
           <artifactId>*</artifactId>
@@ -119,7 +110,6 @@
       <artifactId>vaadin-spring-boot-starter</artifactId>
       <version>${vaadin.version}</version>
       <exclusions>
-        <!-- Excluding so that webjars are not included. -->
         <exclusion>
           <groupId>com.vaadin</groupId>
           <artifactId>vaadin-core</artifactId>
