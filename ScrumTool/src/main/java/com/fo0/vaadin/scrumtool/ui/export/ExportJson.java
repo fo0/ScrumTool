@@ -30,9 +30,6 @@ public class ExportJson {
       return false;
     }
 
-    Notification.show("Board already exists",
-                      (int) TimeUnit.SECONDS.toMillis(5),
-                      Position.MIDDLE);
     return true;
   }
 
@@ -41,7 +38,7 @@ public class ExportJson {
    * @return id ob the board
    */
   public static String importAsJson(String json, boolean newId) {
-    if (boardExists(json)) {
+    if (!newId && boardExists(json)) {
       return null;
     }
 
@@ -49,10 +46,6 @@ public class ExportJson {
     if(newId){
       data.setId(UUID.randomUUID().toString());
     }
-
-    Notification.show("Importing Board with ID: " + data.getId(),
-                      (int) TimeUnit.SECONDS.toMillis(5),
-                      Position.MIDDLE);
 
     repository.save(data);
     return data.getId();

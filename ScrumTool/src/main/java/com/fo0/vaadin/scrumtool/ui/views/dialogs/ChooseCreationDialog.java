@@ -6,9 +6,12 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.dom.Style;
+import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.util.Strings;
 
 public class ChooseCreationDialog extends Dialog {
@@ -43,7 +46,8 @@ public class ChooseCreationDialog extends Dialog {
     btn.setHeight("100px");
     btn.addClickListener(e -> {
       // TODO:
-      Checkbox chkNewBoardId = new Checkbox("New Board-ID", false);
+      Checkbox chkNewBoardId = new Checkbox("New Board-ID", true);
+      chkNewBoardId.setVisible(false);
       TextFieldDialog dialog = new TextFieldDialog(
           "Import Board Data",
           "Data as Json",
@@ -51,8 +55,15 @@ public class ChooseCreationDialog extends Dialog {
           text -> {
             String id = ExportJson.importAsJson(text, chkNewBoardId.getValue());
             if (id == null) {
+              Notification.show("Board already exists",
+                                (int) TimeUnit.SECONDS.toMillis(5),
+                                Position.MIDDLE);
               return;
             }
+
+            Notification.show("Importing Board with ID: " + id,
+                              (int) TimeUnit.SECONDS.toMillis(5),
+                              Position.MIDDLE);
 
             UI.getCurrent()
               .navigate(KanbanView.class, id);
