@@ -22,7 +22,7 @@
     <spring.version>2.4.10</spring.version>
 
     <!-- Vaadin -->
-    <vaadin.version>14.6.8</vaadin.version>
+    <vaadin.version>14.7.0</vaadin.version>
     <clipboardhelper.vaadin.addon.version>1.1.2</clipboardhelper.vaadin.addon.version>
 
     <lombok.version>1.18.20</lombok.version>
