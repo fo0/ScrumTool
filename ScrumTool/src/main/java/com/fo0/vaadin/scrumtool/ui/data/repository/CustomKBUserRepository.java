@@ -9,6 +9,6 @@ public interface CustomKBUserRepository {
 
 	TKBUser deleteUserById(String dataUserId, String userId);
 	
-	int countByDataIdFetched(String dataId);
+	int countByDataId(String dataId);
 
 }

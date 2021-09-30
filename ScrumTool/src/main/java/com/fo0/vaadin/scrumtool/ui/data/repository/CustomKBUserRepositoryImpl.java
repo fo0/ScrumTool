@@ -45,7 +45,7 @@ public class CustomKBUserRepositoryImpl implements CustomKBUserRepository {
 	}
 
 	@Override
-	public int countByDataIdFetched(String dataId) {
+	public int countByDataId(String dataId) {
 		TKBUser user = repository.findByDataIdFetched(dataId);
 		if (user == null) {
 			return 0;

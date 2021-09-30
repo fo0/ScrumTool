@@ -497,7 +497,7 @@ public class KanbanView extends Div implements HasUrlParameter<String>, IThemeTo
   public void changeUsersCounter() {
     getId().ifPresent(e -> {
       if (btnUsers != null) {
-        btnUsers.setText(String.valueOf(userRepository.countByDataIdFetched(e)));
+        btnUsers.setText(String.valueOf(userRepository.countByDataId(e)));
       }
     });
   }
