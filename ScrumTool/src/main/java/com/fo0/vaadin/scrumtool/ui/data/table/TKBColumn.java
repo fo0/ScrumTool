@@ -40,6 +40,8 @@ public class TKBColumn implements Serializable, IDataOrder {
 
 	private String name;
 
+	private String description;
+
 	@Builder.Default
 	private int dataOrder = -1;
 

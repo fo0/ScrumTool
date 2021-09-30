@@ -2,12 +2,10 @@ package com.fo0.vaadin.scrumtool.ui.export;
 
 import com.fo0.vaadin.scrumtool.ui.data.repository.KBDataRepository;
 import com.fo0.vaadin.scrumtool.ui.data.table.TKBData;
+import com.fo0.vaadin.scrumtool.ui.session.SessionUtils;
 import com.fo0.vaadin.scrumtool.ui.utils.SpringContext;
 import com.google.gson.Gson;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.Notification.Position;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author fo0
@@ -43,9 +41,18 @@ public class ExportJson {
     }
 
     TKBData data = gson.fromJson(json, TKBData.class);
-    if(newId){
-      data.setId(UUID.randomUUID().toString());
+    if (newId) {
+      data.setId(UUID.randomUUID()
+                     .toString());
     }
+
+    // clear current users
+    data.getUser()
+        .getUsers()
+        .clear();
+
+    // set new current owner
+    data.setOwnerId(SessionUtils.getSessionId());
 
     repository.save(data);
     return data.getId();
