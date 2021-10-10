@@ -16,7 +16,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BroadcasterColumn {
 
-	public static final String MESSAGE_SHUFFLE = "shuffle";
+	public static final String MESSAGE_SORT = "sort";
 	public static final String ADD_COLUMN = "addcolumn.";
 
 	private static final Executor EXECUTOR = Executors.newCachedThreadPool();

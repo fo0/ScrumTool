@@ -19,7 +19,7 @@
     <failOnMissingWebXml>false</failOnMissingWebXml>
 
     <!-- Spring -->
-    <spring.version>2.4.11</spring.version>
+    <spring.version>2.5.5</spring.version>
 
     <!-- Vaadin -->
     <vaadin.version>14.7.1</vaadin.version>

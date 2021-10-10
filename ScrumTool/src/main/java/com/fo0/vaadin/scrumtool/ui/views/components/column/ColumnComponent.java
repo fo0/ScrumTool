@@ -65,12 +65,12 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
   private final HorizontalLayout captionLayout;
   private Icon icon;
 
-  private KBDataRepository dataRepository = SpringContext.getBean(KBDataRepository.class);
-  private KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
-  private KBColumnRepository repository = SpringContext.getBean(KBColumnRepository.class);
+  private final KBDataRepository dataRepository = SpringContext.getBean(KBDataRepository.class);
+  private final KBCardRepository cardRepository = SpringContext.getBean(KBCardRepository.class);
+  private final KBColumnRepository repository = SpringContext.getBean(KBColumnRepository.class);
 
   @Getter
-  private KanbanView view;
+  private final KanbanView view;
 
   private TextArea area;
   private H3 h3;
@@ -334,7 +334,30 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
 
                 tmp.setCards(Sets.newHashSet(toShuffle));
                 tmp = repository.save(tmp);
-                BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.MESSAGE_SHUFFLE);
+                BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.MESSAGE_SORT);
+              });
+
+      menuItem.getSubMenu()
+              .addItem("Sort Cards by Votes", e -> {
+                TKBColumn tmp = repository.findById(getId().get())
+                                          .get();
+
+                List<TKBCard> sortedByVotes = tmp
+                    .getCards()
+                    .stream()
+                    .sorted(Comparator.comparingLong(TKBCard::getLikes))
+                    .collect(Collectors.toList());
+
+                // fix order
+                IntStream.range(0, sortedByVotes.size())
+                         .forEachOrdered(counter -> {
+                           TKBCard cc = sortedByVotes.get(counter);
+                           cc.setDataOrder(counter);
+                         });
+
+                tmp.setCards(Sets.newHashSet(sortedByVotes));
+                tmp = repository.save(tmp);
+                BroadcasterColumn.broadcast(getId().get(), BroadcasterColumn.MESSAGE_SORT);
               });
 
       menuItem.getSubMenu()
@@ -473,7 +496,7 @@ public class ColumnComponent extends VerticalLayout implements IBroadcastRegistr
         String[] cmd = event.split("\\.");
 
         switch (cmd[0]) {
-          case BroadcasterColumn.MESSAGE_SHUFFLE:
+          case BroadcasterColumn.MESSAGE_SORT:
             cards.removeAll();
             reload();
             break;
