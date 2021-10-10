@@ -1,4 +1,4 @@
-![Build-Publish](https://github.com/fo0/ScrumTool/workflows/Build-Publish/badge.svg?event=push)
+[![Build-Publish](https://github.com/fo0/ScrumTool/actions/workflows/maven.yml/badge.svg)](https://github.com/fo0/ScrumTool/actions/workflows/maven.yml)
 
 # ScrumTool
 ![Demo-GUI](docs/chrome_2020-08-17_09-49-26.png)
