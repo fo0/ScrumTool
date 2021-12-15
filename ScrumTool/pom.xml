@@ -231,6 +231,22 @@
       <artifactId>pem-keystore</artifactId>
       <version>${pem-keystore.version}</version>
     </dependency>
+    <dependency>
+       <groupid>org.springframework.boot</groupid>
+       <artifactid>spring-boot-starter-log4j2</artifactid>
+       <version>${spring.version}</version>
+       <exclusions>
+         <exclusion>
+           <groupid>org.apache.logging.log4j</groupid>
+           <artifactid>log4j-core</artifactid>
+         </exclusion>
+       </exclusions>
+    </dependency>
+    <dependency>
+       <groupid>org.apache.logging.log4j</groupid>
+       <artifactid>log4j-core</artifactid>
+       <version>2.15.0</version>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>
