@@ -19,13 +19,13 @@
     <failOnMissingWebXml>false</failOnMissingWebXml>
 
     <!-- Spring -->
-    <spring.version>2.5.5</spring.version>
+    <spring.version>2.5.8</spring.version>
 
     <!-- Vaadin -->
-    <vaadin.version>14.7.1</vaadin.version>
+    <vaadin.version>14.8.1</vaadin.version>
     <clipboardhelper.vaadin.addon.version>1.1.2</clipboardhelper.vaadin.addon.version>
 
-    <lombok.version>1.18.20</lombok.version>
+    <lombok.version>1.18.22</lombok.version>
     <kotlin-reflect.version>1.5.21</kotlin-reflect.version>
     <reactor-core.version>3.4.10</reactor-core.version>
     <guava.version>31.0.1-jre</guava.version>
@@ -124,15 +124,11 @@
       <artifactId>reactor-core</artifactId>
       <version>${reactor-core.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
       <version>${spring.version}</version>
     </dependency>
-
-
-    <!-- Lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -144,13 +140,11 @@
       <artifactId>guava</artifactId>
       <version>${guava.version}</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>2.8.8</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-collections4</artifactId>
@@ -167,8 +161,6 @@
       <artifactId>spring-boot-devtools</artifactId>
       <version>${spring.version}</version>
     </dependency>
-
-    <!-- Vaadin-Addons -->
     <dependency>
       <groupId>org.vaadin.olli</groupId>
       <artifactId>clipboardhelper</artifactId>
@@ -230,22 +222,6 @@
       <groupId>de.dentrassi.crypto</groupId>
       <artifactId>pem-keystore</artifactId>
       <version>${pem-keystore.version}</version>
-    </dependency>
-    <dependency>
-       <groupid>org.springframework.boot</groupid>
-       <artifactid>spring-boot-starter-log4j2</artifactid>
-       <version>${spring.version}</version>
-       <exclusions>
-         <exclusion>
-           <groupid>org.apache.logging.log4j</groupid>
-           <artifactid>log4j-core</artifactid>
-         </exclusion>
-       </exclusions>
-    </dependency>
-    <dependency>
-       <groupid>org.apache.logging.log4j</groupid>
-       <artifactid>log4j-core</artifactid>
-       <version>2.15.0</version>
     </dependency>
   </dependencies>
 
