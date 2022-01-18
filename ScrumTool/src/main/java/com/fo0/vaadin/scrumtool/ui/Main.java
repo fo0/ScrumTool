@@ -17,6 +17,7 @@ public class Main extends SpringBootServletInitializer {
     Security.addProvider(new PemKeyStoreProvider());
     new SpringApplicationBuilder(Main.class)
         .properties("vaadin.heartbeatinterval=5")
+        .properties("spring.main.allow-circular-references=true")
         .profiles(Profiles.H2_DRIVER)
         .run(args);
   }
