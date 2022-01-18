@@ -6,6 +6,7 @@ import java.security.Security;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.vaadin.artur.helpers.LaunchUtil;
 
 /**
  * The entry point of the Spring Boot application.
@@ -15,11 +16,12 @@ public class Main extends SpringBootServletInitializer {
 
   public static void main(String[] args) {
     Security.addProvider(new PemKeyStoreProvider());
-    new SpringApplicationBuilder(Main.class)
-        .properties("vaadin.heartbeatinterval=5")
-        .properties("spring.main.allow-circular-references=true")
-        .profiles(Profiles.H2_DRIVER)
-        .run(args);
+    LaunchUtil.launchBrowserInDevelopmentMode(
+        new SpringApplicationBuilder(Main.class)
+            .properties("vaadin.heartbeatinterval=5")
+            .properties("spring.main.allow-circular-references=true")
+            .profiles(Profiles.H2_DRIVER)
+            .run(args));
   }
 
 }
