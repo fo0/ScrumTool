@@ -39,7 +39,7 @@
     <simple-timer.version>2.0.1</simple-timer.version>
     <tooltip.version>1.5.0</tooltip.version>
     <confirm-dialog.version>2.0.0</confirm-dialog.version>
-    <mysql-connector-java.version>8.0.25</mysql-connector-java.version>
+    <mysql-connector-java.version>8.0.28</mysql-connector-java.version>
     <jaxb-api.version>2.4.0-b180830.0359</jaxb-api.version>
     <jaxb-runtime.version>3.0.1</jaxb-runtime.version>
     <font-awesome-iron-iconset.version>2.1.2</font-awesome-iron-iconset.version>
