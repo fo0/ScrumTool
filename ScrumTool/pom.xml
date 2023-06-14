@@ -32,7 +32,7 @@
     <lombok.version>1.18.22</lombok.version>
     <kotlin-reflect.version>1.6.0</kotlin-reflect.version>
     <reactor-core.version>3.4.14</reactor-core.version>
-    <guava.version>31.0.1-jre</guava.version>
+    <guava.version>32.0.0-jre</guava.version>
     <commons-collections4.version>4.4</commons-collections4.version>
     <h2.version>2.1.210</h2.version>
     <markdown-area.version>1.0.2</markdown-area.version>
